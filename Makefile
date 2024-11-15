@@ -1,11 +1,13 @@
 CXX = g++
 CXXFLAGS = -std=c++17 -Wall
 
-# List of packages
-PACKAGES := .
+# List of package directories
+PACKAGE_DIRS := .
 
-# Generate the list of .cpp files from each _package.mk
-SOURCES := $(foreach dir, $(PACKAGES), $(shell cat $(dir)/_package.mk | grep -oP 'SOURCES\s*=\s*\K.*'))
+include $(foreach dir, $(PACKAGE_DIRS), $(dir)/_package.mk)
+
+# List the packages to be converted to sources
+SOURCES := $(PKG_MAIN)
 
 # Append ".cpp" to each source file name
 SOURCES_CPP := $(addsuffix .cpp, $(SOURCES))
@@ -26,9 +28,6 @@ $(TARGET): $(OBJ_FILES)
 # Rule to compile each .cpp file to .o
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
-
-# Include the module Makefiles
-include $(foreach dir, $(PACKAGES), $(dir)/_package.mk)
 
 # Clean rule to remove object files and the target
 clean:

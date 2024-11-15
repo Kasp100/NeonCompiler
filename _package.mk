@@ -1,1 +1,3 @@
-SOURCES = main
+# PACKAGE_SOURCE
+PKG_MAIN := \
+    main
