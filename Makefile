@@ -6,9 +6,6 @@ PACKAGE_DIRS := .
 
 include $(foreach dir, $(PACKAGE_DIRS), $(dir)/_package.mk)
 
-# List the packages to be converted to sources
-SOURCES := $(PKG_MAIN)
-
 # Append ".cpp" to each source file name
 SOURCES_CPP := $(addsuffix .cpp, $(SOURCES))
 
@@ -19,7 +16,7 @@ OBJ_FILES := $(addsuffix .o, $(basename $(SOURCES_CPP)))
 TARGET = build
 
 # Default target
-all: $(TARGET)
+all: $(TARGET) clean_obj
 
 # Rule to create the executable
 $(TARGET): $(OBJ_FILES)
@@ -32,3 +29,6 @@ $(TARGET): $(OBJ_FILES)
 # Clean rule to remove object files and the target
 clean:
 	rm -f $(OBJ_FILES) $(TARGET)
+
+clean_obj:
+	rm -f $(OBJ_FILES)
