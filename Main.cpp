@@ -3,7 +3,7 @@
 
 int main()
 {
-    Compiler compiler;
+    Compiler compiler{};
 
     try
     {
