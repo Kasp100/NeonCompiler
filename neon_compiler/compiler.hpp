@@ -4,7 +4,7 @@
 #include <memory>
 #include <string>
 
-class Compiler
+class compiler
 {
 public:
     void run(const std::string& source_file, const std::string& output_file) const;

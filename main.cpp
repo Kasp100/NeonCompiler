@@ -1,9 +1,9 @@
-#include "neon_compiler/Compiler.hpp"
+#include "neon_compiler/compiler.hpp"
 #include <iostream>
 
 int main()
 {
-    Compiler compiler{};
+    compiler compiler{};
 
     try
     {
