@@ -1,4 +1,3 @@
-#include <iostream>
 #include <memory>
 #include <vector>
 
@@ -15,7 +14,7 @@ int main(int argc, char** argv)
 
     if (argc < 2)
     {
-        cerr << "Usage: " << argv[0] << " <source file(s)>" << std::endl;
+        logger->error("Usage: " + string(argv[0]) + " <source file(s)>\n");
         return 1;
     }
 
@@ -27,7 +26,7 @@ int main(int argc, char** argv)
 
         if (!file_reader->read_file(file_name))
         {
-            std::cerr << "Error reading file: " << file_name << std::endl;
+            logger->error("Error reading file: " + string(file_name) + "\n");
             return 1;
         }
     }
