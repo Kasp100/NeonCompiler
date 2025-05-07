@@ -21,11 +21,9 @@ bool FileReader::read_file(const char* file_name)
         return false;
     }
 
-    // Read the file content into the string, managed by unique_ptr
     *file_content = std::string((std::istreambuf_iterator<char>(file)),
                                 std::istreambuf_iterator<char>());
 
-    // Optionally print the file content to verify
     logger->debug("File content of " + string(file_name) + ": \n" + string(*file_content) + "\n");
 
     return true;
