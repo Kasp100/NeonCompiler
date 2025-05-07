@@ -6,9 +6,7 @@
 using namespace logging;
 using namespace std;
 
-Logger::Logger()
-{
-}
+Logger::Logger() {}
 
 void Logger::error(const string& message)
 {

@@ -3,7 +3,7 @@
 
 #include <string>
 #include <memory>
-#include "logging/logger.hpp"
+#include "../logging/logger.hpp"
 
 namespace file_reading
 {
