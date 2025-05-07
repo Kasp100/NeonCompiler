@@ -2,7 +2,7 @@
 #define COMPILER_HPP
 
 #include <memory>
-#include <string>
+#include "../logging/logger.hpp"
 
 namespace neon_compiler
 {
@@ -10,7 +10,17 @@ namespace neon_compiler
 class Compiler
 {
 public:
-    void run(const std::string& source_file, const std::string& output_file) const;
+    explicit Compiler(std::shared_ptr<logging::Logger> logger);
+
+    void read_file(std::unique_ptr<std::istream> stream);
+    void build();
+
+private:
+    std::shared_ptr<logging::Logger> logger;
+
+    // Internal state
+    // std::vector<Token> tokens;
+    // ASTNode ast;
 };
 
 }

@@ -1,30 +1,37 @@
 #include "file_reader.hpp"
 
-#include <fstream>
+#include <cstring>
+#include <cerrno>
 
 using namespace file_reading;
 using namespace std;
 
 FileReader::FileReader(shared_ptr<logging::Logger> init_logger)
 {
-    file_content = make_unique<std::string>();
+    input_stream = nullptr;
     logger = init_logger;
 }
 
-bool FileReader::read_file(const char* file_name)
+bool FileReader::open_file(const char* file_name)
 {
-    ifstream file(file_name);
+    input_stream = std::make_unique<std::ifstream>(file_name);
 
-    if (!file)
+    if (!input_stream->is_open())
     {
-        logger->error("Failed to open file: " + string(file_name));
+        logger->error("Failed to open file: " + string(file_name) +
+                      " - " + std::strerror(errno));
         return false;
     }
 
-    *file_content = std::string((std::istreambuf_iterator<char>(file)),
-                                std::istreambuf_iterator<char>());
-
-    logger->debug("File content of " + string(file_name) + ": \n" + string(*file_content) + "\n");
-
     return true;
+}
+
+std::unique_ptr<std::istream> FileReader::move_stream()
+{
+    if (!input_stream)
+    {
+        logger->error("Attempted to move an unopened stream.");
+    }
+
+    return std::move(input_stream);
 }

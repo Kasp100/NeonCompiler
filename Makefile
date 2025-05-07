@@ -2,7 +2,7 @@ CXX = g++
 CXXFLAGS = -std=c++17 -Wall
 
 # List of package directories
-PACKAGE_DIRS := . neon_compiler logging file_reading 
+PACKAGE_DIRS := . neon_compiler logging file_reading reading 
 
 # Collect all source files from the _package.txt files
 SOURCES := $(foreach dir, $(PACKAGE_DIRS), $(addprefix $(dir)/, $(shell cat $(dir)/_package.txt)))
