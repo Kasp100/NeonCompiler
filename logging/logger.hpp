@@ -9,7 +9,7 @@ namespace logging
 class Logger
 {
 public:
-    Logger();
+    explicit Logger();
 
     void error(const std::string& message) const;
     void warning(const std::string& message) const;
