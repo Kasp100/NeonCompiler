@@ -1,5 +1,6 @@
 #include <memory>
 #include <vector>
+#include <string_view>
 
 #include "logging/logger.hpp"
 #include "file_reading/file_reader.hpp"
@@ -31,7 +32,7 @@ int main(int argc, char** argv)
             return 1;
         }
 
-        compiler.read_file(file_reader->move_stream());
+        compiler.read_file(file_reader->move_stream(), string_view(file_name));
     }
 
     compiler.build();
