@@ -12,7 +12,7 @@ class Compiler
 public:
     explicit Compiler(std::shared_ptr<logging::Logger> logger);
 
-    void read_file(std::unique_ptr<std::istream> stream);
+    void read_file(std::unique_ptr<std::istream> stream, std::string_view file_name);
     void build();
 
 private:
