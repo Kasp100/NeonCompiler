@@ -24,7 +24,7 @@ namespace reading
 
         char consume(int offset = 0);
         char peek(int offset = 0);
-        bool end_of_file_reached() const;
+        bool end_of_file_reached();
         bool consume_if_matches(char match);
         bool consume_all_if_next(const std::string& str);
 
