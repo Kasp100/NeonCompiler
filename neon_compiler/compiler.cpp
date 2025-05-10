@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include "../reading/char_reader.hpp"
+#include "tokeniser.hpp"
 
 using namespace neon_compiler;
 using namespace std;
@@ -11,18 +12,13 @@ Compiler::Compiler(std::shared_ptr<logging::Logger> logger)
 
 void Compiler::read_file(std::unique_ptr<std::istream> stream)
 {
+    unique_ptr<reading::CharReader> reader = make_unique<reading::CharReader>(stream);
     logger->debug("Starting tokenisation...");
-
-    reading::CharReader reader(move(stream));
+	compiler::Tokeniser tokeniser(logger, move(reader));
 
     try
     {
-        while (!reader.end_of_file_reached())
-        {
-            char c = reader.consume();
-            logger->debug("Read character: " + std::string(1, c));
-            // Tokenise here
-        }
+		tokeniser.run();
     }
     catch (const reading::ReadException& e)
     {

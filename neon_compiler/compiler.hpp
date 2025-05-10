@@ -17,10 +17,6 @@ public:
 
 private:
     std::shared_ptr<logging::Logger> logger;
-
-    // Internal state
-    // std::vector<Token> tokens;
-    // ASTNode ast;
 };
 
 }
