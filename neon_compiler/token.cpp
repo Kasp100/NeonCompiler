@@ -6,6 +6,25 @@ using namespace std;
 Token::Token(TokenType type, uint32_t row, uint32_t col, optional<string_view> lexeme)
 		: type(type), row(row), col(col), lexeme(lexeme) {}
 
+TokenType Token::get_type() const
+{
+	return type;
+}
+
+uint32_t Token::get_row() const
+{
+	return row;
+}
+
+uint32_t Token::get_col() const
+{
+	return col;
+}
+
+optional<string_view> Token::get_lexeme() const
+{
+	return lexeme;
+}
 
 optional<TokenType> Token::keyword_to_token_type(string_view word)
 {
