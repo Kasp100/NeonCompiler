@@ -10,13 +10,14 @@ namespace neon_compiler
 class Compiler
 {
 public:
-    explicit Compiler(std::shared_ptr<logging::Logger> logger);
+	explicit Compiler(std::shared_ptr<logging::Logger> logger);
 
-    void read_file(std::unique_ptr<std::istream> stream, std::string_view file_name);
-    void build();
+	void read_file(std::unique_ptr<std::istream> stream, std::string_view file_name);
+	void build() const;
+	void generate_analysis() const;
 
 private:
-    std::shared_ptr<logging::Logger> logger;
+	std::shared_ptr<logging::Logger> logger;
 };
 
 }
