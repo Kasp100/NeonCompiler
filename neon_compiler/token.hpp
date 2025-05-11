@@ -3,7 +3,7 @@
 
 #include <cstdint>
 #include <optional>
-#include <string_view>
+#include <string>
 
 namespace compiler
 {
@@ -59,7 +59,7 @@ enum class TokenType
 class Token {
 
 public:
-	explicit Token(TokenType type, std::uint32_t row, std::uint32_t col, std::optional<std::string_view> lexeme = std::nullopt);
+	explicit Token(TokenType type, std::uint32_t row, std::uint32_t col, std::optional<std::string> lexeme = std::nullopt);
 
 	TokenType get_type() const;
 	std::uint32_t get_row() const;
@@ -71,7 +71,7 @@ public:
 private:
 	TokenType type;
 	std::uint32_t row, col;
-	std::optional<std::string_view> lexeme;
+	std::optional<std::string> lexeme;
 };
 }
 

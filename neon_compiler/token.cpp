@@ -1,9 +1,11 @@
 #include "token.hpp"
 
+#include <string_view>
+
 using namespace compiler;
 using namespace std;
 
-Token::Token(TokenType type, uint32_t row, uint32_t col, optional<string_view> lexeme)
+Token::Token(TokenType type, uint32_t row, uint32_t col, optional<string> lexeme)
 		: type(type), row(row), col(col), lexeme(lexeme) {}
 
 TokenType Token::get_type() const
@@ -23,7 +25,10 @@ uint32_t Token::get_col() const
 
 optional<string_view> Token::get_lexeme() const
 {
-	return lexeme;
+	if (lexeme.has_value()) {
+		return string_view(*lexeme);
+	}
+	return std::nullopt;
 }
 
 optional<TokenType> Token::keyword_to_token_type(string_view word)

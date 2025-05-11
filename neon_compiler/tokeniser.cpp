@@ -21,7 +21,6 @@ void Tokeniser::run()
 
 void Tokeniser::skip_whitespace()
 {
-	
 	char c;
 	bool whitespace;
 	do{
@@ -40,6 +39,11 @@ Token Tokeniser::tokenise_next()
 	{
 		return tokenise_identifier();
 	}
+
+	char custom_char = reader->consume();
+	string lexeme("");
+	lexeme += custom_char;
+	return Token(TokenType::CUSTOM_TOKEN, 0, 0, optional<string>(lexeme));
 }
 
 Token Tokeniser::tokenise_identifier()
@@ -54,21 +58,20 @@ Token Tokeniser::tokenise_identifier()
 	}
 	while (is_alpha(c) || is_digit(c) || c == '_');
 
-	//TODO fix:
-	return Token(TokenType::IDENTIFIER, 0, 0, optional<string_view>(lexeme));// UNSAFE as "lexeme" is local
+	return Token(TokenType::IDENTIFIER, 0, 0, optional<string>(lexeme));
 }
 
 bool Tokeniser::is_alpha(char ch)
 {
-    return (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z');
+	return (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z');
 }
 
 bool Tokeniser::is_digit(char ch)
 {
-    return ch >= '0' && ch <= '9';
+	return ch >= '0' && ch <= '9';
 }
 
 bool Tokeniser::is_space(char ch)
 {
-    return ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r';
+	return ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r';
 }
