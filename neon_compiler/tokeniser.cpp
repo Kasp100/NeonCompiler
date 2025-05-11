@@ -15,7 +15,14 @@ void Tokeniser::run()
 	}
 	for(Token t : tokens)
 	{
-		if(t.get_lexeme().has_value()) logger->debug("Token: " + string(t.get_lexeme().value()));
+		if(t.get_lexeme().has_value())
+		{
+			logger->debug("Token: " + string(t.get_lexeme().value()));
+		}
+		else
+		{
+			logger->debug("Token (" + to_string(static_cast<int>(t.get_type())) + ")");
+		}
 	}
 }
 
