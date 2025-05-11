@@ -19,6 +19,12 @@ private:
     std::unique_ptr<reading::CharReader> reader;
     std::vector<compiler::Token> tokens;
     compiler::Token tokenise_next();
+    void skip_whitespace();
+    compiler::Token tokenise_identifier();
+    compiler::Token tokenise_number();
+    static bool is_alpha(char ch);
+    static bool is_digit(char ch);
+    static bool is_space(char ch);
 };
 
 }
