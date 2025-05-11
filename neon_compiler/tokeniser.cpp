@@ -44,7 +44,7 @@ Token Tokeniser::tokenise_next()
 {
 	if(is_alpha(reader->peek()))
 	{
-		return tokenise_identifier();
+		return tokenise_word();
 	}
 
 	char custom_char = reader->consume();
@@ -53,7 +53,7 @@ Token Tokeniser::tokenise_next()
 	return Token(TokenType::CUSTOM_TOKEN, 0, 0, optional<string>(lexeme));
 }
 
-Token Tokeniser::tokenise_identifier()
+Token Tokeniser::tokenise_word()
 {
 	std::string lexeme;
 	char c;
@@ -65,7 +65,26 @@ Token Tokeniser::tokenise_identifier()
 	}
 	while (is_alpha(c) || is_digit(c) || c == '_');
 
-	return Token(TokenType::IDENTIFIER, 0, 0, optional<string>(lexeme));
+	if(reader->peek() == ':')
+	{
+		lexeme += reader->consume();
+	}
+
+	return convert_word_to_token(lexeme);
+}
+
+Token Tokeniser::convert_word_to_token(const string& word)
+{
+	const optional<TokenType> type = Token::keyword_to_token_type(string_view(word));
+	
+	if(type.has_value())
+	{
+		return Token(*type, 0, 0);
+	}
+	else
+	{
+		return Token(TokenType::IDENTIFIER, 0, 0, optional<string>(word));
+	}
 }
 
 bool Tokeniser::is_alpha(char ch)
