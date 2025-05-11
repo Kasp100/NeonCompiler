@@ -55,10 +55,6 @@ optional<TokenType> Token::keyword_to_token_type(string_view word)
 	else if (word == "extendable")       return TokenType::DECL_CLASS_EXTENDABLE;
 	else if (word == "final")            return TokenType::DECL_METHOD_FINAL;
 	else if (word == "override")         return TokenType::DECL_METHOD_OVERRIDE;
-	else if (word == "ret")              return TokenType::STMT_RETURN;
-	else if (word == "move")             return TokenType::STMT_MOVE;
-	else if (word == "pass")             return TokenType::STMT_PASS;
-	else if (word == "copy")             return TokenType::STMT_COPY;
 	else if (word == "copyable")         return TokenType::DECL_TYPE_COPYABLE;
 	else if (word == "serialisable")     return TokenType::DECL_TYPE_SERIALISABLE;
 	else if (word == "true")             return TokenType::BOOL_TRUE;
@@ -66,6 +62,15 @@ optional<TokenType> Token::keyword_to_token_type(string_view word)
 	else if (word == "auto:")            return TokenType::CALL_COMPILE_FUNCTION;
 	else if (word == "compile_function") return TokenType::DEFINE_COMPILE_FUNCTION;
 	else if (word == "grammar")          return TokenType::DEFINE_GRAMMAR_SET;
+	else if (word == "void")             return TokenType::RETURN_TYPE_VOID;
+	else if (word == "if")               return TokenType::STMT_IF;
+	else if (word == "else")             return TokenType::STMT_ELSE;
+	else if (word == "for")              return TokenType::STMT_FOR;
+	else if (word == "foreach")          return TokenType::STMT_FOREACH;
+	else if (word == "ret")              return TokenType::STMT_RETURN;
+	else if (word == "move")             return TokenType::STMT_MOVE;
+	else if (word == "pass")             return TokenType::STMT_PASS;
+	else if (word == "copy")             return TokenType::STMT_COPY;
 
 	return nullopt;
 }
