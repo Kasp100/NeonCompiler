@@ -38,7 +38,8 @@ void Tokeniser::tokenise_next()
 {
 	if(is_alpha(reader->peek()))
 	{
-		return tokenise_word();
+		tokenise_word();
+		return;
 	}
 
 	char custom_char = reader->consume();
