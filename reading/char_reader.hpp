@@ -1,6 +1,7 @@
 #ifndef CHAR_READER_HPP
 #define CHAR_READER_HPP
 
+#include <cstdint>
 #include <istream>
 #include <vector>
 #include <memory>
