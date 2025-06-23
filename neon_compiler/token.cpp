@@ -5,8 +5,8 @@
 using namespace compiler;
 using namespace std;
 
-Token::Token(TokenType type, uint32_t line, uint32_t column, optional<string> lexeme)
-		: type(type), line(line), column(column), lexeme(lexeme) {}
+Token::Token(TokenType type, uint32_t line, uint32_t column, uint32_t length, optional<string> lexeme)
+		: type(type), line(line), column(column), length(length), lexeme(lexeme) {}
 
 TokenType Token::get_type() const
 {
@@ -21,6 +21,11 @@ uint32_t Token::get_line() const
 uint32_t Token::get_column() const
 {
 	return column;
+}
+
+uint32_t Token::get_length() const
+{
+	return length;
 }
 
 optional<string_view> Token::get_lexeme() const

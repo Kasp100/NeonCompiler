@@ -44,7 +44,7 @@ Token Tokeniser::tokenise_next()
 	char custom_char = reader->consume();
 	string lexeme("");
 	lexeme += custom_char;
-	return Token(TokenType::CUSTOM_TOKEN, 0, 0, optional<string>(lexeme));
+	return Token(TokenType::CUSTOM_TOKEN, 0, 0, 0, optional<string>(lexeme));
 }
 
 Token Tokeniser::tokenise_word()
@@ -73,11 +73,11 @@ Token Tokeniser::convert_word_to_token(const string& word)
 	
 	if(type.has_value())
 	{
-		return Token(*type, 0, 0);
+		return Token(*type, 0, 0, 0);
 	}
 	else
 	{
-		return Token(TokenType::IDENTIFIER, 0, 0, optional<string>(word));
+		return Token(TokenType::IDENTIFIER, 0, 0, 0, optional<string>(word));
 	}
 }
 
