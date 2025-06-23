@@ -71,7 +71,7 @@ optional<TokenType> Token::keyword_to_token_type(string_view word)
 	else if (word == "if")               return TokenType::STMT_IF;
 	else if (word == "else")             return TokenType::STMT_ELSE;
 	else if (word == "for")              return TokenType::STMT_FOR;
-	else if (word == "foreach")          return TokenType::STMT_FOREACH;
+	else if (word == "for_each_in")      return TokenType::STMT_FOR_EACH_IN;
 	else if (word == "while")            return TokenType::STMT_WHILE;
 	else if (word == "serialising")      return TokenType::STMT_SERIALISING;
 	else if (word == "ret")              return TokenType::STMT_RETURN;
