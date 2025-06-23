@@ -19,11 +19,11 @@ private:
     std::shared_ptr<logging::Logger> logger;
     std::unique_ptr<reading::CharReader> reader;
     std::vector<compiler::Token> tokens;
-    compiler::Token tokenise_next();
+    void tokenise_next();
     void skip_whitespace();
-    compiler::Token tokenise_word();
-    compiler::Token tokenise_number();
-    static compiler::Token convert_word_to_token(const std::string& word);
+    void tokenise_word();
+    void tokenise_number();
+    void tokenise_word(const std::string& word);
     static bool is_alpha(char ch);
     static bool is_digit(char ch);
     static bool is_space(char ch);

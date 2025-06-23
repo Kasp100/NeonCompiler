@@ -11,7 +11,7 @@ void Tokeniser::run()
 	while (!reader->end_of_file_reached())
 	{
 		skip_whitespace();
-		tokens.push_back(tokenise_next());
+		tokenise_next();
 	}
 }
 
@@ -34,7 +34,7 @@ void Tokeniser::skip_whitespace()
 	}while(whitespace);
 }
 
-Token Tokeniser::tokenise_next()
+void Tokeniser::tokenise_next()
 {
 	if(is_alpha(reader->peek()))
 	{
@@ -44,10 +44,21 @@ Token Tokeniser::tokenise_next()
 	char custom_char = reader->consume();
 	string lexeme("");
 	lexeme += custom_char;
-	return Token(TokenType::CUSTOM_TOKEN, 0, 0, 0, optional<string>(lexeme));
+
+	tokens.push_back
+	(
+		Token
+		(
+			TokenType::CUSTOM_TOKEN,
+			reader->get_line_number(),
+			reader->get_column_number(),
+			1,
+			optional<string>(lexeme)
+		)
+	);
 }
 
-Token Tokeniser::tokenise_word()
+void Tokeniser::tokenise_word()
 {
 	std::string lexeme;
 	char c;
@@ -64,20 +75,39 @@ Token Tokeniser::tokenise_word()
 		lexeme += reader->consume();
 	}
 
-	return convert_word_to_token(lexeme);
+	tokenise_word(lexeme);
 }
 
-Token Tokeniser::convert_word_to_token(const string& word)
+void Tokeniser::tokenise_word(const string& word)
 {
 	const optional<TokenType> type = Token::keyword_to_token_type(string_view(word));
 	
 	if(type.has_value())
 	{
-		return Token(*type, 0, 0, 0);
+		tokens.push_back
+		(
+			Token
+			(
+				*type,
+				reader->get_line_number(),
+				reader->get_column_number(),
+				word.length()
+			)
+		);
 	}
 	else
 	{
-		return Token(TokenType::IDENTIFIER, 0, 0, 0, optional<string>(word));
+		tokens.push_back
+		(
+			Token
+			(
+				TokenType::IDENTIFIER,
+				reader->get_line_number(),
+				reader->get_column_number(),
+				word.length(),
+				optional<string>(word)
+			)
+		);
 	}
 }
 
