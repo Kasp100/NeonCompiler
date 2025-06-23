@@ -28,15 +28,15 @@ namespace reading
         bool end_of_file_reached();
         bool consume_if_matches(char match);
         bool consume_all_if_next(const std::string& str);
-        std::uint64_t get_line_number() const;
-        std::uint64_t get_column_number() const;
+        std::uint32_t get_line_number() const;
+        std::uint32_t get_column_number() const;
 
     private:
         std::unique_ptr<std::istream> reader;
         std::vector<char> buffer;
         bool eof_reached = false;
-        std::uint64_t line_number = 1;
-        std::uint64_t column_number = 1;
+        std::uint32_t line_number = 1;
+        std::uint32_t column_number = 1;
 
         char read_next();
         char consume_next();

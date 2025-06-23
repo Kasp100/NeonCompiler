@@ -104,12 +104,12 @@ bool CharReader::consume_all_if_next(const std::string& str)
     return true;
 }
 
-uint64_t CharReader::get_line_number() const
+uint32_t CharReader::get_line_number() const
 {
     return line_number;
 }
 
-uint64_t CharReader::get_column_number() const
+uint32_t CharReader::get_column_number() const
 {
     return column_number;
 }
