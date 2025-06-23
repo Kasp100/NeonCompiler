@@ -42,6 +42,9 @@ void Tokeniser::tokenise_next()
 		return;
 	}
 
+	uint32_t line = reader->get_line_number();
+	uint32_t column = reader->get_column_number();
+
 	char custom_char = reader->consume();
 	string lexeme("");
 	lexeme += custom_char;
@@ -51,8 +54,8 @@ void Tokeniser::tokenise_next()
 		Token
 		(
 			TokenType::CUSTOM_TOKEN,
-			reader->get_line_number(),
-			reader->get_column_number(),
+			line,
+			column,
 			1,
 			optional<string>(lexeme)
 		)
@@ -79,7 +82,7 @@ void Tokeniser::tokenise_word()
 	tokenise_word(lexeme);
 }
 
-void Tokeniser::tokenise_word(const string& word)
+void Tokeniser::tokenise_word(uint32_t line, uint32_t column, const string& word)
 {
 	const optional<TokenType> type = Token::keyword_to_token_type(string_view(word));
 	
@@ -90,8 +93,8 @@ void Tokeniser::tokenise_word(const string& word)
 			Token
 			(
 				*type,
-				reader->get_line_number(),
-				reader->get_column_number(),
+				line,
+				column,
 				word.length()
 			)
 		);
@@ -103,8 +106,8 @@ void Tokeniser::tokenise_word(const string& word)
 			Token
 			(
 				TokenType::IDENTIFIER,
-				reader->get_line_number(),
-				reader->get_column_number(),
+				line,
+				column,
 				word.length(),
 				optional<string>(word)
 			)
