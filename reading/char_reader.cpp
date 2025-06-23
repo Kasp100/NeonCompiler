@@ -59,6 +59,17 @@ char CharReader::consume_next()
 {
     char c = buffer.front();
     buffer.erase(buffer.begin());
+
+    if (c == '\n')
+    {
+        line_number++;
+        column_number = 1;
+    }
+    else
+    {
+        column_number++;
+    }
+
     return c;
 }
 
