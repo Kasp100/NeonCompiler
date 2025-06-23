@@ -5,22 +5,22 @@
 using namespace compiler;
 using namespace std;
 
-Token::Token(TokenType type, uint32_t row, uint32_t col, optional<string> lexeme)
-		: type(type), row(row), col(col), lexeme(lexeme) {}
+Token::Token(TokenType type, uint32_t line, uint32_t column, optional<string> lexeme)
+		: type(type), line(line), column(column), lexeme(lexeme) {}
 
 TokenType Token::get_type() const
 {
 	return type;
 }
 
-uint32_t Token::get_row() const
+uint32_t Token::get_line() const
 {
-	return row;
+	return line;
 }
 
-uint32_t Token::get_col() const
+uint32_t Token::get_column() const
 {
-	return col;
+	return column;
 }
 
 optional<string_view> Token::get_lexeme() const
