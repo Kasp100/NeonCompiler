@@ -92,3 +92,13 @@ bool CharReader::consume_all_if_next(const std::string& str)
     consume(static_cast<int>(str.size()) - 1);
     return true;
 }
+
+uint64_t CharReader::get_line_number() const
+{
+    return line_number;
+}
+
+uint64_t CharReader::get_column_number() const
+{
+    return column_number;
+}
