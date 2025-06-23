@@ -15,6 +15,11 @@ void Tokeniser::run()
 	}
 }
 
+vector<Token> Tokeniser::get_tokens() const
+{
+	return tokens;
+}
+
 void Tokeniser::skip_whitespace()
 {
 	char c;

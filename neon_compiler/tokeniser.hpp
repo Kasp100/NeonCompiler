@@ -14,6 +14,7 @@ class Tokeniser
 public:
     explicit Tokeniser(std::shared_ptr<logging::Logger> logger, std::unique_ptr<reading::CharReader> reader);
     void run();
+    std::vector<compiler::Token> get_tokens() const;
 private:
     std::shared_ptr<logging::Logger> logger;
     std::unique_ptr<reading::CharReader> reader;
