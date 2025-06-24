@@ -42,6 +42,12 @@ void Tokeniser::tokenise_next()
 		return;
 	}
 
+	if(is_digit(reader->peek()))
+	{
+		tokenise_number();
+		return;
+	}
+
 	uint32_t line = reader->get_line_number();
 	uint32_t column = reader->get_column_number();
 
@@ -113,6 +119,48 @@ void Tokeniser::tokenise_word(uint32_t line, uint32_t column, const string& word
 			)
 		);
 	}
+}
+
+void Tokeniser::tokenise_number()
+{
+	uint32_t line = reader->get_line_number();
+	uint32_t column = reader->get_column_number();
+	string lexeme;
+
+	if(reader->consume_all_if_next("0x"))
+	{
+		lexeme = "0x";
+	}
+	else if(reader->consume_all_if_next("0b"))
+	{
+		lexeme = "0b";
+	}
+
+	char c = reader->peek();
+
+	/* 1. `is_digit` to check for decimal digits
+	 * 2. `is_alpha` to check for hexadecimal digits (A-F, a-f)
+	 * 3. `.` is allowed in floating point numbers
+	 * 4. `_` is allowed as a separator in numbers, for readability (e.g., 1_000_000)
+	 * Validation of numbers is done in the parser. */
+	while (is_digit(c) || is_alpha(c) || c == '.' || c == '_')
+	{
+		c = reader->consume();
+		lexeme += c;
+		c = reader->peek();
+	};
+
+	tokens.push_back
+	(
+		Token
+		(
+			TokenType::NUMBER,
+			line,
+			column,
+			lexeme.length(),
+			optional<string>(lexeme)
+		)
+	);
 }
 
 bool Tokeniser::is_alpha(char ch)
