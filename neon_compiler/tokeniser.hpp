@@ -27,6 +27,7 @@ private:
     void tokenise_word(std::uint32_t line, std::uint32_t column, const std::string& word);
     void read_and_tokenise_number();
     void read_and_tokenise_string();
+    void read_and_tokenise_character();
     static bool is_alpha(char ch);
     static bool is_digit(char ch);
     static bool is_space(char ch);

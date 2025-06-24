@@ -56,6 +56,12 @@ void Tokeniser::tokenise_next()
 		return;
 	}
 
+	if(reader->peek() == '\'')
+	{
+		read_and_tokenise_character();
+		return;
+	}
+
 	uint32_t line = reader->get_line_number();
 	uint32_t column = reader->get_column_number();
 
@@ -242,6 +248,59 @@ void Tokeniser::read_and_tokenise_string()
 			column,
 			reader->get_column_number() - column,
 			optional<string>(lexeme)
+		)
+	);
+}
+
+void Tokeniser::read_and_tokenise_character()
+{
+	uint32_t line = reader->get_line_number();
+	uint32_t column = reader->get_column_number();
+
+	reader->consume();// Consume the opening quote
+	char c = reader->consume();
+
+	if(c == '\\')
+	{
+		c = reader->consume();
+
+		optional<char> escaped = convert_escaped(c);
+		if(escaped.has_value())
+		{
+			c = escaped.value();
+		}
+		else
+		{
+			logger->error("Unknown escape sequence at line " + to_string(line) + ", column " + to_string(column));
+			return;
+		}
+	}
+	else if(c == '\n')
+	{
+		logger->error("Newline in character literal at line " + to_string(line) + ", column " + to_string(column));
+		return;
+	}
+	else if(c == '\'')
+	{
+		logger->error("Empty character literal at line " + to_string(line) + ", column " + to_string(column));
+		return;
+	}
+
+	if(!reader->consume_if_matches('\''))
+	{
+		logger->error("Unterminated character literal at line " + to_string(line) + ", column " + to_string(reader->get_column_number()));
+		return;
+	}
+
+	tokens.push_back
+	(
+		Token
+		(
+			TokenType::LITERAL_CHARACTER,
+			line,
+			column,
+			reader->get_column_number() - column,
+			optional<string>("" + c)
 		)
 	);
 }
