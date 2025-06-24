@@ -7,17 +7,17 @@ CharReader::CharReader(std::unique_ptr<std::istream> input_stream)
 
 char CharReader::read_next()
 {
-    if (eof_reached) return END_OF_FILE;
+    if(eof_reached) { return END_OF_FILE; }
 
     int val = reader->get();
-    if (val == EOF)
+    if(val == EOF)
     {
         eof_reached = true;
         return END_OF_FILE;
     }
 
     char c = static_cast<char>(val);
-    if (c == '\r')
+    if(c == '\r')
     {
         char next = static_cast<char>(reader->peek());
         if (next == '\n')

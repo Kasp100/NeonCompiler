@@ -8,7 +8,7 @@ Tokeniser::Tokeniser(shared_ptr<logging::Logger> logger, unique_ptr<reading::Cha
 
 void Tokeniser::run()
 {
-	while (!reader->end_of_file_reached())
+	while(!reader->end_of_file_reached())
 	{
 		skip_whitespace();
 		tokenise_next();
@@ -24,14 +24,16 @@ void Tokeniser::skip_whitespace()
 {
 	char c;
 	bool whitespace;
-	do{
+	do
+	{
 		c = reader->peek();
 		whitespace = is_space(c);
-		if(whitespace)
+		if (whitespace)
 		{
 			reader->consume();
 		}
-	}while(whitespace);
+	}
+	while (whitespace);
 }
 
 void Tokeniser::tokenise_next()
@@ -95,7 +97,7 @@ void Tokeniser::tokenise_word(uint32_t line, uint32_t column, const string& word
 {
 	const optional<TokenType> type = Token::keyword_to_token_type(string_view(word));
 	
-	if(type.has_value())
+	if (type.has_value())
 	{
 		tokens.push_back
 		(
