@@ -50,6 +50,12 @@ void Tokeniser::tokenise_next()
 		return;
 	}
 
+	if(reader->consume_if_matches('"'))
+	{
+		read_and_tokenise_string();
+		return;
+	}
+
 	uint32_t line = reader->get_line_number();
 	uint32_t column = reader->get_column_number();
 
@@ -168,6 +174,70 @@ void Tokeniser::read_and_tokenise_number()
 	);
 }
 
+void Tokeniser::read_and_tokenise_string()
+{
+	uint32_t line = reader->get_line_number();
+	uint32_t column = reader->get_column_number();
+	string lexeme;
+
+	bool escape_sequence = false;
+
+	char c = reader->consume();
+	bool ending_at_eof;
+	while (!(ending_at_eof = reader->end_of_file_reached()))
+	{
+		if(escape_sequence)
+		{
+			optional<char> escaped = convert_escaped(c);
+			if(escaped.has_value())
+			{
+				lexeme += escaped.value();
+			}
+			else
+			{
+				logger->error("Unknown escape sequence at line " + to_string(line) + ", column " + to_string(column));
+				return;
+			}
+			
+			escape_sequence = false;
+			continue;
+		}
+		
+		if(c == '\\')
+		{
+			escape_sequence = true;
+			continue;
+		}
+		
+		if(c == '"')
+		{
+			break;
+		}
+
+		lexeme += c;
+
+		c = reader->consume();
+	}
+
+	if(ending_at_eof)
+	{
+		logger->error("Unterminated string literal at line " + to_string(line) + ", column " + to_string(column));
+		return;
+	}
+
+	tokens.push_back
+	(
+		Token
+		(
+			TokenType::LITERAL_STRING,
+			line,
+			column,
+			lexeme.length(),
+			optional<string>(lexeme)
+		)
+	);
+}
+
 bool Tokeniser::is_alpha(char ch)
 {
 	return (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z');
@@ -181,4 +251,18 @@ bool Tokeniser::is_digit(char ch)
 bool Tokeniser::is_space(char ch)
 {
 	return ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r';
+}
+
+optional<char> Tokeniser::convert_escaped(char ch)
+{
+	switch (ch) {
+		case 'n': return '\n';
+		case 'r': return '\r';
+		case 't': return '\t';
+		case '0': return '\0';
+		case '"': return '"';
+		case '\'': return '\'';
+		case '\\': return '\\';
+		default: return nullopt;
+	}
 }

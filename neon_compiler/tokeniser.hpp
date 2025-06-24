@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <optional>
 #include "../logging/logger.hpp"
 #include "../reading/char_reader.hpp"
 #include "token.hpp"
@@ -25,9 +26,11 @@ private:
     void read_and_tokenise_word();
     void tokenise_word(std::uint32_t line, std::uint32_t column, const std::string& word);
     void read_and_tokenise_number();
+    void read_and_tokenise_string();
     static bool is_alpha(char ch);
     static bool is_digit(char ch);
     static bool is_space(char ch);
+    static std::optional<char> convert_escaped(char ch);
 };
 
 }
