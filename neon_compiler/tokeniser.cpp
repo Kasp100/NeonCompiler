@@ -250,7 +250,7 @@ bool Tokeniser::is_digit(char ch)
 
 bool Tokeniser::is_space(char ch)
 {
-	return ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r';
+	return ch == ' ' || ch == '\t' || ch == '\n';
 }
 
 optional<char> Tokeniser::convert_escaped(char ch)
