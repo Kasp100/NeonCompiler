@@ -38,13 +38,13 @@ void Tokeniser::tokenise_next()
 {
 	if(is_alpha(reader->peek()))
 	{
-		tokenise_word();
+		read_and_tokenise_word();
 		return;
 	}
 
 	if(is_digit(reader->peek()))
 	{
-		tokenise_number();
+		read_and_tokenise_number();
 		return;
 	}
 
@@ -68,9 +68,12 @@ void Tokeniser::tokenise_next()
 	);
 }
 
-void Tokeniser::tokenise_word()
+void Tokeniser::read_and_tokenise_word()
 {
-	std::string lexeme;
+	uint32_t line = reader->get_line_number();
+	uint32_t column = reader->get_column_number();
+	string lexeme;
+
 	char c;
 	do
 	{
@@ -85,7 +88,7 @@ void Tokeniser::tokenise_word()
 		lexeme += reader->consume();
 	}
 
-	tokenise_word(lexeme);
+	tokenise_word(line, column, lexeme);
 }
 
 void Tokeniser::tokenise_word(uint32_t line, uint32_t column, const string& word)
@@ -121,7 +124,7 @@ void Tokeniser::tokenise_word(uint32_t line, uint32_t column, const string& word
 	}
 }
 
-void Tokeniser::tokenise_number()
+void Tokeniser::read_and_tokenise_number()
 {
 	uint32_t line = reader->get_line_number();
 	uint32_t column = reader->get_column_number();
@@ -154,7 +157,7 @@ void Tokeniser::tokenise_number()
 	(
 		Token
 		(
-			TokenType::NUMBER,
+			TokenType::LITERAL_NUMBER,
 			line,
 			column,
 			lexeme.length(),

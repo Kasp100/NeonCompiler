@@ -1,6 +1,7 @@
 #ifndef TOKENISER_HPP
 #define TOKENISER_HPP
 
+#include <cstdint>
 #include <memory>
 #include "../logging/logger.hpp"
 #include "../reading/char_reader.hpp"
@@ -21,9 +22,9 @@ private:
     std::vector<compiler::Token> tokens;
     void tokenise_next();
     void skip_whitespace();
-    void tokenise_word();
-    void tokenise_number();
-    void tokenise_word(const std::string& word);
+    void read_and_tokenise_word();
+    void tokenise_word(std::uint32_t line, std::uint32_t column, const std::string& word);
+    void read_and_tokenise_number();
     static bool is_alpha(char ch);
     static bool is_digit(char ch);
     static bool is_space(char ch);
