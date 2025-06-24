@@ -50,7 +50,7 @@ void Tokeniser::tokenise_next()
 		return;
 	}
 
-	if(reader->consume_if_matches('"'))
+	if(reader->peek() == '"')
 	{
 		read_and_tokenise_string();
 		return;
@@ -180,6 +180,8 @@ void Tokeniser::read_and_tokenise_string()
 	uint32_t column = reader->get_column_number();
 	string lexeme;
 
+	reader->consume(); // Consume the opening quote
+
 	bool escape_sequence = false;
 
 	char c = reader->consume();
@@ -208,7 +210,13 @@ void Tokeniser::read_and_tokenise_string()
 			escape_sequence = true;
 			continue;
 		}
-		
+
+		if(c == '\n')
+		{
+			logger->error("Newline in string literal at line " + to_string(line) + ", column " + to_string(column));
+			return;
+		}
+
 		if(c == '"')
 		{
 			break;
@@ -221,7 +229,7 @@ void Tokeniser::read_and_tokenise_string()
 
 	if(ending_at_eof)
 	{
-		logger->error("Unterminated string literal at line " + to_string(line) + ", column " + to_string(column));
+		logger->error("Unterminated string literal at line " + to_string(line) + ", column " + to_string(reader->get_column_number()));
 		return;
 	}
 
@@ -232,7 +240,7 @@ void Tokeniser::read_and_tokenise_string()
 			TokenType::LITERAL_STRING,
 			line,
 			column,
-			lexeme.length(),
+			reader->get_column_number() - column,
 			optional<string>(lexeme)
 		)
 	);
