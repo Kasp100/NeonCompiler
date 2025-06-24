@@ -45,7 +45,6 @@ optional<TokenType> Token::keyword_to_token_type(string_view word)
 	else if (word == "inner")            return TokenType::VISIBILITY_INNER;
 	else if (word == "static")           return TokenType::MEMBER_STATIC;
 	else if (word == "const")            return TokenType::MEMBER_CONST;
-	else if (word == "external")         return TokenType::MEMBER_EXTERNAL;
 	else if (word == "mut:")             return TokenType::MUTABLE_REFERENCE;
 	else if (word == "mut")              return TokenType::MUTABLE_DECLARATION;
 	else if (word == "own")              return TokenType::REF_TYPE_OWN;
