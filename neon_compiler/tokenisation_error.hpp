@@ -13,7 +13,7 @@ public:
     explicit TokenisationError(std::uint32_t line, std::uint32_t column, const std::string& message);
     std::uint32_t get_line() const;
     std::uint32_t get_column() const;
-    std::string get_message() const;
+    std::string_view get_message() const;
 private:
     std::uint32_t line;
     std::uint32_t column;

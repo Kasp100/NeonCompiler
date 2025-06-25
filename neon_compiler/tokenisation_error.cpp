@@ -13,6 +13,6 @@ std::uint32_t TokenisationError::get_column() const {
     return column;
 }
 
-std::string TokenisationError::get_message() const {
-    return message;
+std::string_view TokenisationError::get_message() const {
+    return std::string_view(message);
 }
