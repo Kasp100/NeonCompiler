@@ -71,23 +71,23 @@ public:
 	explicit Token
 	(
 		TokenType type,
-		std::uint32_t line,
-		std::uint32_t column,
-		std::uint32_t length,
+		uint32_t line,
+		uint32_t column,
+		uint32_t length,
 		std::optional<std::string> lexeme = std::nullopt
 	);
 
 	TokenType get_type() const;
-	std::uint32_t get_line() const;
-	std::uint32_t get_column() const;
-	std::uint32_t get_length() const;
+	uint32_t get_line() const;
+	uint32_t get_column() const;
+	uint32_t get_length() const;
 	std::optional<std::string_view> get_lexeme() const;
 
 	static std::optional<TokenType> keyword_to_token_type(std::string_view word);
 
 private:
 	TokenType type;
-	std::uint32_t line, column, length;
+	uint32_t line, column, length;
 	std::optional<std::string> lexeme;
 };
 }

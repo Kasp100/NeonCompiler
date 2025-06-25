@@ -4,7 +4,7 @@
 
 using namespace tokenisation;
 
-Token::Token(TokenType type, std::uint32_t line, std::uint32_t column, std::uint32_t length, std::optional<std::string> lexeme)
+Token::Token(TokenType type, uint32_t line, uint32_t column, uint32_t length, std::optional<std::string> lexeme)
 		: type(type), line(line), column(column), length(length), lexeme(lexeme) {}
 
 TokenType Token::get_type() const
@@ -12,17 +12,17 @@ TokenType Token::get_type() const
 	return type;
 }
 
-std::uint32_t Token::get_line() const
+uint32_t Token::get_line() const
 {
 	return line;
 }
 
-std::uint32_t Token::get_column() const
+uint32_t Token::get_column() const
 {
 	return column;
 }
 
-std::uint32_t Token::get_length() const
+uint32_t Token::get_length() const
 {
 	return length;
 }

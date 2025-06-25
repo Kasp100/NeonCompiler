@@ -10,13 +10,13 @@ namespace tokenisation
 class TokenisationError
 {
 public:
-    explicit TokenisationError(std::uint32_t line, std::uint32_t column, std::string_view message);
-    std::uint32_t get_line() const;
-    std::uint32_t get_column() const;
+    explicit TokenisationError(uint32_t line, uint32_t column, std::string_view message);
+    uint32_t get_line() const;
+    uint32_t get_column() const;
     std::string_view get_message() const;
 private:
-    std::uint32_t line;
-    std::uint32_t column;
+    uint32_t line;
+    uint32_t column;
     std::string_view message;
 };
 

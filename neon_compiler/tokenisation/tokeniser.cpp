@@ -109,7 +109,7 @@ void Tokeniser::read_and_tokenise_word()
 	tokenise_word(line, column, lexeme);
 }
 
-void Tokeniser::tokenise_word(std::uint32_t line, std::uint32_t column, const std::string& word)
+void Tokeniser::tokenise_word(uint32_t line, uint32_t column, const std::string& word)
 {
 	const std::optional<TokenType> type = Token::keyword_to_token_type(std::string_view(word));
 	
@@ -144,8 +144,8 @@ void Tokeniser::tokenise_word(std::uint32_t line, std::uint32_t column, const st
 
 void Tokeniser::read_and_tokenise_number()
 {
-	std::uint32_t line = reader->get_line_number();
-	std::uint32_t column = reader->get_column_number();
+	uint32_t line = reader->get_line_number();
+	uint32_t column = reader->get_column_number();
 	std::string lexeme;
 
 	if(reader->consume_all_if_next("0x"))
@@ -186,8 +186,8 @@ void Tokeniser::read_and_tokenise_number()
 
 void Tokeniser::read_and_tokenise_string()
 {
-	std::uint32_t line = reader->get_line_number();
-	std::uint32_t column = reader->get_column_number();
+	uint32_t line = reader->get_line_number();
+	uint32_t column = reader->get_column_number();
 	std::string lexeme;
 
 	reader->consume(); // Consume the opening quote
@@ -260,8 +260,8 @@ void Tokeniser::read_and_tokenise_string()
 
 void Tokeniser::read_and_tokenise_character()
 {
-	std::uint32_t line = reader->get_line_number();
-	std::uint32_t column = reader->get_column_number();
+	uint32_t line = reader->get_line_number();
+	uint32_t column = reader->get_column_number();
 
 	reader->consume();// Consume the opening quote
 	char c = reader->consume();
