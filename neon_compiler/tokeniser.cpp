@@ -237,7 +237,8 @@ void Tokeniser::read_and_tokenise_string()
 
 		if(c == '"')
 		{
-			break;
+			skip_whitespace();
+			if(reader->consume_if_matches('"')) { break; }
 		}
 
 		lexeme += c;
