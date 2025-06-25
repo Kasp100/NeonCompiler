@@ -66,24 +66,7 @@ void Tokeniser::tokenise_next()
 		return;
 	}
 
-	uint32_t line = reader->get_line_number();
-	uint32_t column = reader->get_column_number();
-
-	char custom_char = reader->consume();
-	std::string lexeme("");
-	lexeme += custom_char;
-
-	tokens.push_back
-	(
-		Token
-		(
-			TokenType::CUSTOM_TOKEN,
-			line,
-			column,
-			1,
-			std::optional<std::string>(lexeme)
-		)
-	);
+	read_and_tokenise_symbol();
 }
 
 void Tokeniser::read_and_tokenise_word()
@@ -307,6 +290,49 @@ void Tokeniser::read_and_tokenise_character()
 	);
 }
 
+void Tokeniser::read_and_tokenise_symbol()
+{
+	uint32_t line = reader->get_line_number();
+	uint32_t column = reader->get_column_number();
+
+	if(reader->consume_all_if_next("::"))
+	{
+		tokens.push_back(Token(TokenType::STATIC_ACCESSOR, line, column, 1, std::nullopt));
+		return;
+	}
+
+	{
+		std::optional<TokenType> optTokenType = convert_single_char_token(reader->peek());
+		if(optTokenType.has_value())
+		{
+			reader->consume();
+			tokens.push_back(Token(optTokenType.value(), line, column, 1, std::nullopt));
+			return;
+		}
+	}
+
+	char custom_char = reader->consume();
+	tokenise_custom_char(line, column, custom_char);
+}
+
+void Tokeniser::tokenise_custom_char(uint32_t line, uint32_t column, char custom_char)
+{
+	std::string lexeme("");
+	lexeme += custom_char;
+
+	tokens.push_back
+	(
+		Token
+		(
+			TokenType::CUSTOM_TOKEN,
+			line,
+			column,
+			1,
+			std::optional<std::string>(lexeme)
+		)
+	);
+}
+
 bool Tokeniser::is_alpha(char ch)
 {
 	return (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z');
@@ -333,6 +359,22 @@ std::optional<char> Tokeniser::convert_escaped(char ch)
 		case '"': return '"';
 		case '\'': return '\'';
 		case '\\': return '\\';
+		default: return std::nullopt;
+	}
+}
+
+std::optional<TokenType> Tokeniser::convert_single_char_token(char ch)
+{
+	switch (ch)
+	{
+		case '{': return TokenType::BRACKET_CURLY_OPEN;
+		case '}': return TokenType::BRACKET_CURLY_CLOSE;
+		case '(': return TokenType::BRACKET_ROUND_OPEN;
+		case ')': return TokenType::BRACKET_ROUND_CLOSE;
+		case '<': return TokenType::SMALLER_THAN;
+		case '>': return TokenType::GREATER_THAN;
+		case ';': return TokenType::END_STATEMENT;
+		case ',': return TokenType::COMMA;
 		default: return std::nullopt;
 	}
 }

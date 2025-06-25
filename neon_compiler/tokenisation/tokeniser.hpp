@@ -47,10 +47,13 @@ private:
 	void read_and_tokenise_number();
 	void read_and_tokenise_string();
 	void read_and_tokenise_character();
+	void read_and_tokenise_symbol();
+	void tokenise_custom_char(std::uint32_t line, std::uint32_t column, char custom_char);
 	static bool is_alpha(char ch);
 	static bool is_digit(char ch);
 	static bool is_space(char ch);
 	static std::optional<char> convert_escaped(char ch);
+	static std::optional<tokenisation::TokenType> convert_single_char_token(char ch);
 };
 
 }
