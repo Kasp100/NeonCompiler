@@ -15,16 +15,17 @@ namespace compiler
 namespace error_messages
 {
 	constexpr std::string_view UNKNOWN_ESCAPE_SEQUENCE =
-			"Unknown escape sequence. Valid escape sequences are: \\n, \\r, \\t, \\0, \\\", \\\', and \\\\.";
+			"Unknown escape sequence. Valid escape sequences are `\\n`, `\\r`, `\\t`, `\\0`, `\\\"`, `\\\'`, and `\\\\`.";
 	constexpr std::string_view UNTERMINATED_STRING_LITERAL =
-			"Unterminated string literal. Use double quotes to start and end string literals.";
+			"Unterminated string literal. Use `\"` to start and end string literals.";
 	constexpr std::string_view UNTERMINATED_CHARACTER_LITERAL =
-			"Unterminated character literal. Use single quotes to start and end character literals.";
+			"Unterminated character literal. Use `'` to start and end character literals.";
 	constexpr std::string_view NEWLINE_IN_STRING_LITERAL =
-			"Newline in string literal is not allowed. "
-			"Use \\n for newline characters, or terminate the string literal and restart on the next line for readability.";
+			"Newline in string literal is not allowed."
+			"If the code needs spliting across multiple lines, terminate the string literal and restart on the next line. "
+			"If the string is intended to use multiple lines, use `\\n` to end the line.";
 	constexpr std::string_view NEWLINE_IN_CHARACTER_LITERAL =
-			"Newline in character literal is not allowed. Use \\n for newline characters.";
+			"Newline in character literal is not allowed. Use `\\n` for newline characters.";
 	constexpr std::string_view EMPTY_CHARACTER_LITERAL =
 			"Empty character literals are not allowed. A character literal must contain exactly one character.";
 }

@@ -198,9 +198,11 @@ void Tokeniser::read_and_tokenise_string()
 	char c = reader->consume();
 	while (!escape_sequence && c != '"')
 	{
+		uint32_t current_column = reader->get_column_number();
+
 		if(reader->end_of_file_reached())
 		{
-			errors.emplace_back(line, column, error_messages::UNTERMINATED_STRING_LITERAL);
+			errors.emplace_back(line, current_column, error_messages::UNTERMINATED_STRING_LITERAL);
 			break;
 		}
 
@@ -213,7 +215,7 @@ void Tokeniser::read_and_tokenise_string()
 			}
 			else
 			{
-				errors.emplace_back(line, column, error_messages::UNKNOWN_ESCAPE_SEQUENCE);
+				errors.emplace_back(line, current_column, error_messages::UNKNOWN_ESCAPE_SEQUENCE);
 			}
 			
 			escape_sequence = false;
@@ -228,6 +230,8 @@ void Tokeniser::read_and_tokenise_string()
 
 		if(c == '\n')
 		{
+			line = reader->get_line_number();
+			column = reader->get_column_number();
 			errors.emplace_back(line, column, error_messages::NEWLINE_IN_STRING_LITERAL);
 		}
 
