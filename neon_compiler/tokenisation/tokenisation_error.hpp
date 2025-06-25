@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <string>
 
-namespace compiler
+namespace tokenisation
 {
 
 class TokenisationError

@@ -2,10 +2,9 @@
 
 #include <string_view>
 
-using namespace compiler;
-using namespace std;
+using namespace tokenisation;
 
-Token::Token(TokenType type, uint32_t line, uint32_t column, uint32_t length, optional<string> lexeme)
+Token::Token(TokenType type, std::uint32_t line, std::uint32_t column, std::uint32_t length, std::optional<std::string> lexeme)
 		: type(type), line(line), column(column), length(length), lexeme(lexeme) {}
 
 TokenType Token::get_type() const
@@ -13,30 +12,30 @@ TokenType Token::get_type() const
 	return type;
 }
 
-uint32_t Token::get_line() const
+std::uint32_t Token::get_line() const
 {
 	return line;
 }
 
-uint32_t Token::get_column() const
+std::uint32_t Token::get_column() const
 {
 	return column;
 }
 
-uint32_t Token::get_length() const
+std::uint32_t Token::get_length() const
 {
 	return length;
 }
 
-optional<string_view> Token::get_lexeme() const
+std::optional<std::string_view> Token::get_lexeme() const
 {
 	if (lexeme.has_value()) {
-		return string_view(*lexeme);
+		return std::string_view(*lexeme);
 	}
 	return std::nullopt;
 }
 
-optional<TokenType> Token::keyword_to_token_type(string_view word)
+std::optional<TokenType> Token::keyword_to_token_type(std::string_view word)
 {
 	     if (word == "pkg")              return TokenType::PACKAGE;
 	else if (word == "public")           return TokenType::VISIBILITY_PUBLIC;
@@ -78,5 +77,5 @@ optional<TokenType> Token::keyword_to_token_type(string_view word)
 	else if (word == "pass")             return TokenType::STMT_PASS;
 	else if (word == "copy")             return TokenType::STMT_COPY;
 
-	return nullopt;
+	return std::nullopt;
 }

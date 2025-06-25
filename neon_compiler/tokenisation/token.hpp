@@ -5,7 +5,7 @@
 #include <optional>
 #include <string>
 
-namespace compiler
+namespace tokenisation
 {
 
 enum class TokenType

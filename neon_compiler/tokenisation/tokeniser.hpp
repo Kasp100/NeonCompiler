@@ -4,12 +4,12 @@
 #include <cstdint>
 #include <memory>
 #include <optional>
-#include "../logging/logger.hpp"
-#include "../reading/char_reader.hpp"
+#include "../../logging/logger.hpp"
+#include "../../reading/char_reader.hpp"
 #include "token.hpp"
 #include "tokenisation_error.hpp"
 
-namespace compiler
+namespace tokenisation
 {
 
 namespace error_messages
@@ -34,12 +34,12 @@ class Tokeniser
 public:
 	explicit Tokeniser(std::unique_ptr<reading::CharReader> reader);
 	void run();
-	std::vector<compiler::Token> get_tokens() const;
-	std::vector<compiler::TokenisationError> get_errors() const;
+	std::vector<tokenisation::Token> get_tokens() const;
+	std::vector<tokenisation::TokenisationError> get_errors() const;
 private:
 	std::unique_ptr<reading::CharReader> reader;
-	std::vector<compiler::Token> tokens;
-	std::vector<compiler::TokenisationError> errors;
+	std::vector<tokenisation::Token> tokens;
+	std::vector<tokenisation::TokenisationError> errors;
 	void tokenise_next();
 	void skip_whitespace();
 	void read_and_tokenise_word();

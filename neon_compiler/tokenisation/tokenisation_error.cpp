@@ -1,6 +1,6 @@
 #include "tokenisation_error.hpp"
 
-using namespace compiler;
+using namespace tokenisation;
 
 TokenisationError::TokenisationError(std::uint32_t line, std::uint32_t column, std::string_view message)
         : line(line), column(column), message(message) {}

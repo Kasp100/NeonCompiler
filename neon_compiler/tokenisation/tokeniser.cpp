@@ -1,9 +1,8 @@
 #include "tokeniser.hpp"
 
-using namespace compiler;
-using namespace std;
+using namespace tokenisation;
 
-Tokeniser::Tokeniser(unique_ptr<reading::CharReader> reader)
+Tokeniser::Tokeniser(std::unique_ptr<reading::CharReader> reader)
 	: reader(move(reader)), tokens(), errors() {}
 
 void Tokeniser::run()
@@ -15,12 +14,12 @@ void Tokeniser::run()
 	}
 }
 
-vector<Token> Tokeniser::get_tokens() const
+std::vector<Token> Tokeniser::get_tokens() const
 {
 	return tokens;
 }
 
-vector<TokenisationError> Tokeniser::get_errors() const
+std::vector<TokenisationError> Tokeniser::get_errors() const
 {
 	return errors;
 }
@@ -71,7 +70,7 @@ void Tokeniser::tokenise_next()
 	uint32_t column = reader->get_column_number();
 
 	char custom_char = reader->consume();
-	string lexeme("");
+	std::string lexeme("");
 	lexeme += custom_char;
 
 	tokens.push_back
@@ -82,7 +81,7 @@ void Tokeniser::tokenise_next()
 			line,
 			column,
 			1,
-			optional<string>(lexeme)
+			std::optional<std::string>(lexeme)
 		)
 	);
 }
@@ -91,7 +90,7 @@ void Tokeniser::read_and_tokenise_word()
 {
 	uint32_t line = reader->get_line_number();
 	uint32_t column = reader->get_column_number();
-	string lexeme;
+	std::string lexeme;
 
 	char c;
 	do
@@ -110,9 +109,9 @@ void Tokeniser::read_and_tokenise_word()
 	tokenise_word(line, column, lexeme);
 }
 
-void Tokeniser::tokenise_word(uint32_t line, uint32_t column, const string& word)
+void Tokeniser::tokenise_word(std::uint32_t line, std::uint32_t column, const std::string& word)
 {
-	const optional<TokenType> type = Token::keyword_to_token_type(string_view(word));
+	const std::optional<TokenType> type = Token::keyword_to_token_type(std::string_view(word));
 	
 	if (type.has_value())
 	{
@@ -137,7 +136,7 @@ void Tokeniser::tokenise_word(uint32_t line, uint32_t column, const string& word
 				line,
 				column,
 				word.length(),
-				optional<string>(word)
+				std::optional<std::string>(word)
 			)
 		);
 	}
@@ -145,9 +144,9 @@ void Tokeniser::tokenise_word(uint32_t line, uint32_t column, const string& word
 
 void Tokeniser::read_and_tokenise_number()
 {
-	uint32_t line = reader->get_line_number();
-	uint32_t column = reader->get_column_number();
-	string lexeme;
+	std::uint32_t line = reader->get_line_number();
+	std::uint32_t column = reader->get_column_number();
+	std::string lexeme;
 
 	if(reader->consume_all_if_next("0x"))
 	{
@@ -180,16 +179,16 @@ void Tokeniser::read_and_tokenise_number()
 			line,
 			column,
 			lexeme.length(),
-			optional<string>(lexeme)
+			std::optional<std::string>(lexeme)
 		)
 	);
 }
 
 void Tokeniser::read_and_tokenise_string()
 {
-	uint32_t line = reader->get_line_number();
-	uint32_t column = reader->get_column_number();
-	string lexeme;
+	std::uint32_t line = reader->get_line_number();
+	std::uint32_t column = reader->get_column_number();
+	std::string lexeme;
 
 	reader->consume(); // Consume the opening quote
 
@@ -208,7 +207,7 @@ void Tokeniser::read_and_tokenise_string()
 
 		if(escape_sequence)
 		{
-			optional<char> escaped = convert_escaped(c);
+			std::optional<char> escaped = convert_escaped(c);
 			if(escaped.has_value())
 			{
 				lexeme += escaped.value();
@@ -254,15 +253,15 @@ void Tokeniser::read_and_tokenise_string()
 			line,
 			column,
 			reader->get_column_number() - column,
-			optional<string>(lexeme)
+			std::optional<std::string>(lexeme)
 		)
 	);
 }
 
 void Tokeniser::read_and_tokenise_character()
 {
-	uint32_t line = reader->get_line_number();
-	uint32_t column = reader->get_column_number();
+	std::uint32_t line = reader->get_line_number();
+	std::uint32_t column = reader->get_column_number();
 
 	reader->consume();// Consume the opening quote
 	char c = reader->consume();
@@ -271,7 +270,7 @@ void Tokeniser::read_and_tokenise_character()
 	{
 		c = reader->consume();
 
-		optional<char> escaped = convert_escaped(c);
+		std::optional<char> escaped = convert_escaped(c);
 		if(escaped.has_value())
 		{
 			c = escaped.value();
@@ -303,7 +302,7 @@ void Tokeniser::read_and_tokenise_character()
 			line,
 			column,
 			reader->get_column_number() - column,
-			optional<string>("" + c)
+			std::optional<std::string>("" + c)
 		)
 	);
 }
@@ -323,7 +322,7 @@ bool Tokeniser::is_space(char ch)
 	return ch == ' ' || ch == '\t' || ch == '\n';
 }
 
-optional<char> Tokeniser::convert_escaped(char ch)
+std::optional<char> Tokeniser::convert_escaped(char ch)
 {
 	switch (ch)
 	{
@@ -334,6 +333,6 @@ optional<char> Tokeniser::convert_escaped(char ch)
 		case '"': return '"';
 		case '\'': return '\'';
 		case '\\': return '\\';
-		default: return nullopt;
+		default: return std::nullopt;
 	}
 }
