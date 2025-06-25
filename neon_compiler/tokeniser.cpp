@@ -196,9 +196,14 @@ void Tokeniser::read_and_tokenise_string()
 	bool escape_sequence = false;
 
 	char c = reader->consume();
-	bool ending_at_eof;
-	while (!(ending_at_eof = reader->end_of_file_reached()))
+	while (!escape_sequence && c != '"')
 	{
+		if(reader->end_of_file_reached())
+		{
+			errors.emplace_back(line, column, error_messages::UNTERMINATED_STRING_LITERAL);
+			break;
+		}
+
 		if(escape_sequence)
 		{
 			optional<char> escaped = convert_escaped(c);
@@ -234,11 +239,6 @@ void Tokeniser::read_and_tokenise_string()
 		lexeme += c;
 
 		c = reader->consume();
-	}
-
-	if(ending_at_eof)
-	{
-		errors.emplace_back(line, column, error_messages::UNTERMINATED_STRING_LITERAL);
 	}
 
 	tokens.push_back
