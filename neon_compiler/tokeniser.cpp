@@ -3,8 +3,8 @@
 using namespace compiler;
 using namespace std;
 
-Tokeniser::Tokeniser(shared_ptr<logging::Logger> logger, unique_ptr<reading::CharReader> reader)
-	: logger(logger), reader(move(reader)), tokens() {}
+Tokeniser::Tokeniser(unique_ptr<reading::CharReader> reader)
+	: reader(move(reader)), tokens(), errors() {}
 
 void Tokeniser::run()
 {
@@ -18,6 +18,11 @@ void Tokeniser::run()
 vector<Token> Tokeniser::get_tokens() const
 {
 	return tokens;
+}
+
+vector<TokenisationError> Tokeniser::get_errors() const
+{
+	return errors;
 }
 
 void Tokeniser::skip_whitespace()
@@ -203,8 +208,7 @@ void Tokeniser::read_and_tokenise_string()
 			}
 			else
 			{
-				logger->error("Unknown escape sequence at line " + to_string(line) + ", column " + to_string(column));
-				return;
+				errors.emplace_back(line, column, error_messages::UNKNOWN_ESCAPE_SEQUENCE);
 			}
 			
 			escape_sequence = false;
@@ -219,8 +223,7 @@ void Tokeniser::read_and_tokenise_string()
 
 		if(c == '\n')
 		{
-			logger->error("Newline in string literal at line " + to_string(line) + ", column " + to_string(column));
-			return;
+			errors.emplace_back(line, column, error_messages::NEWLINE_IN_STRING_LITERAL);
 		}
 
 		if(c == '"')
@@ -235,8 +238,7 @@ void Tokeniser::read_and_tokenise_string()
 
 	if(ending_at_eof)
 	{
-		logger->error("Unterminated string literal at line " + to_string(line) + ", column " + to_string(reader->get_column_number()));
-		return;
+		errors.emplace_back(line, column, error_messages::UNTERMINATED_STRING_LITERAL);
 	}
 
 	tokens.push_back
@@ -271,25 +273,21 @@ void Tokeniser::read_and_tokenise_character()
 		}
 		else
 		{
-			logger->error("Unknown escape sequence at line " + to_string(line) + ", column " + to_string(column));
-			return;
+			errors.emplace_back(line, column, error_messages::UNKNOWN_ESCAPE_SEQUENCE);
 		}
 	}
 	else if(c == '\n')
 	{
-		logger->error("Newline in character literal at line " + to_string(line) + ", column " + to_string(column));
-		return;
+		errors.emplace_back(line, column, error_messages::NEWLINE_IN_CHARACTER_LITERAL);
 	}
 	else if(c == '\'')
 	{
-		logger->error("Empty character literal at line " + to_string(line) + ", column " + to_string(column));
-		return;
+		errors.emplace_back(line, column, error_messages::EMPTY_CHARACTER_LITERAL);
 	}
 
 	if(!reader->consume_if_matches('\''))
 	{
-		logger->error("Unterminated character literal at line " + to_string(line) + ", column " + to_string(reader->get_column_number()));
-		return;
+		errors.emplace_back(line, column, error_messages::UNTERMINATED_CHARACTER_LITERAL);
 	}
 
 	tokens.push_back
@@ -322,7 +320,8 @@ bool Tokeniser::is_space(char ch)
 
 optional<char> Tokeniser::convert_escaped(char ch)
 {
-	switch (ch) {
+	switch (ch)
+	{
 		case 'n': return '\n';
 		case 'r': return '\r';
 		case 't': return '\t';
