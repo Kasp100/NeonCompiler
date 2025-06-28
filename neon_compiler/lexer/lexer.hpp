@@ -9,7 +9,7 @@
 #include "../token.hpp"
 #include "tokenisation_error.hpp"
 
-namespace tokenisation
+namespace neon_compiler::lexer
 {
 
 namespace error_messages
@@ -34,12 +34,12 @@ class Lexer
 public:
 	explicit Lexer(std::unique_ptr<reading::CharReader> reader);
 	void run();
-	std::vector<tokenisation::Token> get_tokens() const;
-	std::vector<tokenisation::TokenisationError> get_errors() const;
+	std::vector<neon_compiler::Token> get_tokens() const;
+	std::vector<neon_compiler::lexer::TokenisationError> get_errors() const;
 private:
 	std::unique_ptr<reading::CharReader> reader;
-	std::vector<tokenisation::Token> tokens;
-	std::vector<tokenisation::TokenisationError> errors;
+	std::vector<neon_compiler::Token> tokens;
+	std::vector<neon_compiler::lexer::TokenisationError> errors;
 	void tokenise_next();
 	void skip_whitespace();
 	void read_and_tokenise_word();
@@ -53,7 +53,7 @@ private:
 	static bool is_digit(char ch);
 	static bool is_space(char ch);
 	static std::optional<char> convert_escaped(char ch);
-	static std::optional<tokenisation::TokenType> convert_single_char_token(char ch);
+	static std::optional<neon_compiler::TokenType> convert_single_char_token(char ch);
 };
 
 }

@@ -1,6 +1,6 @@
 #include "lexer.hpp"
 
-using namespace tokenisation;
+using namespace neon_compiler::lexer;
 
 Lexer::Lexer(std::unique_ptr<reading::CharReader> reader)
 	: reader(move(reader)), tokens(), errors() {}
@@ -14,7 +14,7 @@ void Lexer::run()
 	}
 }
 
-std::vector<Token> Lexer::get_tokens() const
+std::vector<neon_compiler::Token> Lexer::get_tokens() const
 {
 	return tokens;
 }
@@ -363,7 +363,7 @@ std::optional<char> Lexer::convert_escaped(char ch)
 	}
 }
 
-std::optional<TokenType> Lexer::convert_single_char_token(char ch)
+std::optional<neon_compiler::TokenType> Lexer::convert_single_char_token(char ch)
 {
 	switch (ch)
 	{

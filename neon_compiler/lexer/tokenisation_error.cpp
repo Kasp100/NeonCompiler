@@ -1,6 +1,6 @@
 #include "tokenisation_error.hpp"
 
-using namespace tokenisation;
+using namespace neon_compiler::lexer;
 
 TokenisationError::TokenisationError(uint32_t line, uint32_t column, std::string_view message)
         : line(line), column(column), message(message) {}

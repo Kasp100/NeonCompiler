@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <string>
 
-namespace tokenisation
+namespace neon_compiler::lexer
 {
 
 class TokenisationError

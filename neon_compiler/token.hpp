@@ -5,7 +5,7 @@
 #include <optional>
 #include <string>
 
-namespace tokenisation
+namespace neon_compiler
 {
 
 enum class TokenType

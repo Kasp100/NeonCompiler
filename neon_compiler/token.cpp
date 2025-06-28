@@ -2,7 +2,7 @@
 
 #include <string_view>
 
-using namespace tokenisation;
+using namespace neon_compiler;
 
 Token::Token(TokenType type, uint32_t line, uint32_t column, uint32_t length, std::optional<std::string> lexeme)
 		: type(type), line(line), column(column), length(length), lexeme(lexeme) {}
