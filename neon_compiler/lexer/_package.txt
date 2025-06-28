@@ -1,3 +1,2 @@
-tokeniser
-token
+lexer
 tokenisation_error

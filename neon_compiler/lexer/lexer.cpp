@@ -1,11 +1,11 @@
-#include "tokeniser.hpp"
+#include "lexer.hpp"
 
 using namespace tokenisation;
 
-Tokeniser::Tokeniser(std::unique_ptr<reading::CharReader> reader)
+Lexer::Lexer(std::unique_ptr<reading::CharReader> reader)
 	: reader(move(reader)), tokens(), errors() {}
 
-void Tokeniser::run()
+void Lexer::run()
 {
 	while(!reader->end_of_file_reached())
 	{
@@ -14,17 +14,17 @@ void Tokeniser::run()
 	}
 }
 
-std::vector<Token> Tokeniser::get_tokens() const
+std::vector<Token> Lexer::get_tokens() const
 {
 	return tokens;
 }
 
-std::vector<TokenisationError> Tokeniser::get_errors() const
+std::vector<TokenisationError> Lexer::get_errors() const
 {
 	return errors;
 }
 
-void Tokeniser::skip_whitespace()
+void Lexer::skip_whitespace()
 {
 	char c;
 	bool whitespace;
@@ -40,7 +40,7 @@ void Tokeniser::skip_whitespace()
 	while (whitespace);
 }
 
-void Tokeniser::tokenise_next()
+void Lexer::tokenise_next()
 {
 	if(is_alpha(reader->peek()))
 	{
@@ -69,7 +69,7 @@ void Tokeniser::tokenise_next()
 	read_and_tokenise_symbol();
 }
 
-void Tokeniser::read_and_tokenise_word()
+void Lexer::read_and_tokenise_word()
 {
 	uint32_t line = reader->get_line_number();
 	uint32_t column = reader->get_column_number();
@@ -92,7 +92,7 @@ void Tokeniser::read_and_tokenise_word()
 	tokenise_word(line, column, lexeme);
 }
 
-void Tokeniser::tokenise_word(uint32_t line, uint32_t column, const std::string& word)
+void Lexer::tokenise_word(uint32_t line, uint32_t column, const std::string& word)
 {
 	const std::optional<TokenType> type = Token::keyword_to_token_type(std::string_view(word));
 	
@@ -125,7 +125,7 @@ void Tokeniser::tokenise_word(uint32_t line, uint32_t column, const std::string&
 	}
 }
 
-void Tokeniser::read_and_tokenise_number()
+void Lexer::read_and_tokenise_number()
 {
 	uint32_t line = reader->get_line_number();
 	uint32_t column = reader->get_column_number();
@@ -167,7 +167,7 @@ void Tokeniser::read_and_tokenise_number()
 	);
 }
 
-void Tokeniser::read_and_tokenise_string()
+void Lexer::read_and_tokenise_string()
 {
 	uint32_t line = reader->get_line_number();
 	uint32_t column = reader->get_column_number();
@@ -241,7 +241,7 @@ void Tokeniser::read_and_tokenise_string()
 	);
 }
 
-void Tokeniser::read_and_tokenise_character()
+void Lexer::read_and_tokenise_character()
 {
 	uint32_t line = reader->get_line_number();
 	uint32_t column = reader->get_column_number();
@@ -290,7 +290,7 @@ void Tokeniser::read_and_tokenise_character()
 	);
 }
 
-void Tokeniser::read_and_tokenise_symbol()
+void Lexer::read_and_tokenise_symbol()
 {
 	uint32_t line = reader->get_line_number();
 	uint32_t column = reader->get_column_number();
@@ -315,7 +315,7 @@ void Tokeniser::read_and_tokenise_symbol()
 	tokenise_custom_char(line, column, custom_char);
 }
 
-void Tokeniser::tokenise_custom_char(uint32_t line, uint32_t column, char custom_char)
+void Lexer::tokenise_custom_char(uint32_t line, uint32_t column, char custom_char)
 {
 	std::string lexeme("");
 	lexeme += custom_char;
@@ -333,22 +333,22 @@ void Tokeniser::tokenise_custom_char(uint32_t line, uint32_t column, char custom
 	);
 }
 
-bool Tokeniser::is_alpha(char ch)
+bool Lexer::is_alpha(char ch)
 {
 	return (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z');
 }
 
-bool Tokeniser::is_digit(char ch)
+bool Lexer::is_digit(char ch)
 {
 	return ch >= '0' && ch <= '9';
 }
 
-bool Tokeniser::is_space(char ch)
+bool Lexer::is_space(char ch)
 {
 	return ch == ' ' || ch == '\t' || ch == '\n';
 }
 
-std::optional<char> Tokeniser::convert_escaped(char ch)
+std::optional<char> Lexer::convert_escaped(char ch)
 {
 	switch (ch)
 	{
@@ -363,7 +363,7 @@ std::optional<char> Tokeniser::convert_escaped(char ch)
 	}
 }
 
-std::optional<TokenType> Tokeniser::convert_single_char_token(char ch)
+std::optional<TokenType> Lexer::convert_single_char_token(char ch)
 {
 	switch (ch)
 	{

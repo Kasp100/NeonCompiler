@@ -6,7 +6,7 @@
 #include <optional>
 #include "../../logging/logger.hpp"
 #include "../../reading/char_reader.hpp"
-#include "token.hpp"
+#include "../token.hpp"
 #include "tokenisation_error.hpp"
 
 namespace tokenisation
@@ -29,10 +29,10 @@ namespace error_messages
 			"A character literal must contain exactly one character.";
 }
 
-class Tokeniser
+class Lexer
 {
 public:
-	explicit Tokeniser(std::unique_ptr<reading::CharReader> reader);
+	explicit Lexer(std::unique_ptr<reading::CharReader> reader);
 	void run();
 	std::vector<tokenisation::Token> get_tokens() const;
 	std::vector<tokenisation::TokenisationError> get_errors() const;
