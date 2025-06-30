@@ -24,9 +24,9 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    Compiler compiler(logger);
+    Compiler compiler{logger};
 
-    const string_view task(argv[1]);
+    const string_view task{argv[1]};
 
     function<void(void)> task_runnable;
     if(task == TASK_BUILD)
@@ -57,7 +57,7 @@ int main(int argc, char** argv)
             return 1;
         }
 
-        compiler.read_file(file_reader->move_stream(), string_view(file_name));
+        compiler.read_file(file_reader->move_stream(), string_view{file_name});
     }
 
     task_runnable();

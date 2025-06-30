@@ -3,7 +3,7 @@
 using namespace neon_compiler::lexer;
 
 Lexer::Lexer(std::unique_ptr<reading::CharReader> reader)
-	: reader(move(reader)), tokens(), errors() {}
+	: reader{move(reader)}, tokens{}, errors{} {}
 
 void Lexer::run()
 {

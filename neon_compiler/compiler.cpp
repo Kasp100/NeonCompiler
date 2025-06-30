@@ -8,7 +8,7 @@
 using namespace neon_compiler;
 
 Compiler::Compiler(std::shared_ptr<logging::Logger> logger)
-	: logger(logger) {}
+	: logger{logger} {}
 
 void Compiler::read_file(std::unique_ptr<std::istream> stream, std::string_view file_name)
 {

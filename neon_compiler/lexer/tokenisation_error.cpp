@@ -3,7 +3,7 @@
 using namespace neon_compiler::lexer;
 
 TokenisationError::TokenisationError(uint32_t line, uint32_t column, std::string_view message)
-        : line(line), column(column), message(message) {}
+        : line{line}, column{column}, message{message} {}
 
 uint32_t TokenisationError::get_line() const
 {
