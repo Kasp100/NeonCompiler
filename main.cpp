@@ -7,57 +7,52 @@
 #include "file_reading/file_reader.hpp"
 #include "neon_compiler/compiler.hpp"
 
-using namespace std;
-using namespace logging;
-using namespace neon_compiler;
-
 constexpr const char* TASK_BUILD = "build";
 constexpr const char* TASK_ANALYSE = "analyse";
 
 int main(int argc, char** argv)
 {
-    shared_ptr<Logger> logger = make_shared<Logger>();
+    std::shared_ptr<logging::Logger> logger = std::make_shared<logging::Logger>();
 
     if (argc < 3)
     {
-        logger->error("Usage: " + string(argv[0]) + " <build|analyse> <source file(s)>\n");
+        logger->error("Usage: " + std::string(argv[0]) + " <build|analyse> <source file(s)>\n");
         return 1;
     }
 
-    Compiler compiler{logger};
+    neon_compiler::Compiler compiler{logger};
 
-    const string_view task{argv[1]};
+    const std::string_view task{argv[1]};
 
-    function<void(void)> task_runnable;
+    std::function<void(void)> task_runnable;
     if(task == TASK_BUILD)
     {
-        task_runnable = bind(&Compiler::build, &compiler);
+        task_runnable = std::bind(&neon_compiler::Compiler::build, &compiler);
         logger->info("Building...");
     }
     else if(task == TASK_ANALYSE)
     {
-        task_runnable = bind(&Compiler::generate_analysis, &compiler);
+        task_runnable = std::bind(&neon_compiler::Compiler::generate_analysis, &compiler);
         logger->info("Analysing...");
     }
     else
     {
-        logger->error("No such task: " + string(task));
+        logger->error("No such task: " + std::string(task));
         return 1;
     }
-
 
     for (int i = 2; i < argc; ++i)
     {
         const char* file_name = argv[i];
 
-        unique_ptr<file_reading::FileReader> file_reader = make_unique<file_reading::FileReader>(logger);
+        std::unique_ptr<file_reading::FileReader> file_reader = std::make_unique<file_reading::FileReader>(logger);
 
         if (!file_reader->open_file(file_name))
         {
             return 1;
         }
 
-        compiler.read_file(file_reader->move_stream(), string_view{file_name});
+        compiler.read_file(file_reader->move_stream(), std::string_view{file_name});
     }
 
     task_runnable();
