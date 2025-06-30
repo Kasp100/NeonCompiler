@@ -13,7 +13,7 @@ namespace reading
     {
     public:
         explicit ReadException(const std::string& msg)
-            : std::runtime_error(msg) {}
+            : std::runtime_error{msg} {}
     };
 
     class CharReader
