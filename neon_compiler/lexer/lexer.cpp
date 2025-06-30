@@ -42,6 +42,11 @@ void Lexer::skip_whitespace()
 
 void Lexer::tokenise_next()
 {
+	if(reader->end_of_file_reached())
+	{
+		return;
+	}
+
 	if(is_alpha(reader->peek()))
 	{
 		read_and_tokenise_word();
@@ -67,6 +72,7 @@ void Lexer::tokenise_next()
 	}
 
 	read_and_tokenise_symbol();
+
 }
 
 void Lexer::read_and_tokenise_word()
