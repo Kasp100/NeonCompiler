@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -std=c++17 -Wall
+CXXFLAGS = -std=c++20 -Wall
 
 # List of package directories
 PACKAGE_DIRS := . logging file_reading reading neon_compiler neon_compiler/lexer
