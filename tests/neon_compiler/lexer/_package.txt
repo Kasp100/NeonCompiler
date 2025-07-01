@@ -1,0 +1,5 @@
+lexer_test
+../../../neon_compiler/token
+../../../neon_compiler/lexer/lexer
+../../../neon_compiler/lexer/tokenisation_error
+../../../reading/char_reader
