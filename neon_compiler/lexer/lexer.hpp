@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <memory>
 #include <optional>
+#include <span>
 #include "../../logging/logger.hpp"
 #include "../../reading/char_reader.hpp"
 #include "../token.hpp"
@@ -34,8 +35,8 @@ class Lexer
 public:
 	explicit Lexer(std::unique_ptr<reading::CharReader> reader);
 	void run();
-	std::vector<neon_compiler::Token> get_tokens() const;
-	std::vector<neon_compiler::lexer::TokenisationError> get_errors() const;
+	std::span<neon_compiler::Token> get_tokens() const;
+	std::span<neon_compiler::lexer::TokenisationError> get_errors() const;
 private:
 	std::unique_ptr<reading::CharReader> reader;
 	std::vector<neon_compiler::Token> tokens;

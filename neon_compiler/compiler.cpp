@@ -1,6 +1,7 @@
 #include "compiler.hpp"
 
 #include <iostream>
+#include <span>
 #include "../reading/char_reader.hpp"
 #include "lexer/lexer.hpp"
 #include "lexer/tokenisation_error.hpp"
@@ -23,6 +24,15 @@ void Compiler::read_file(std::unique_ptr<std::istream> stream, std::string_view 
 	{
 		logger->error("Reading failed: " + std::string(e.what()));
 		return;
+	}
+
+	for(const Token& token : lexer.get_tokens())
+	{
+		logger->debug("Token\t" + std::to_string(static_cast<int>(token.get_type())));
+		if(token.get_lexeme().has_value())
+		{
+			logger->debug("Lexeme =\t" + std::string(token.get_lexeme().value()));
+		}
 	}
 
 	for(const lexer::TokenisationError& error : lexer.get_errors())
