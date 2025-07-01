@@ -179,12 +179,10 @@ void Lexer::read_and_tokenise_string()
 	uint32_t column = reader->get_column_number();
 	std::string lexeme;
 
-	reader->consume(); // Consume the opening quote
+	bool is_open = reader->consume() == '"';
 
-	bool escape_sequence = false;
-
-	char c = reader->consume();
-	while (!escape_sequence && c != '"')
+	char c = 0;
+	while (is_open)
 	{
 		uint32_t current_column = reader->get_column_number();
 
@@ -194,9 +192,11 @@ void Lexer::read_and_tokenise_string()
 			break;
 		}
 
-		if(escape_sequence)
+		c = reader->consume();
+
+		if(c == '\\')
 		{
-			std::optional<char> escaped = convert_escaped(c);
+			std::optional<char> escaped = convert_escaped(reader->consume());
 			if(escaped.has_value())
 			{
 				lexeme += escaped.value();
@@ -205,33 +205,25 @@ void Lexer::read_and_tokenise_string()
 			{
 				errors.emplace_back(line, current_column, error_messages::UNKNOWN_ESCAPE_SEQUENCE);
 			}
-			
-			escape_sequence = false;
-			continue;
-		}
-		
-		if(c == '\\')
-		{
-			escape_sequence = true;
 			continue;
 		}
 
-		if(c == '\n')
+		if(c == '\n') 
 		{
 			line = reader->get_line_number();
 			column = reader->get_column_number();
 			errors.emplace_back(line, column, error_messages::NEWLINE_IN_STRING_LITERAL);
+			continue;
 		}
 
 		if(c == '"')
 		{
 			skip_whitespace();
-			if(reader->consume_if_matches('"')) { break; }
+			is_open = reader->consume_if_matches('"');
+			continue;
 		}
 
 		lexeme += c;
-
-		c = reader->consume();
 	}
 
 	tokens.push_back
