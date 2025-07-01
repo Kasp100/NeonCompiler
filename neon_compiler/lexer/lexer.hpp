@@ -35,8 +35,8 @@ class Lexer
 public:
 	explicit Lexer(std::unique_ptr<reading::CharReader> reader);
 	void run();
-	std::span<neon_compiler::Token> get_tokens() const;
-	std::span<neon_compiler::lexer::TokenisationError> get_errors() const;
+	std::span<const neon_compiler::Token> get_tokens() const;
+	std::span<const neon_compiler::lexer::TokenisationError> get_errors() const;
 private:
 	std::unique_ptr<reading::CharReader> reader;
 	std::vector<neon_compiler::Token> tokens;
