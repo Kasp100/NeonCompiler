@@ -11,7 +11,8 @@ using namespace neon_compiler::lexer;
 
 constexpr const char
 		*TEST_KEYWORDS = "pkg interface mut:",
-		*TEST_STRING_LITERALS = "\"strings\",\"test\" \"ing\"";
+		*TEST_LITERAL_STRING = "\"strings\",\"test\" \"ing\"",
+		*TEST_LITERAL_CHARACTER = "'c' '\\'' '\\n'";
 
 TEST_CASE("Keywords are parsed correctly")
 {
@@ -37,7 +38,7 @@ TEST_CASE("Keywords are parsed correctly")
 TEST_CASE("String literals are parsed correctly")
 {
 	// Arrange
-	std::unique_ptr<std::istringstream> iss = std::make_unique<std::istringstream>(TEST_STRING_LITERALS);
+	std::unique_ptr<std::istringstream> iss = std::make_unique<std::istringstream>(TEST_LITERAL_STRING);
 	std::unique_ptr<reading::CharReader> reader = std::make_unique<reading::CharReader>(std::move(iss));
 
 	// Act
@@ -55,4 +56,28 @@ TEST_CASE("String literals are parsed correctly")
 	CHECK(tokens[1].get_type() == neon_compiler::TokenType::COMMA);
 	CHECK(tokens[2].get_type() == neon_compiler::TokenType::LITERAL_STRING);
 	CHECK(tokens[2].get_lexeme().value() == "testing");
+}
+
+TEST_CASE("Character literals are parsed correctly")
+{
+	// Arrange
+	std::unique_ptr<std::istringstream> iss = std::make_unique<std::istringstream>(TEST_LITERAL_CHARACTER);
+	std::unique_ptr<reading::CharReader> reader = std::make_unique<reading::CharReader>(std::move(iss));
+
+	// Act
+	Lexer lexer{std::move(reader)};
+	lexer.run();
+
+	// Assert
+	CHECK(lexer.get_errors().size() == 0);
+
+	std::span<const neon_compiler::Token> tokens = lexer.get_tokens();
+	CHECK(tokens.size() == 3);
+
+	CHECK(tokens[0].get_type() == neon_compiler::TokenType::LITERAL_CHARACTER);
+	CHECK(tokens[0].get_lexeme().value() == "c");
+	CHECK(tokens[1].get_type() == neon_compiler::TokenType::LITERAL_CHARACTER);
+	CHECK(tokens[1].get_lexeme().value() == "'");
+	CHECK(tokens[2].get_type() == neon_compiler::TokenType::LITERAL_CHARACTER);
+	CHECK(tokens[2].get_lexeme().value() == "\n");
 }
