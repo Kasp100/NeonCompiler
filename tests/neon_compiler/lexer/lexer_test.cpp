@@ -12,7 +12,8 @@ using namespace neon_compiler::lexer;
 constexpr const char
 		*TEST_KEYWORDS = "pkg interface mut:",
 		*TEST_LITERAL_STRING = "\"strings\",\"test\" \"ing\"",
-		*TEST_LITERAL_CHARACTER = "'c' '\\'' '\\n'";
+		*TEST_LITERAL_CHARACTER = "'c' '\\'' '\\n'",
+		*TEST_ILLEGAL_LITERAL_CHARACTER = "'ab'";
 
 TEST_CASE("Keywords are parsed correctly")
 {
@@ -81,3 +82,22 @@ TEST_CASE("Character literals are parsed correctly")
 	CHECK(tokens[2].get_type() == neon_compiler::TokenType::LITERAL_CHARACTER);
 	CHECK(tokens[2].get_lexeme().value() == "\n");
 }
+
+
+TEST_CASE("Illegal character literals are disallowed")
+{
+	// Arrange
+	std::unique_ptr<std::istringstream> iss = std::make_unique<std::istringstream>(TEST_ILLEGAL_LITERAL_CHARACTER);
+	std::unique_ptr<reading::CharReader> reader = std::make_unique<reading::CharReader>(std::move(iss));
+
+	// Act
+	Lexer lexer{std::move(reader)};
+	lexer.run();
+
+	// Assert
+	std::span<const neon_compiler::lexer::TokenisationError> errors = lexer.get_errors();
+	CHECK(errors.size() == 1);
+
+	CHECK(errors[0].get_message() == error_messages::CHARACTER_LITERAL_TOO_LONG);
+}
+
