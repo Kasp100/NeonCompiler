@@ -175,56 +175,9 @@ void Lexer::read_and_tokenise_number()
 
 void Lexer::read_and_tokenise_string()
 {
-	uint32_t line = reader->get_line_number();
-	uint32_t column = reader->get_column_number();
-	std::string lexeme;
-
-	bool is_open = reader->consume() == '"';
-
-	char c = 0;
-	while (is_open)
-	{
-		uint32_t current_column = reader->get_column_number();
-
-		if(reader->end_of_file_reached())
-		{
-			errors.emplace_back(line, current_column, error_messages::UNTERMINATED_STRING_LITERAL);
-			break;
-		}
-
-		c = reader->consume();
-
-		if(c == '\\')
-		{
-			std::optional<char> escaped = convert_escaped(reader->consume());
-			if(escaped.has_value())
-			{
-				lexeme += escaped.value();
-			}
-			else
-			{
-				errors.emplace_back(line, current_column, error_messages::UNKNOWN_ESCAPE_SEQUENCE);
-			}
-			continue;
-		}
-
-		if(c == '\n') 
-		{
-			line = reader->get_line_number();
-			column = reader->get_column_number();
-			errors.emplace_back(line, column, error_messages::NEWLINE_IN_STRING_LITERAL);
-			continue;
-		}
-
-		if(c == '"')
-		{
-			skip_whitespace();
-			is_open = reader->consume_if_matches('"');
-			continue;
-		}
-
-		lexeme += c;
-	}
+	const uint32_t line = reader->get_line_number();
+	const uint32_t column = reader->get_column_number();
+	const std::string lexeme = parse_text_literal('"', true, error_messages::UNTERMINATED_STRING_LITERAL, error_messages::NEWLINE_IN_STRING_LITERAL);
 
 	tokens.push_back
 	(
@@ -241,41 +194,19 @@ void Lexer::read_and_tokenise_string()
 
 void Lexer::read_and_tokenise_character()
 {
-	uint32_t line = reader->get_line_number();
-	uint32_t column = reader->get_column_number();
+	const uint32_t line = reader->get_line_number();
+	const uint32_t column = reader->get_column_number();
+	const std::string lexeme = parse_text_literal('\'', false, error_messages::UNTERMINATED_CHARACTER_LITERAL, error_messages::NEWLINE_IN_CHARACTER_LITERAL);
 
-	reader->consume();// Consume the opening quote
-	char c = reader->consume();
-
-	if(c == '\\')
-	{
-		c = reader->consume();
-
-		std::optional<char> escaped = convert_escaped(c);
-		if(escaped.has_value())
-		{
-			c = escaped.value();
-		}
-		else
-		{
-			errors.emplace_back(line, column, error_messages::UNKNOWN_ESCAPE_SEQUENCE);
-		}
-	}
-	else if(c == '\n')
-	{
-		errors.emplace_back(line, column, error_messages::NEWLINE_IN_CHARACTER_LITERAL);
-	}
-	else if(c == '\'')
+	if(lexeme.length() < 1)
 	{
 		errors.emplace_back(line, column, error_messages::EMPTY_CHARACTER_LITERAL);
 	}
-
-	if(!reader->consume_if_matches('\''))
+	else if(lexeme.length() > 1)
 	{
-		errors.emplace_back(line, column, error_messages::UNTERMINATED_CHARACTER_LITERAL);
+		errors.emplace_back(line, column, error_messages::CHARACTER_LITERAL_TOO_LONG);
 	}
 
-	std::string lexeme{c};
 	tokens.push_back
 	(
 		Token
@@ -287,6 +218,69 @@ void Lexer::read_and_tokenise_character()
 			std::optional<std::string>(lexeme)
 		)
 	);
+}
+
+std::string Lexer::parse_text_literal(char opening_and_closing_char, bool merge_consecutive, std::string_view err_unterminated, std::string_view err_newline)
+{
+	uint32_t line = reader->get_line_number();
+	uint32_t column = reader->get_column_number();
+	std::string str = "";
+
+	bool is_open = reader->consume() == opening_and_closing_char;
+
+	char c = 0;
+	while (is_open)
+	{
+		uint32_t current_column = reader->get_column_number();
+
+		if(reader->end_of_file_reached())
+		{
+			errors.emplace_back(line, current_column, err_unterminated);
+			break;
+		}
+
+		c = reader->consume();
+
+		if(c == '\\')
+		{
+			std::optional<char> escaped = convert_escaped(reader->consume());
+			if(escaped.has_value())
+			{
+				str += escaped.value();
+			}
+			else
+			{
+				errors.emplace_back(line, current_column, error_messages::UNKNOWN_ESCAPE_SEQUENCE);
+			}
+			continue;
+		}
+
+		if(c == '\n') 
+		{
+			line = reader->get_line_number();
+			column = reader->get_column_number();
+			errors.emplace_back(line, column, err_newline);
+			continue;
+		}
+
+		if(c == opening_and_closing_char)
+		{
+			if(merge_consecutive)
+			{
+				skip_whitespace();
+				is_open = reader->consume_if_matches(opening_and_closing_char);
+			}
+			else
+			{
+				is_open = false;
+			}
+			continue;
+		}
+
+		str += c;
+	}
+
+	return str;
 }
 
 void Lexer::read_and_tokenise_symbol()

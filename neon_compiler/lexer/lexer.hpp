@@ -27,7 +27,9 @@ namespace error_messages
 	constexpr std::string_view NEWLINE_IN_CHARACTER_LITERAL =
 			"Newline in character literal is not allowed. Use `\\n` for newline characters.";
 	constexpr std::string_view EMPTY_CHARACTER_LITERAL =
-			"A character literal must contain exactly one character.";
+			"Empty character literals are not allowed. A character literal must contain exactly one character.";
+	constexpr std::string_view CHARACTER_LITERAL_TOO_LONG =
+			"Character literal too long. A character literal must contain exactly one character.";
 }
 
 class Lexer
@@ -48,6 +50,7 @@ private:
 	void read_and_tokenise_number();
 	void read_and_tokenise_string();
 	void read_and_tokenise_character();
+	std::string parse_text_literal(char opening_and_closing_char, bool merge_consecutive, std::string_view err_unterminated, std::string_view err_newline);
 	void read_and_tokenise_symbol();
 	void tokenise_custom_char(std::uint32_t line, std::uint32_t column, char custom_char);
 	static bool is_alpha(char ch);
