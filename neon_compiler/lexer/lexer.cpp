@@ -275,6 +275,7 @@ void Lexer::read_and_tokenise_character()
 		errors.emplace_back(line, column, error_messages::UNTERMINATED_CHARACTER_LITERAL);
 	}
 
+	std::string lexeme{c};
 	tokens.push_back
 	(
 		Token
@@ -283,7 +284,7 @@ void Lexer::read_and_tokenise_character()
 			line,
 			column,
 			reader->get_column_number() - column,
-			std::optional<std::string>("" + c)
+			std::optional<std::string>(lexeme)
 		)
 	);
 }
