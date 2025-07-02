@@ -13,6 +13,7 @@ constexpr const char
 		*TEST_KEYWORDS = "pkg interface mut:",
 		*TEST_LITERAL_STRING = "\"strings\",\"test\" \"ing\"",
 		*TEST_LITERAL_CHARACTER = "'c' '\\'' '\\n'",
+		*TEST_ILLEGAL_LITERAL_STRING = "\"a\\qb\nc",
 		*TEST_ILLEGAL_LITERAL_CHARACTER = "'ab'";
 
 TEST_CASE("Keywords are parsed correctly")
@@ -83,6 +84,24 @@ TEST_CASE("Character literals are parsed correctly")
 	CHECK(tokens[2].get_lexeme().value() == "\n");
 }
 
+TEST_CASE("Illegal string literals are disallowed")
+{
+	// Arrange
+	std::unique_ptr<std::istringstream> iss = std::make_unique<std::istringstream>(TEST_ILLEGAL_LITERAL_STRING);
+	std::unique_ptr<reading::CharReader> reader = std::make_unique<reading::CharReader>(std::move(iss));
+
+	// Act
+	Lexer lexer{std::move(reader)};
+	lexer.run();
+
+	// Assert
+	std::span<const neon_compiler::lexer::TokenisationError> errors = lexer.get_errors();
+	CHECK(errors.size() == 3);
+
+	CHECK(errors[0].get_message() == error_messages::UNKNOWN_ESCAPE_SEQUENCE);
+	CHECK(errors[1].get_message() == error_messages::NEWLINE_IN_STRING_LITERAL);
+	CHECK(errors[2].get_message() == error_messages::UNTERMINATED_STRING_LITERAL);
+}
 
 TEST_CASE("Illegal character literals are disallowed")
 {
