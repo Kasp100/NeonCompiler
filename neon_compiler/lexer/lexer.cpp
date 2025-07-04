@@ -164,7 +164,7 @@ void Lexer::read_and_tokenise_number()
 
 	char c = reader->peek();
 
-	while (is_digit(nn, c) || c == '_' || (c == '.' && is_digit(nn, reader->peek(1))))
+	while (is_digit(nn, c) || c == '_' || c == '.')
 	{
 		c = reader->consume();
 
