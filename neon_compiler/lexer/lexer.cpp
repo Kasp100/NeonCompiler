@@ -156,7 +156,7 @@ void Lexer::read_and_tokenise_number()
 
 	if(prefix)
 	{
-		if(!is_digit(nn, reader->peek()))
+		if(!is_digit(NumberNotation::DECIMAL, reader->peek()) && !is_alpha(reader->peek()))
 		{
 			errors.emplace_back(reader->get_line_number(), reader->get_column_number(), error_messages::NUMBER_BASE_PREFIX_WITHOUT_DIGITS);
 		}
