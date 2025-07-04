@@ -37,7 +37,7 @@ namespace error_messages
 	constexpr std::string_view ILLEGAL_DIGITS_IN_NUMBER_LITERAL =
 			"Illegal digits in number literal. Normal (decimal) number notation uses digits 0-9, "
 			"hexadecimal number notation (prefix `0x`) uses digits 0-9 and letters A-F (upper/lower case), "
-			"binary number notation uses digits 0 and 1.";
+			"binary number notation (prefix `0b`) uses digits 0 and 1.";
 }
 
 enum class NumberNotation
