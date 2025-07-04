@@ -38,6 +38,8 @@ namespace error_messages
 			"Illegal digits in number literal. Normal (decimal) number notation uses digits 0-9, "
 			"hexadecimal number notation (prefix `0x`) uses digits 0-9 and letters A-F (upper/lower case), "
 			"binary number notation (prefix `0b`) uses digits 0 and 1.";
+	constexpr std::string_view DECIMAL_POINT_IN_NON_DECIMAL_LITERAL =
+			"Decimal point in non decimal literal. Only base 10 number literals can have a decimal point.";
 }
 
 enum class NumberNotation

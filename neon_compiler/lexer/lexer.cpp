@@ -177,6 +177,10 @@ void Lexer::read_and_tokenise_number()
 			else
 			{
 				passed_decimal_point = true;
+				if(nn != NumberNotation::DECIMAL)
+				{
+					errors.emplace_back(reader->get_line_number(), reader->get_column_number(), error_messages::DECIMAL_POINT_IN_NON_DECIMAL_LITERAL);
+				}
 			}
 		}
 

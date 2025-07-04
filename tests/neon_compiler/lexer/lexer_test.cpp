@@ -24,7 +24,8 @@ constexpr const char
 		*TEST_ILLEGAL_LITERAL_NUMBER_ILLEGAL_DIGITS_DECIMAL = "0123456789AG",
 		*TEST_ILLEGAL_LITERAL_NUMBER_PREFIX_WITHOUT_DIGITS_HEXADECIMAL = "0x",
 		*TEST_ILLEGAL_LITERAL_NUMBER_PREFIX_WITHOUT_DIGITS_BINARY = "0b",
-		*TEST_ILLEGAL_LITERAL_NUMBER_MULTIPLE_DECIMAL_POINTS = "70.1.7";
+		*TEST_ILLEGAL_LITERAL_NUMBER_MULTIPLE_DECIMAL_POINTS = "70.1.7",
+		*TEST_ILLEGAL_LITERAL_NUMBER_DECIMAL_POINT_IN_NON_DECIMAL_LITERAL = "0xabc.def 0b1010.101001";
 
 TEST_CASE("Keywords are parsed correctly")
 {
@@ -312,4 +313,20 @@ TEST_CASE("Multiple decimal points aren't allowed")
 	CHECK(errors[0].get_message() == error_messages::MULTIPLE_DECIMAL_POINTS_IN_NUMBER_LITERAL);
 }
 
+TEST_CASE("Decimal points in non decimal literals aren't allowed")
+{
+	// Arrange
+	std::unique_ptr<std::istringstream> iss = std::make_unique<std::istringstream>(TEST_ILLEGAL_LITERAL_NUMBER_DECIMAL_POINT_IN_NON_DECIMAL_LITERAL);
+	std::unique_ptr<reading::CharReader> reader = std::make_unique<reading::CharReader>(std::move(iss));
 
+	// Act
+	Lexer lexer{std::move(reader)};
+	lexer.run();
+
+	// Assert
+	std::span<const neon_compiler::lexer::TokenisationError> errors = lexer.get_errors();
+	CHECK(errors.size() == 2);
+
+	CHECK(errors[0].get_message() == error_messages::DECIMAL_POINT_IN_NON_DECIMAL_LITERAL);
+	CHECK(errors[1].get_message() == error_messages::DECIMAL_POINT_IN_NON_DECIMAL_LITERAL);
+}
