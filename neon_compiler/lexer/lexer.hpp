@@ -34,6 +34,10 @@ namespace error_messages
 			"Multiple decimal points in a number literal.";
 	constexpr std::string_view NUMBER_BASE_PREFIX_WITHOUT_DIGITS =
 			"Number base prefix (`0x`/`0b`) without digits. The number literal must have at least one digit.";
+	constexpr std::string_view ILLEGAL_DIGITS_IN_NUMBER_LITERAL =
+			"Illegal digits in number literal. Normal (decimal) number notation uses digits 0-9, "
+			"hexadecimal number notation (prefix `0x`) uses digits 0-9 and letters A-F (upper/lower case), "
+			"binary number notation uses digits 0 and 1.";
 }
 
 enum class NumberNotation

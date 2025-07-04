@@ -187,6 +187,11 @@ void Lexer::read_and_tokenise_number()
 		c = reader->peek();
 	};
 
+	if(is_digit(NumberNotation::DECIMAL, reader->peek()) || is_alpha(reader->peek()))
+	{
+		errors.emplace_back(reader->get_line_number(), reader->get_column_number(), error_messages::ILLEGAL_DIGITS_IN_NUMBER_LITERAL);
+	}
+
 	tokens.push_back
 	(
 		Token
