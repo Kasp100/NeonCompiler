@@ -13,6 +13,10 @@ constexpr const char
 		*TEST_KEYWORDS = "pkg interface mut:",
 		*TEST_LITERAL_STRING = "\"strings\",\"test\" \"ing\"",
 		*TEST_LITERAL_CHARACTER = "'c' '\\'' '\\n'",
+		*TEST_LITERAL_NUMBER_DECIMAL = "105_788",
+		*TEST_LITERAL_NUMBER_DECIMAL_FLOAT = "105_788.750_1",
+		*TEST_LITERAL_NUMBER_HEXADECIMAL = "0x758a_0b71",
+		*TEST_LITERAL_NUMBER_BINARY = "0b10110001_00101110",
 		*TEST_ILLEGAL_LITERAL_STRING = "\"a\\qb\nc",
 		*TEST_ILLEGAL_LITERAL_CHARACTER = "'ab'",
 		*TEST_ILLEGAL_LITERAL_NUMBER_ILLEGAL_DIGITS_HEXADECIMAL = "0x012345689ABCDEFG",
@@ -88,6 +92,86 @@ TEST_CASE("Character literals are parsed correctly")
 	CHECK(tokens[1].get_lexeme().value() == "'");
 	CHECK(tokens[2].get_type() == neon_compiler::TokenType::LITERAL_CHARACTER);
 	CHECK(tokens[2].get_lexeme().value() == "\n");
+}
+
+TEST_CASE("Decimal number literals are parsed correctly")
+{
+	// Arrange
+	std::unique_ptr<std::istringstream> iss = std::make_unique<std::istringstream>(TEST_LITERAL_NUMBER_DECIMAL);
+	std::unique_ptr<reading::CharReader> reader = std::make_unique<reading::CharReader>(std::move(iss));
+
+	// Act
+	Lexer lexer{std::move(reader)};
+	lexer.run();
+
+	// Assert
+	CHECK(lexer.get_errors().size() == 0);
+
+	std::span<const neon_compiler::Token> tokens = lexer.get_tokens();
+	CHECK(tokens.size() == 1);
+
+	CHECK(tokens[0].get_type() == neon_compiler::TokenType::LITERAL_NUMBER);
+	CHECK(tokens[0].get_lexeme().value() == "105788");
+}
+
+TEST_CASE("Floating point decimal number literals are parsed correctly")
+{
+	// Arrange
+	std::unique_ptr<std::istringstream> iss = std::make_unique<std::istringstream>(TEST_LITERAL_NUMBER_DECIMAL_FLOAT);
+	std::unique_ptr<reading::CharReader> reader = std::make_unique<reading::CharReader>(std::move(iss));
+
+	// Act
+	Lexer lexer{std::move(reader)};
+	lexer.run();
+
+	// Assert
+	CHECK(lexer.get_errors().size() == 0);
+
+	std::span<const neon_compiler::Token> tokens = lexer.get_tokens();
+	CHECK(tokens.size() == 1);
+
+	CHECK(tokens[0].get_type() == neon_compiler::TokenType::LITERAL_NUMBER);
+	CHECK(tokens[0].get_lexeme().value() == "105788.7501");
+}
+
+TEST_CASE("Hexadecimal number literals are parsed correctly")
+{
+	// Arrange
+	std::unique_ptr<std::istringstream> iss = std::make_unique<std::istringstream>(TEST_LITERAL_NUMBER_HEXADECIMAL);
+	std::unique_ptr<reading::CharReader> reader = std::make_unique<reading::CharReader>(std::move(iss));
+
+	// Act
+	Lexer lexer{std::move(reader)};
+	lexer.run();
+
+	// Assert
+	CHECK(lexer.get_errors().size() == 0);
+
+	std::span<const neon_compiler::Token> tokens = lexer.get_tokens();
+	CHECK(tokens.size() == 1);
+
+	CHECK(tokens[0].get_type() == neon_compiler::TokenType::LITERAL_NUMBER);
+	CHECK(tokens[0].get_lexeme().value() == "0x758a0b71");
+}
+
+TEST_CASE("Binary number literals are parsed correctly")
+{
+	// Arrange
+	std::unique_ptr<std::istringstream> iss = std::make_unique<std::istringstream>(TEST_LITERAL_NUMBER_BINARY);
+	std::unique_ptr<reading::CharReader> reader = std::make_unique<reading::CharReader>(std::move(iss));
+
+	// Act
+	Lexer lexer{std::move(reader)};
+	lexer.run();
+
+	// Assert
+	CHECK(lexer.get_errors().size() == 0);
+
+	std::span<const neon_compiler::Token> tokens = lexer.get_tokens();
+	CHECK(tokens.size() == 1);
+
+	CHECK(tokens[0].get_type() == neon_compiler::TokenType::LITERAL_NUMBER);
+	CHECK(tokens[0].get_lexeme().value() == "0b1011000100101110");
 }
 
 TEST_CASE("Illegal string literals are disallowed")
