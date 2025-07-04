@@ -53,7 +53,7 @@ void Lexer::tokenise_next()
 		return;
 	}
 
-	if(is_digit(reader->peek()))
+	if(is_digit(NumberNotation::DECIMAL, reader->peek()))
 	{
 		read_and_tokenise_number();
 		return;
@@ -88,7 +88,7 @@ void Lexer::read_and_tokenise_word()
 		lexeme += c;
 		c = reader->peek();
 	}
-	while (is_alpha(c) || is_digit(c) || c == '_');
+	while (is_alpha(c) || is_digit(NumberNotation::DECIMAL, c) || c == '_');
 
 	if(reader->peek() == ':')
 	{
@@ -137,26 +137,53 @@ void Lexer::read_and_tokenise_number()
 	uint32_t column = reader->get_column_number();
 	std::string lexeme;
 
+	NumberNotation nn = NumberNotation::DECIMAL;
+	bool passed_decimal_point = false;
+	bool prefix = false;
+
 	if(reader->consume_all_if_next("0x"))
 	{
 		lexeme = "0x";
+		nn = NumberNotation::HEXADECIMAL;
+		prefix = true;
 	}
 	else if(reader->consume_all_if_next("0b"))
 	{
 		lexeme = "0b";
+		nn = NumberNotation::BINARY;
+		prefix = true;
+	}
+
+	if(prefix)
+	{
+		if(!is_digit(nn, reader->peek()))
+		{
+			errors.emplace_back(reader->get_line_number(), reader->get_column_number(), error_messages::NUMBER_BASE_PREFIX_WITHOUT_DIGITS);
+		}
 	}
 
 	char c = reader->peek();
 
-	/* 1. `is_digit` to check for decimal digits
-	 * 2. `is_alpha` to check for hexadecimal digits (A-F, a-f)
-	 * 3. `.` is allowed in floating point numbers
-	 * 4. `_` is allowed as a separator in numbers, for readability (e.g., 1_000_000)
-	 * Validation of numbers is done in the parser. */
-	while (is_digit(c) || is_alpha(c) || c == '.' || c == '_')
+	while (is_digit(nn, c) || c == '_' || (c == '.' && is_digit(nn, reader->peek(1))))
 	{
 		c = reader->consume();
-		lexeme += c;
+
+		if(c == '.')
+		{
+			if(passed_decimal_point)
+			{
+				errors.emplace_back(reader->get_line_number(), reader->get_column_number(), error_messages::MULTIPLE_DECIMAL_POINTS_IN_NUMBER_LITERAL);
+			}
+			else
+			{
+				passed_decimal_point = true;
+			}
+		}
+
+		if(c != '_')
+		{
+			lexeme += c;
+		}
 		c = reader->peek();
 	};
 
@@ -331,9 +358,20 @@ bool Lexer::is_alpha(char ch)
 	return (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z');
 }
 
-bool Lexer::is_digit(char ch)
+
+bool Lexer::is_digit(NumberNotation nn, char ch)
 {
-	return ch >= '0' && ch <= '9';
+	if(ch == '0' || ch == '1') { return true; }
+
+	switch (nn)
+	{
+	case NumberNotation::DECIMAL:
+		return ch >= '2' && ch <= '9';
+	case NumberNotation::HEXADECIMAL:
+		return (ch >= '2' && ch <= '9') || (ch >= 'A' && ch <= 'F') || (ch >= 'a' && ch <= 'f');
+	default:
+		return false;
+	}
 }
 
 bool Lexer::is_space(char ch)

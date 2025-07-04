@@ -30,7 +30,18 @@ namespace error_messages
 			"Empty character literals are not allowed. A character literal must contain exactly one character.";
 	constexpr std::string_view CHARACTER_LITERAL_TOO_LONG =
 			"Character literal too long. A character literal must contain exactly one character.";
+	constexpr std::string_view MULTIPLE_DECIMAL_POINTS_IN_NUMBER_LITERAL =
+			"Multiple decimal points in a number literal.";
+	constexpr std::string_view NUMBER_BASE_PREFIX_WITHOUT_DIGITS =
+			"Number base prefix (`0x`/`0b`) without digits. The number literal must have at least one digit.";
 }
+
+enum class NumberNotation
+{
+	BINARY,
+	DECIMAL,
+	HEXADECIMAL
+};
 
 class Lexer
 {
@@ -54,7 +65,7 @@ private:
 	void read_and_tokenise_symbol();
 	void tokenise_custom_char(std::uint32_t line, std::uint32_t column, char custom_char);
 	static bool is_alpha(char ch);
-	static bool is_digit(char ch);
+	static bool is_digit(NumberNotation nn, char ch);
 	static bool is_space(char ch);
 	static std::optional<char> convert_escaped(char ch);
 	static std::optional<neon_compiler::TokenType> convert_single_char_token(char ch);
