@@ -2,5 +2,5 @@
 
 using namespace neon_compiler::parser;
 
-TokenReader::TokenReader(std::span<neon_compiler::Token> tokens)
+TokenReader::TokenReader(std::span<const neon_compiler::Token> tokens)
 	: tokens{tokens} {}
