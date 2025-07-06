@@ -7,20 +7,20 @@
 
 namespace neon_compiler::parser
 {
-    class TokenReader
-    {
-    public:
-        explicit TokenReader(std::span<const neon_compiler::Token> tokens);
+	class TokenReader
+	{
+	public:
+		explicit TokenReader(std::span<const neon_compiler::Token> tokens);
 
-        std::shared_ptr<neon_compiler::Token> consume(int offset = 0);
-        std::shared_ptr<neon_compiler::Token> peek(int offset = 0);
-        bool end_of_file_reached();
-        bool consume_if_matches(const neon_compiler::TokenType& match);
+		const neon_compiler::Token& consume(uint offset = 0);
+		const neon_compiler::Token& peek(uint offset = 0) const;
+		bool end_of_file_reached() const;
+		bool consume_if_matches(const neon_compiler::TokenType& match);
 
-    private:
-        std::span<const neon_compiler::Token> tokens;
-        uint reading_index = 0;
-    };
+	private:
+		std::span<const neon_compiler::Token> tokens;
+		uint reading_index = 0;
+	};
 
 }
 
