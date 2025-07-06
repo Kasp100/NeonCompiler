@@ -10,6 +10,7 @@ namespace neon_compiler
 
 enum class TokenType
 {
+	END_OF_FILE,
 	IDENTIFIER,
 	LITERAL_NUMBER,
 	LITERAL_STRING,
@@ -65,8 +66,8 @@ enum class TokenType
 	STMT_COPY,
 };
 
-class Token {
-
+class Token
+{
 public:
 	explicit Token
 	(
