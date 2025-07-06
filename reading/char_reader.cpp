@@ -30,11 +30,11 @@ char CharReader::read_next()
     return c;
 }
 
-char CharReader::peek(int offset)
+char CharReader::peek(uint offset)
 {
     try
     {
-        while (offset >= static_cast<int>(buffer.size()))
+        while (offset >= static_cast<uint>(buffer.size()))
         {
             buffer.push_back(read_next());
         }
@@ -45,10 +45,10 @@ char CharReader::peek(int offset)
     }
 }
 
-char CharReader::consume(int offset)
+char CharReader::consume(uint offset)
 {
     char result = peek(offset);
-    for (int i = 0; i <= offset; ++i)
+    for (uint i = 0; i <= offset; ++i)
     {
         consume_next();
     }
