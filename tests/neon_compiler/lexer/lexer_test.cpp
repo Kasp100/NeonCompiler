@@ -38,9 +38,9 @@ TEST_CASE("Keywords are parsed correctly")
 	lexer.run();
 
 	// Assert
-	CHECK(lexer.get_errors().size() == 0);
+	CHECK(lexer.take_errors().size() == 0);
 
-	std::span<const neon_compiler::Token> tokens = lexer.get_tokens();
+	const std::vector<neon_compiler::Token> tokens = lexer.take_tokens();
 	CHECK(tokens.size() == 3);
 
 	CHECK(tokens[0].get_type() == neon_compiler::TokenType::PACKAGE);
@@ -59,9 +59,9 @@ TEST_CASE("String literals are parsed correctly")
 	lexer.run();
 
 	// Assert
-	CHECK(lexer.get_errors().size() == 0);
+	CHECK(lexer.take_errors().size() == 0);
 
-	std::span<const neon_compiler::Token> tokens = lexer.get_tokens();
+	const std::vector<neon_compiler::Token> tokens = lexer.take_tokens();
 	CHECK(tokens.size() == 3);
 
 	CHECK(tokens[0].get_type() == neon_compiler::TokenType::LITERAL_STRING);
@@ -82,9 +82,9 @@ TEST_CASE("Character literals are parsed correctly")
 	lexer.run();
 
 	// Assert
-	CHECK(lexer.get_errors().size() == 0);
+	CHECK(lexer.take_errors().size() == 0);
 
-	std::span<const neon_compiler::Token> tokens = lexer.get_tokens();
+	const std::vector<neon_compiler::Token> tokens = lexer.take_tokens();
 	CHECK(tokens.size() == 3);
 
 	CHECK(tokens[0].get_type() == neon_compiler::TokenType::LITERAL_CHARACTER);
@@ -106,9 +106,9 @@ TEST_CASE("Decimal number literals are parsed correctly")
 	lexer.run();
 
 	// Assert
-	CHECK(lexer.get_errors().size() == 0);
+	CHECK(lexer.take_errors().size() == 0);
 
-	std::span<const neon_compiler::Token> tokens = lexer.get_tokens();
+	const std::vector<neon_compiler::Token> tokens = lexer.take_tokens();
 	CHECK(tokens.size() == 1);
 
 	CHECK(tokens[0].get_type() == neon_compiler::TokenType::LITERAL_NUMBER);
@@ -126,9 +126,9 @@ TEST_CASE("Floating point decimal number literals are parsed correctly")
 	lexer.run();
 
 	// Assert
-	CHECK(lexer.get_errors().size() == 0);
+	CHECK(lexer.take_errors().size() == 0);
 
-	std::span<const neon_compiler::Token> tokens = lexer.get_tokens();
+	const std::vector<neon_compiler::Token> tokens = lexer.take_tokens();
 	CHECK(tokens.size() == 1);
 
 	CHECK(tokens[0].get_type() == neon_compiler::TokenType::LITERAL_NUMBER);
@@ -146,9 +146,9 @@ TEST_CASE("Hexadecimal number literals are parsed correctly")
 	lexer.run();
 
 	// Assert
-	CHECK(lexer.get_errors().size() == 0);
+	CHECK(lexer.take_errors().size() == 0);
 
-	std::span<const neon_compiler::Token> tokens = lexer.get_tokens();
+	const std::vector<neon_compiler::Token> tokens = lexer.take_tokens();
 	CHECK(tokens.size() == 1);
 
 	CHECK(tokens[0].get_type() == neon_compiler::TokenType::LITERAL_NUMBER);
@@ -166,9 +166,9 @@ TEST_CASE("Binary number literals are parsed correctly")
 	lexer.run();
 
 	// Assert
-	CHECK(lexer.get_errors().size() == 0);
+	CHECK(lexer.take_errors().size() == 0);
 
-	std::span<const neon_compiler::Token> tokens = lexer.get_tokens();
+	const std::vector<neon_compiler::Token> tokens = lexer.take_tokens();
 	CHECK(tokens.size() == 1);
 
 	CHECK(tokens[0].get_type() == neon_compiler::TokenType::LITERAL_NUMBER);
@@ -186,7 +186,7 @@ TEST_CASE("Illegal string literals are disallowed")
 	lexer.run();
 
 	// Assert
-	std::span<const neon_compiler::lexer::TokenisationError> errors = lexer.get_errors();
+	const std::vector<neon_compiler::lexer::TokenisationError> errors = lexer.take_errors();
 	CHECK(errors.size() == 3);
 
 	CHECK(errors[0].get_message() == error_messages::UNKNOWN_ESCAPE_SEQUENCE);
@@ -205,7 +205,7 @@ TEST_CASE("Illegal character literals are disallowed")
 	lexer.run();
 
 	// Assert
-	std::span<const neon_compiler::lexer::TokenisationError> errors = lexer.get_errors();
+	const std::vector<neon_compiler::lexer::TokenisationError> errors = lexer.take_errors();
 	CHECK(errors.size() == 1);
 
 	CHECK(errors[0].get_message() == error_messages::CHARACTER_LITERAL_TOO_LONG);
@@ -222,7 +222,7 @@ TEST_CASE("Illegal hexadecimal digits aren't allowed")
 	lexer.run();
 
 	// Assert
-	std::span<const neon_compiler::lexer::TokenisationError> errors = lexer.get_errors();
+	const std::vector<neon_compiler::lexer::TokenisationError> errors = lexer.take_errors();
 	CHECK(errors.size() == 1);
 
 	CHECK(errors[0].get_message() == error_messages::ILLEGAL_DIGITS_IN_NUMBER_LITERAL);
@@ -239,7 +239,7 @@ TEST_CASE("Illegal binary digits aren't allowed")
 	lexer.run();
 
 	// Assert
-	std::span<const neon_compiler::lexer::TokenisationError> errors = lexer.get_errors();
+	const std::vector<neon_compiler::lexer::TokenisationError> errors = lexer.take_errors();
 	CHECK(errors.size() == 1);
 
 	CHECK(errors[0].get_message() == error_messages::ILLEGAL_DIGITS_IN_NUMBER_LITERAL);
@@ -256,7 +256,7 @@ TEST_CASE("Illegal hexadecimal digits aren't allowed")
 	lexer.run();
 
 	// Assert
-	std::span<const neon_compiler::lexer::TokenisationError> errors = lexer.get_errors();
+	const std::vector<neon_compiler::lexer::TokenisationError> errors = lexer.take_errors();
 	CHECK(errors.size() == 1);
 
 	CHECK(errors[0].get_message() == error_messages::ILLEGAL_DIGITS_IN_NUMBER_LITERAL);
@@ -273,7 +273,7 @@ TEST_CASE("Hexadecimal prefix without digits isn't allowed")
 	lexer.run();
 
 	// Assert
-	std::span<const neon_compiler::lexer::TokenisationError> errors = lexer.get_errors();
+	const std::vector<neon_compiler::lexer::TokenisationError> errors = lexer.take_errors();
 	CHECK(errors.size() == 1);
 
 	CHECK(errors[0].get_message() == error_messages::NUMBER_BASE_PREFIX_WITHOUT_DIGITS);
@@ -290,7 +290,7 @@ TEST_CASE("Binary prefix without digits isn't allowed")
 	lexer.run();
 
 	// Assert
-	std::span<const neon_compiler::lexer::TokenisationError> errors = lexer.get_errors();
+	const std::vector<neon_compiler::lexer::TokenisationError> errors = lexer.take_errors();
 	CHECK(errors.size() == 1);
 
 	CHECK(errors[0].get_message() == error_messages::NUMBER_BASE_PREFIX_WITHOUT_DIGITS);
@@ -307,7 +307,7 @@ TEST_CASE("Multiple decimal points aren't allowed")
 	lexer.run();
 
 	// Assert
-	std::span<const neon_compiler::lexer::TokenisationError> errors = lexer.get_errors();
+	const std::vector<neon_compiler::lexer::TokenisationError> errors = lexer.take_errors();
 	CHECK(errors.size() == 1);
 
 	CHECK(errors[0].get_message() == error_messages::MULTIPLE_DECIMAL_POINTS_IN_NUMBER_LITERAL);
@@ -324,7 +324,7 @@ TEST_CASE("Decimal points in non decimal literals aren't allowed")
 	lexer.run();
 
 	// Assert
-	std::span<const neon_compiler::lexer::TokenisationError> errors = lexer.get_errors();
+	const std::vector<neon_compiler::lexer::TokenisationError> errors = lexer.take_errors();
 	CHECK(errors.size() == 2);
 
 	CHECK(errors[0].get_message() == error_messages::DECIMAL_POINT_IN_NON_DECIMAL_LITERAL);

@@ -13,12 +13,18 @@ Compiler::Compiler(std::shared_ptr<logging::Logger> logger)
 
 void Compiler::read_file(std::unique_ptr<std::istream> stream, std::string_view file_name)
 {
-	std::unique_ptr<reading::CharReader> reader = std::make_unique<reading::CharReader>(std::move(stream));
-	lexer::Lexer lexer(std::move(reader));
-
+	std::vector<Token> tokens;
+	std::vector<lexer::TokenisationError> errors;
 	try
 	{
+		std::unique_ptr<reading::CharReader> reader =
+				std::make_unique<reading::CharReader>(std::move(stream));
+		lexer::Lexer lexer(std::move(reader));
+
 		lexer.run();
+
+		tokens = lexer.take_tokens();
+		errors = lexer.take_errors();
 	}
 	catch (const reading::ReadException& e)
 	{
@@ -26,7 +32,7 @@ void Compiler::read_file(std::unique_ptr<std::istream> stream, std::string_view 
 		return;
 	}
 
-	for(const Token& token : lexer.get_tokens())
+	for(const Token& token : tokens)
 	{
 		logger->debug("Token\t" + std::to_string(static_cast<int>(token.get_type())));
 		if(token.get_lexeme().has_value())
@@ -35,7 +41,7 @@ void Compiler::read_file(std::unique_ptr<std::istream> stream, std::string_view 
 		}
 	}
 
-	for(const lexer::TokenisationError& error : lexer.get_errors())
+	for(const lexer::TokenisationError& error : errors)
 	{
 		logger->error
 		(

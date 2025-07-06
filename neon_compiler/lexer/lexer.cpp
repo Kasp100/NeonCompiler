@@ -14,14 +14,14 @@ void Lexer::run()
 	}
 }
 
-std::span<const neon_compiler::Token> Lexer::get_tokens() const
+std::vector<neon_compiler::Token> Lexer::take_tokens()
 {
-	return std::span<const neon_compiler::Token>(tokens);
+	return std::move(tokens);
 }
 
-std::span<const TokenisationError> Lexer::get_errors() const
+std::vector<TokenisationError> Lexer::take_errors()
 {
-	return std::span<const TokenisationError>(errors);
+	return std::move(errors);
 }
 
 void Lexer::skip_whitespace()
