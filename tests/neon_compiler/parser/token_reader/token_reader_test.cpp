@@ -1,7 +1,6 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "../../../../libs/doctest/doctest.hpp"
 
-#include <memory>
 #include <vector>
 #include "../../../../neon_compiler/parser/token_reader.hpp"
 
