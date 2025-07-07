@@ -9,8 +9,10 @@ using namespace neon_compiler::parser;
 static const std::vector<neon_compiler::Token> TEST_TOKENS
 {
 	neon_compiler::Token{neon_compiler::TokenType::PACKAGE,0,0,0,std::nullopt},
-	neon_compiler::Token{neon_compiler::TokenType::IDENTIFIER,0,0,0,"main"},
-	neon_compiler::Token{neon_compiler::TokenType::END_STATEMENT,0,0,0,std::nullopt}
+	neon_compiler::Token{neon_compiler::TokenType::IDENTIFIER,0,0,0,std::nullopt},
+	neon_compiler::Token{neon_compiler::TokenType::END_STATEMENT,0,0,0,std::nullopt},
+	neon_compiler::Token{neon_compiler::TokenType::TYPE_CLASS,0,0,0,std::nullopt},
+	neon_compiler::Token{neon_compiler::TokenType::IDENTIFIER,0,0,0,std::nullopt}
 };
 
 TEST_CASE("Token reader works")
@@ -22,10 +24,18 @@ TEST_CASE("Token reader works")
 	// Act & Assert
 	CHECK(tr.peek().get_type() == neon_compiler::TokenType::PACKAGE);
 	CHECK(tr.peek(1).get_type() == neon_compiler::TokenType::IDENTIFIER);
-	CHECK(tr.peek(1).get_lexeme().value() == "main");
 	CHECK(tr.peek(2).get_type() == neon_compiler::TokenType::END_STATEMENT);
-	CHECK(tr.peek(100).get_type() == neon_compiler::TokenType::END_OF_FILE);
+	CHECK(tr.peek(3).get_type() == neon_compiler::TokenType::TYPE_CLASS);
+	CHECK(tr.peek(9).get_type() == neon_compiler::TokenType::END_OF_FILE);
+	CHECK(tr.end_of_file_reached() == false);
 	CHECK(tr.consume().get_type() == neon_compiler::TokenType::PACKAGE);
 	CHECK(tr.consume(1).get_type() == neon_compiler::TokenType::END_STATEMENT);
+	CHECK(tr.end_of_file_reached() == false);
+	CHECK(tr.consume_if_matches(neon_compiler::TokenType::TYPE_CLASS) == true);
+	CHECK(tr.consume_if_matches(neon_compiler::TokenType::INHERITANCE_EXTENDS) == false);
+	CHECK(tr.consume().get_type() == neon_compiler::TokenType::IDENTIFIER);
+	CHECK(tr.end_of_file_reached() == true);
 	CHECK(tr.consume().get_type() == neon_compiler::TokenType::END_OF_FILE);
+	CHECK(tr.consume().get_type() == neon_compiler::TokenType::END_OF_FILE);
+	CHECK(tr.end_of_file_reached() == true);
 }
