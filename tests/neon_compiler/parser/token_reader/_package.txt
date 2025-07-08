@@ -1,3 +1,0 @@
-token_reader_test
-../../../../neon_compiler/token
-../../../../neon_compiler/parser/token_reader

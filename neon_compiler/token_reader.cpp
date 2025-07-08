@@ -1,6 +1,6 @@
 #include "token_reader.hpp"
 
-using namespace neon_compiler::parser;
+using namespace neon_compiler;
 
 static const neon_compiler::Token END_OF_FILE_TOKEN{neon_compiler::TokenType::END_OF_FILE,0,0,0,std::nullopt};
 

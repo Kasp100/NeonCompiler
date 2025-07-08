@@ -3,9 +3,9 @@
 
 #include <memory>
 #include <span>
-#include "../token.hpp"
+#include "token.hpp"
 
-namespace neon_compiler::parser
+namespace neon_compiler
 {
 	class TokenReader
 	{
