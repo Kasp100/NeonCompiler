@@ -10,46 +10,48 @@ namespace neon_compiler::ast::nodes
 
 struct Root : ASTNode
 {
-    std::unordered_map<std::string, PackageMember> members;
+	std::unordered_map<std::string, PackageMember> members;
 
-    void accept(ASTVisitor& visitor) override
-    {
-        visitor.visit(*this);
-    }
+	void accept(ASTVisitor& visitor) override
+	{
+		visitor.visit(*this);
+	}
 };
 
 struct PackageMember : ASTNode {};
 
 struct Type : PackageMember
 {
-    void accept(ASTVisitor& visitor) override
-    {
-        visitor.visit(*this);
-    }
+
+
+	void accept(ASTVisitor& visitor) override
+	{
+		visitor.visit(*this);
+	}
 };
 
 struct PureFunctionSet : PackageMember
 {
-    void accept(ASTVisitor& visitor) override
-    {
-        visitor.visit(*this);
-    }
+	void accept(ASTVisitor& visitor) override
+	{
+		visitor.visit(*this);
+	}
 };
 
 struct GrammarSet : PackageMember
 {
-    void accept(ASTVisitor& visitor) override
-    {
-        visitor.visit(*this);
-    }
+	void accept(ASTVisitor& visitor) override
+	{
+		visitor.visit(*this);
+	}
 };
 
 struct CompileFunction : PackageMember
 {
-    void accept(ASTVisitor& visitor) override
-    {
-        visitor.visit(*this);
-    }
+	void accept(ASTVisitor& visitor) override
+	{
+		visitor.visit(*this);
+	}
 };
 
 }
