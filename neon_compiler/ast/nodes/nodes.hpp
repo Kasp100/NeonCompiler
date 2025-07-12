@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <vector>
 #include "../ast_node.hpp"
+#include "statement_nodes.hpp"
 
 namespace neon_compiler::ast::nodes
 {
@@ -57,6 +58,8 @@ struct Method : ASTNode
 	bool mutating;
 	/** Parameters */
 	std::vector<ReferenceType> parameters;
+	/** Method body. Empty means it's not implemented (an abstract method). */
+	std::optional<CodeBlock> implementation;
 
 	void accept(ASTVisitor& visitor) const override
 	{
@@ -72,6 +75,16 @@ struct ReferenceType : PackageMember
 	bool mut;
 	/** The name of the type */
 	std::string type;
+
+	void accept(ASTVisitor& visitor) const override
+	{
+		visitor.visit(*this);
+	}
+};
+
+struct CodeBlock : ASTNode
+{
+	std::vector<std::unique_ptr<Statement>> statements;
 
 	void accept(ASTVisitor& visitor) const override
 	{
