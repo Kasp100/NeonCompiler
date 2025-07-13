@@ -41,11 +41,12 @@ std::optional<TokenType> Token::keyword_to_token_type(std::string_view word)
 	else if (word == "public")           return TokenType::VISIBILITY_PUBLIC;
 	else if (word == "private")          return TokenType::VISIBILITY_PRIVATE;
 	else if (word == "protected")        return TokenType::VISIBILITY_PROTECTED;
-	else if (word == "inner")            return TokenType::VISIBILITY_INNER;
+	else if (word == "exclusive")        return TokenType::VISIBILITY_EXCLUSIVE;
 	else if (word == "static")           return TokenType::MEMBER_STATIC;
 	else if (word == "const")            return TokenType::MEMBER_CONST;
 	else if (word == "mut:")             return TokenType::MUTABLE_REFERENCE;
 	else if (word == "mut")              return TokenType::MUTABLE_DECLARATION;
+	else if (word == "opt")              return TokenType::REF_TYPE_OPTIONAL;
 	else if (word == "own")              return TokenType::REF_TYPE_OWN;
 	else if (word == "shared")           return TokenType::REF_TYPE_SHARED;
 	else if (word == "class")            return TokenType::TYPE_CLASS;
@@ -56,12 +57,13 @@ std::optional<TokenType> Token::keyword_to_token_type(std::string_view word)
 	else if (word == "impl")             return TokenType::INHERITANCE_IMPLEMENTS;
 	else if (word == "extends")          return TokenType::INHERITANCE_EXTENDS;
 	else if (word == "extendable")       return TokenType::DECL_CLASS_EXTENDABLE;
-	else if (word == "final")            return TokenType::DECL_METHOD_FINAL;
 	else if (word == "override")         return TokenType::DECL_METHOD_OVERRIDE;
+	else if (word == "overridable")      return TokenType::DECL_METHOD_OVERRIDABLE;
 	else if (word == "copyable")         return TokenType::DECL_TYPE_COPYABLE;
 	else if (word == "serialisable")     return TokenType::DECL_TYPE_SERIALISABLE;
 	else if (word == "true")             return TokenType::BOOL_TRUE;
 	else if (word == "false")            return TokenType::BOOL_FALSE;
+	else if (word == "opt:")             return TokenType::CALL_OPTIONAL;
 	else if (word == "auto:")            return TokenType::CALL_COMPILE_FUNCTION;
 	else if (word == "compile_function") return TokenType::DEFINE_COMPILE_FUNCTION;
 	else if (word == "grammar")          return TokenType::DEFINE_GRAMMAR_SET;
@@ -73,7 +75,6 @@ std::optional<TokenType> Token::keyword_to_token_type(std::string_view word)
 	else if (word == "while")            return TokenType::STMT_WHILE;
 	else if (word == "serialising")      return TokenType::STMT_SERIALISING;
 	else if (word == "ret")              return TokenType::STMT_RETURN;
-	else if (word == "move")             return TokenType::STMT_MOVE;
 	else if (word == "pass")             return TokenType::STMT_PASS;
 	else if (word == "copy")             return TokenType::STMT_COPY;
 
