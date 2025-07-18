@@ -49,6 +49,7 @@ std::optional<TokenType> Token::keyword_to_token_type(std::string_view word)
 	else if (word == "opt")              return TokenType::REF_TYPE_OPTIONAL;
 	else if (word == "own")              return TokenType::REF_TYPE_OWN;
 	else if (word == "shared")           return TokenType::REF_TYPE_SHARED;
+	else if (word == "borrow")           return TokenType::REF_TYPE_BORROW;
 	else if (word == "class")            return TokenType::TYPE_CLASS;
 	else if (word == "interface")        return TokenType::TYPE_INTERFACE;
 	else if (word == "constructor")      return TokenType::CONSTRUCTOR;
