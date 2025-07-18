@@ -23,16 +23,10 @@ struct DiscardExpression : Statement
 	}
 };
 
-struct VariableDeclaration : Statement
+struct LocalDeclaration : Statement
 {
-    /** Whether this variable can be reassigned after initialisation */
-    bool var;
-    /** The reference type */
-	ReferenceType reference_type;
-    /** The reference name */
-    std::string reference_name;
-    /** Optional initialisation */
-    std::optional<std::unique_ptr<Expression>> initialisation;
+	/** The variable declaration within this statement */
+    VariableDeclaration variable_declaration;
 
 	void accept(ASTVisitor& visitor) const override
 	{
@@ -43,7 +37,9 @@ struct VariableDeclaration : Statement
 /** Call to a compile function */
 struct AutoCall : Statement
 {
+	/** The name matching the one of a compile function name */
 	std::string function_name;
+	/** Tokens to pass. `,` separates parameters. */
 	std::vector<std::vector<neon_compiler::Token>> parameters;
 
 	void accept(ASTVisitor& visitor) const override
@@ -69,6 +65,11 @@ struct Assignment : Expression
 
 struct StaticFunctionCall : Expression
 {
+	/** The path and name of a specific static function, relative to the current package member. */
+	std::string function_path;
+	/** Parameter values */
+	std::vector<std::unique_ptr<Expression>> parameters;
+
 	void accept(ASTVisitor& visitor) const override
 	{
 		visitor.visit(*this);
@@ -77,6 +78,13 @@ struct StaticFunctionCall : Expression
 
 struct MethodCall : Expression
 {
+	/** The object on which the method is called. Empty if the object is "this". */
+	std::optional<std::unique_ptr<Expression>> callee;
+	/** The name of a specific method. */
+	std::string method_name;
+	/** Parameter values */
+	std::vector<std::unique_ptr<Expression>> parameters;
+
 	void accept(ASTVisitor& visitor) const override
 	{
 		visitor.visit(*this);
@@ -85,14 +93,22 @@ struct MethodCall : Expression
 
 struct StaticFieldCall : Expression
 {
+	/** The path and name of a specific static field, relative to the current package member. */
+	std::string static_field_path;
+
 	void accept(ASTVisitor& visitor) const override
 	{
 		visitor.visit(*this);
 	}
 };
 
-struct FieldCall : Expression
+struct ReferenceCall : Expression
 {
+	/** The object on which the field is called. Empty if the object is "this". */
+	std::optional<std::unique_ptr<Expression>> callee;
+	/** The name of a specific field, local variable, or constant. */
+	std::string reference_name;
+
 	void accept(ASTVisitor& visitor) const override
 	{
 		visitor.visit(*this);
@@ -101,14 +117,22 @@ struct FieldCall : Expression
 
 struct OptFunctionCall : Expression
 {
+	/** The name of the optional function. */
+	std::string function_name;
+	/** Parameter values */
+	std::vector<std::unique_ptr<Expression>> parameters;
+
 	void accept(ASTVisitor& visitor) const override
 	{
 		visitor.visit(*this);
 	}
 };
 
-struct OptFieldCall : Expression
+struct OptConstantCall : Expression
 {
+	/** The name of the optional constant. */
+	std::string constant_name;
+
 	void accept(ASTVisitor& visitor) const override
 	{
 		visitor.visit(*this);
