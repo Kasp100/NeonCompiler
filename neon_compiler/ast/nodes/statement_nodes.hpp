@@ -128,11 +128,9 @@ struct OptFunctionCall : Expression
 	}
 };
 
-struct OptConstantCall : Expression
+/** The node representing `opt:empty` */
+struct OptEmpty : Expression
 {
-	/** The name of the optional constant. */
-	std::string constant_name;
-
 	void accept(ASTVisitor& visitor) const override
 	{
 		visitor.visit(*this);

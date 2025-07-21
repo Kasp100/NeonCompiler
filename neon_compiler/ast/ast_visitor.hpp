@@ -27,7 +27,7 @@ public:
 	virtual void visit(const nodes::StaticFieldCall& node) = 0;
 	virtual void visit(const nodes::ReferenceCall& node) = 0;
 	virtual void visit(const nodes::OptFunctionCall& node) = 0;
-	virtual void visit(const nodes::OptConstantCall& node) = 0;
+	virtual void visit(const nodes::OptEmpty& node) = 0;
 	virtual void visit(const nodes::PureFunctionSet& node) = 0;
 	virtual void visit(const nodes::PureFunction& node) = 0;
 	virtual void visit(const nodes::GrammarSet& node) = 0;
