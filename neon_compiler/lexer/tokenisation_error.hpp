@@ -2,7 +2,7 @@
 #define TOKENISATION_ERROR_HPP
 
 #include <cstdint>
-#include <string>
+#include <string_view>
 
 namespace neon_compiler::lexer
 {
