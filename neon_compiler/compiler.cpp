@@ -5,6 +5,7 @@
 #include "../reading/char_reader.hpp"
 #include "lexer/lexer.hpp"
 #include "lexer/tokenisation_error.hpp"
+#include "parser/parser.hpp"
 
 using namespace neon_compiler;
 
@@ -32,15 +33,6 @@ void Compiler::read_file(std::unique_ptr<std::istream> stream, std::string_view 
 		return;
 	}
 
-	for(const Token& token : tokens)
-	{
-		logger->debug("Token\t" + std::to_string(static_cast<int>(token.get_type())));
-		if(token.get_lexeme().has_value())
-		{
-			logger->debug("Lexeme =\t" + std::string(token.get_lexeme().value()));
-		}
-	}
-
 	for(const lexer::TokenisationError& error : errors)
 	{
 		logger->error
@@ -51,6 +43,10 @@ void Compiler::read_file(std::unique_ptr<std::istream> stream, std::string_view 
 			"\": " + std::string(error.get_message())
 		);
 	}
+
+	std::span<const Token> tokens_view{tokens};
+	parser::Parser parser{tokens_view, logger};
+	parser.run();
 }
 
 void Compiler::build() const
