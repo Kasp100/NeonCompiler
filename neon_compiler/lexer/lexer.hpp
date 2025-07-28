@@ -4,7 +4,6 @@
 #include <cstdint>
 #include <memory>
 #include <optional>
-#include "../../logging/logger.hpp"
 #include "../../reading/char_reader.hpp"
 #include "../token.hpp"
 #include "tokenisation_error.hpp"
