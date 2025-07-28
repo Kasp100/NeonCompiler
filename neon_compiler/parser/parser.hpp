@@ -16,11 +16,12 @@ namespace error_messages
 	constexpr std::string_view MISSING_PACKAGE_DECLARATION =
 			"Expecting a package declaration. Example: `pkg main::example;`";
 	constexpr std::string_view UNEXPECTED_END_OF_FILE =
-			"Unexpected end of file. A terminating token is missing. "
-            "Statements are terminated with `;` and code blocks with `}`.";
+			"Unexpected end of file: a terminating token is missing. "
+            "Statements are terminated with `;` and blocks with `}`.";
 	constexpr std::string_view UNEXPECTED_TOKEN_IN_PACKAGE_IDENTIFIER =
-			"Unexpected token in package identifier. Use alphanumeric names starting with alphabetic characters. "
-            "`::` is used to separate packages. Example: `main::subpkg`";
+			"Unexpected token in package identifier: alphanumeric names starting "
+            "with alphabetic characters should be used, with `::` for subpackages. "
+            "Example: `main::subpkg`";
 }
 
 class Parser
