@@ -6,6 +6,7 @@
 #include "lexer/lexer.hpp"
 #include "lexer/tokenisation_error.hpp"
 #include "parser/parser.hpp"
+#include "parser/parsing_error.hpp"
 
 using namespace neon_compiler;
 
@@ -15,7 +16,7 @@ Compiler::Compiler(std::shared_ptr<logging::Logger> logger)
 void Compiler::read_file(std::unique_ptr<std::istream> stream, std::string_view file_name)
 {
 	std::vector<Token> tokens;
-	std::vector<lexer::TokenisationError> errors;
+	std::vector<lexer::TokenisationError> lexer_errors;
 	try
 	{
 		std::unique_ptr<reading::CharReader> reader =
@@ -25,7 +26,7 @@ void Compiler::read_file(std::unique_ptr<std::istream> stream, std::string_view 
 		lexer.run();
 
 		tokens = lexer.take_tokens();
-		errors = lexer.take_errors();
+		lexer_errors = lexer.take_errors();
 	}
 	catch (const reading::ReadException& e)
 	{
@@ -33,7 +34,7 @@ void Compiler::read_file(std::unique_ptr<std::istream> stream, std::string_view 
 		return;
 	}
 
-	for(const lexer::TokenisationError& error : errors)
+	for(const lexer::TokenisationError& error : lexer_errors)
 	{
 		logger->error
 		(
@@ -44,9 +45,23 @@ void Compiler::read_file(std::unique_ptr<std::istream> stream, std::string_view 
 		);
 	}
 
-	std::span<const Token> tokens_view{tokens};
+	const std::span<const Token> tokens_view{tokens};
 	parser::Parser parser{tokens_view, logger};
 	parser.run();
+
+	const std::vector<parser::ParsingError> parser_errors{parser.take_errors()};
+	for(const parser::ParsingError& error : parser_errors)
+	{
+		const Token& token = error.get_token();
+		logger->error
+		(
+			"At line " + std::to_string(token.get_line()) +
+			", column " + std::to_string(token.get_column()) +
+			" (length: " + std::to_string(token.get_length()) +
+			"), in file \"" + std::string(file_name) +
+			"\": " + std::string(error.get_message())
+		);
+	}
 }
 
 void Compiler::build() const
