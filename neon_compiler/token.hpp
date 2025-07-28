@@ -85,6 +85,7 @@ public:
 	uint32_t get_line() const;
 	uint32_t get_column() const;
 	uint32_t get_length() const;
+	std::string get_location() const;
 	std::optional<std::string_view> get_lexeme() const;
 
 	static std::optional<TokenType> keyword_to_token_type(std::string_view word);

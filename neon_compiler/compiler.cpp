@@ -55,10 +55,8 @@ void Compiler::read_file(std::unique_ptr<std::istream> stream, std::string_view 
 		const Token& token = error.get_token();
 		logger->error
 		(
-			"At line " + std::to_string(token.get_line()) +
-			", column " + std::to_string(token.get_column()) +
-			" (length: " + std::to_string(token.get_length()) +
-			"), in file \"" + std::string(file_name) +
+			token.get_location() +
+			" \"" + std::string(file_name) +
 			"\": " + std::string(error.get_message())
 		);
 	}

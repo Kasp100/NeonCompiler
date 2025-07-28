@@ -27,6 +27,26 @@ uint32_t Token::get_length() const
 	return length;
 }
 
+std::string Token::get_location() const
+{
+	std::string location{};
+	if(type == TokenType::END_OF_FILE)
+	{
+		location += "at the end of file";
+	}
+	else
+	{
+		location += "at line ";
+		location += std::to_string(get_line());
+		location += ", column ";
+		location += std::to_string(get_column());
+		location += " (length: ";
+		location += std::to_string(get_length());
+		location += "), in file";
+	}
+	return location;
+}
+
 std::optional<std::string_view> Token::get_lexeme() const
 {
 	if (lexeme.has_value()) {
