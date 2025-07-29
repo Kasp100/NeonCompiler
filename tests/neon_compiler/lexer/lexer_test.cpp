@@ -44,7 +44,7 @@ TEST_CASE("Keywords are parsed correctly")
 	CHECK(tokens.size() == 3);
 
 	CHECK(tokens[0].get_type() == neon_compiler::TokenType::PACKAGE);
-	CHECK(tokens[1].get_type() == neon_compiler::TokenType::TYPE_INTERFACE);
+	CHECK(tokens[1].get_type() == neon_compiler::TokenType::PACKAGE_MEMBER_INTERFACE);
 	CHECK(tokens[2].get_type() == neon_compiler::TokenType::MUTABLE_REFERENCE);
 }
 
