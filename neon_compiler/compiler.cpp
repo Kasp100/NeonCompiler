@@ -6,7 +6,7 @@
 #include "lexer/lexer.hpp"
 #include "lexer/tokenisation_error.hpp"
 #include "parser/parser.hpp"
-#include "parser/parsing_error.hpp"
+#include "analysis/analysis_reporter.hpp"
 
 using namespace neon_compiler;
 
@@ -46,7 +46,8 @@ void Compiler::read_file(std::unique_ptr<std::istream> stream, std::string_view 
 	}
 
 	const std::span<const Token> tokens_view{tokens};
-	parser::Parser parser{tokens_view, logger};
+	// TODO: work with new Parser API
+	/*parser::Parser parser{tokens_view, logger};
 	parser.run();
 
 	const std::vector<parser::ParsingError> parser_errors{parser.take_errors()};
@@ -59,7 +60,7 @@ void Compiler::read_file(std::unique_ptr<std::istream> stream, std::string_view 
 			" \"" + std::string(file_name) +
 			"\": " + std::string(error.get_message())
 		);
-	}
+	}*/
 }
 
 void Compiler::build() const

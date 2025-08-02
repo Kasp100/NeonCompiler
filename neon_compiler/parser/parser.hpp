@@ -7,8 +7,8 @@
 #include <string>
 #include "../token.hpp"
 #include "../token_reader.hpp"
-#include "parsing_error.hpp"
-#include "../../logging/logger.hpp"
+#include "../analysis/analysis_entry.hpp"
+#include "../analysis/analysis_reporter.hpp"
 #include "../ast/identifiers.hpp"
 
 namespace neon_compiler::parser
@@ -28,14 +28,12 @@ namespace error_messages
 class Parser
 {
 public:
-    explicit Parser(std::span<const neon_compiler::Token> tokens, std::shared_ptr<logging::Logger> logger);
+    explicit Parser(std::span<const neon_compiler::Token> tokens, std::shared_ptr<neon_compiler::analysis::AnalysisReporter> analysis_reporter);
     void run();
-	std::vector<neon_compiler::parser::ParsingError> take_errors();
 private:
     neon_compiler::TokenReader reader;
-    std::vector<neon_compiler::parser::ParsingError> errors;
-    std::shared_ptr<logging::Logger> logger;
-    void print_token(const Token& token);
+    std::shared_ptr<neon_compiler::analysis::AnalysisReporter> analysis_reporter;
+    void report_token(neon_compiler::analysis::AnalysisEntryType type, const neon_compiler::Token& token, std::optional<std::string> info);
     std::optional<Identifier> parse_identifier();
 };
 

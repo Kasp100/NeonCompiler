@@ -2,36 +2,28 @@
 
 using namespace neon_compiler;
 using namespace neon_compiler::parser;
+using namespace neon_compiler::analysis;
 
-Parser::Parser(std::span<const Token> tokens, std::shared_ptr<logging::Logger> logger)
-	: reader{tokens}, errors{}, logger{logger} {}
+Parser::Parser(std::span<const Token> tokens, std::shared_ptr<neon_compiler::analysis::AnalysisReporter> analysis_reporter)
+	: reader{tokens}, analysis_reporter{analysis_reporter} {}
 
 void Parser::run()
 {
 	if(!reader.consume_if_matches(TokenType::PACKAGE))
 	{
-		errors.emplace_back(reader.peek(), error_messages::MISSING_PACKAGE_DECLARATION);
+		report_token(AnalysisEntryType::ERROR, reader.peek(), std::string{error_messages::MISSING_PACKAGE_DECLARATION});
 	}
 
 	std::optional<Identifier> package_id = parse_identifier();
 	if(!package_id.has_value())
 	{
-		errors.emplace_back(reader.peek(), error_messages::MISSING_IDENTIFIER);
+		report_token(AnalysisEntryType::ERROR, reader.peek(), std::string{error_messages::MISSING_IDENTIFIER});
 	}
 }
 
-std::vector<parser::ParsingError> Parser::take_errors()
+void Parser::report_token(AnalysisEntryType type, const Token& token, std::optional<std::string> info = std::nullopt)
 {
-	return std::move(errors);
-}
-
-void Parser::print_token(const Token& token)
-{
-	logger->debug("Token\t" + std::to_string(static_cast<int>(token.get_type())));
-	if(token.get_lexeme().has_value())
-	{
-		logger->debug("Lexeme =\t" + std::string(token.get_lexeme().value()));
-	}
+	analysis_reporter->report(AnalysisEntry{type, token.get_line(), token.get_column(), token.get_length(), info});
 }
 
 std::optional<Identifier> Parser::parse_identifier()
