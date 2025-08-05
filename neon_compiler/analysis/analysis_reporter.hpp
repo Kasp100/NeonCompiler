@@ -10,7 +10,6 @@ class AnalysisReporter
 {
 public:
 	virtual ~AnalysisReporter() = default;
-
 	virtual void report(const AnalysisEntry& entry) = 0;
 };
 
