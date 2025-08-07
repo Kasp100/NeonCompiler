@@ -2,7 +2,7 @@ CXX = g++
 CXXFLAGS = -std=c++20 -Wall
 
 # List of package directories
-DEFAULT_PACKAGE_DIRS := . logging file_reading reading neon_compiler neon_compiler/lexer neon_compiler/parser
+DEFAULT_PACKAGE_DIRS := . logging file_reading reading neon_compiler neon_compiler/lexer neon_compiler/parser neon_compiler/analysis/impl
 
 IS_TEST := $(if $(MAKECMDGOALS),true,false)
 

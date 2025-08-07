@@ -7,15 +7,17 @@
 #include "lexer/tokenisation_error.hpp"
 #include "parser/parser.hpp"
 #include "analysis/analysis_reporter.hpp"
+#include "analysis/impl/console_analysis_reporter.hpp"
 
 using namespace neon_compiler;
 
 Compiler::Compiler(std::shared_ptr<logging::Logger> logger)
-	: logger{logger} {}
+	: logger{logger}, tokens{} {}
 
 void Compiler::read_file(std::unique_ptr<std::istream> stream, std::string_view file_name)
 {
-	std::vector<Token> tokens;
+	latest_file = std::string{file_name};
+
 	std::vector<lexer::TokenisationError> lexer_errors;
 	try
 	{
@@ -44,31 +46,22 @@ void Compiler::read_file(std::unique_ptr<std::istream> stream, std::string_view 
 			"\": " + std::string(error.get_message())
 		);
 	}
-
-	const std::span<const Token> tokens_view{tokens};
-	// TODO: work with new Parser API
-	/*parser::Parser parser{tokens_view, logger};
-	parser.run();
-
-	const std::vector<parser::ParsingError> parser_errors{parser.take_errors()};
-	for(const parser::ParsingError& error : parser_errors)
-	{
-		const Token& token = error.get_token();
-		logger->error
-		(
-			token.get_location() +
-			" \"" + std::string(file_name) +
-			"\": " + std::string(error.get_message())
-		);
-	}*/
 }
 
 void Compiler::build() const
 {
 	logger->debug("Building...");
+	const std::span<const Token> tokens_view{tokens};
 }
 
 void Compiler::generate_analysis() const
 {
 	logger->debug("Generating analysis...");
+	const std::span<const Token> tokens_view{tokens};
+
+	std::shared_ptr<analysis::AnalysisReporter> reporter =
+			std::make_shared<analysis::impl::ConsoleAnalysisReporter>(latest_file);
+
+	parser::Parser parser{tokens_view, reporter};
+	parser.run();
 }

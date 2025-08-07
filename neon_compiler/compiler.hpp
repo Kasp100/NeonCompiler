@@ -2,7 +2,10 @@
 #define COMPILER_HPP
 
 #include <memory>
+#include <vector>
+#include <string>
 #include "../logging/logger.hpp"
+#include "token.hpp"
 
 namespace neon_compiler
 {
@@ -18,6 +21,8 @@ public:
 
 private:
 	std::shared_ptr<logging::Logger> logger;
+	std::vector<Token> tokens;
+	std::string latest_file;
 };
 
 }
