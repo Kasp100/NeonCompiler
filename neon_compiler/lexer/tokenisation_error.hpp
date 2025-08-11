@@ -3,21 +3,15 @@
 
 #include <cstdint>
 #include <string_view>
+#include "../../reading/source_position.hpp"
 
 namespace neon_compiler::lexer
 {
 
-class TokenisationError
+struct TokenisationError
 {
-public:
-    explicit TokenisationError(uint32_t line, uint32_t column, std::string_view message);
-    uint32_t get_line() const;
-    uint32_t get_column() const;
-    std::string_view get_message() const;
-private:
-    uint32_t line;
-    uint32_t column;
-    std::string_view message;
+    const reading::SourcePosition source_position;
+    const std::string_view message;
 };
 
 }

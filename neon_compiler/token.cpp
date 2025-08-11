@@ -1,25 +1,18 @@
 #include "token.hpp"
 
-#include <string_view>
-
 using namespace neon_compiler;
 
-Token::Token(TokenType type, uint32_t line, uint32_t column, uint32_t length, std::optional<std::string> lexeme)
-	: type{type}, line{line}, column{column}, length{length}, lexeme{lexeme} {}
+Token::Token(TokenType type, reading::SourcePosition source_position, uint length, std::optional<std::string> lexeme)
+	: type{type}, source_position{source_position}, length{length}, lexeme{lexeme} {}
 
 TokenType Token::get_type() const
 {
 	return type;
 }
 
-uint32_t Token::get_line() const
+reading::SourcePosition Token::get_source_position() const
 {
-	return line;
-}
-
-uint32_t Token::get_column() const
-{
-	return column;
+	return source_position;
 }
 
 uint32_t Token::get_length() const
@@ -37,9 +30,9 @@ std::string Token::get_location() const
 	else
 	{
 		location += "at line ";
-		location += std::to_string(get_line());
+		location += std::to_string(source_position.newlines_count + 1);
 		location += ", column ";
-		location += std::to_string(get_column());
+		location += std::to_string(source_position.offset_in_line + 1);// TODO: take into account '\t' characters
 		location += " (length: ";
 		location += std::to_string(get_length());
 		location += "), in file";

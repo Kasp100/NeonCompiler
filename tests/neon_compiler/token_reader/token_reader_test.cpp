@@ -8,11 +8,12 @@ using namespace neon_compiler;
 
 static const std::vector<Token> TEST_TOKENS
 {
-	Token{TokenType::PACKAGE,0,0,0,std::nullopt},
-	Token{TokenType::IDENTIFIER,0,0,0,std::nullopt},
-	Token{TokenType::END_STATEMENT,0,0,0,std::nullopt},
-	Token{TokenType::PACKAGE_MEMBER_CLASS,0,0,0,std::nullopt},
-	Token{TokenType::IDENTIFIER,0,0,0,std::nullopt}
+	Token{TokenType::PACKAGE, reading::SourcePosition{0, 0, 0}, 0},
+	Token{TokenType::IDENTIFIER, reading::SourcePosition{0, 0, 0}, 0},
+	Token{TokenType::END_STATEMENT, reading::SourcePosition{0, 0, 0}, 0},
+	Token{TokenType::PACKAGE_MEMBER_CLASS, reading::SourcePosition{0, 0, 0}, 0},
+	Token{TokenType::IDENTIFIER, reading::SourcePosition{0, 0, 0}, 0},
+	Token{TokenType::END_OF_FILE, reading::SourcePosition{0, 0, 0}, 0}
 };
 
 TEST_CASE("Token reader works")

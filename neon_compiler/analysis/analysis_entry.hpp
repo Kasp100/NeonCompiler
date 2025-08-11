@@ -23,9 +23,10 @@ enum class AnalysisEntryType
 
 struct AnalysisEntry
 {
-	AnalysisEntryType type;
-	uint32_t line, column, length;
-	std::optional<std::string> info;
+	const AnalysisEntryType type;
+    const reading::SourcePosition source_position;
+	const uint32_t length;
+	const std::optional<std::string> info;
 };
 
 }

@@ -40,10 +40,10 @@ void Compiler::read_file(std::unique_ptr<std::istream> stream, std::string_view 
 	{
 		logger->error
 		(
-			"At line " + std::to_string(error.get_line()) +
-			", column " + std::to_string(error.get_column()) +
+			"At line " + std::to_string(error.source_position.newlines_count + 1) +
+			", column " + std::to_string(error.source_position.offset_in_line + 1) + // TODO: Take into account '\t'
 			", in file \"" + std::string(file_name) +
-			"\": " + std::string(error.get_message())
+			"\": " + std::string(error.message)
 		);
 	}
 }

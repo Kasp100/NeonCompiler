@@ -23,7 +23,7 @@ void Parser::run()
 
 void Parser::report_token(AnalysisEntryType type, const Token& token, std::optional<std::string> info = std::nullopt)
 {
-	analysis_reporter->report(AnalysisEntry{type, token.get_line(), token.get_column(), token.get_length(), info});
+	analysis_reporter->report(AnalysisEntry{type, token.get_source_position(), token.get_length(), info});
 }
 
 std::optional<Identifier> Parser::parse_identifier()

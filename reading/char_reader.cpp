@@ -1,115 +1,137 @@
 #include "char_reader.hpp"
 
+#include "char_w_source_position.hpp"
+
 using namespace reading;
 
 CharReader::CharReader(std::unique_ptr<std::istream> input_stream)
-    : reader{std::move(input_stream)} {}
+	: reader{std::move(input_stream)} {}
 
-char CharReader::read_next()
+std::optional<CharWSourcePosition> CharReader::read_next()
 {
-    if(eof_reached) { return END_OF_FILE; }
+	std::optional<unsigned char> c = convert(read_next_byte());
+	if(!c.has_value())
+	{
+		return std::nullopt;
+	}
 
-    int val = reader->get();
-    if(val == EOF)
-    {
-        eof_reached = true;
-        return END_OF_FILE;
-    }
+	// Normalise newlines
+	if(c == '\r')
+	{
+		if(convert(reader->peek()) == '\n')
+		{
+			read_next_byte();
+		}
+		c = '\n';
+	}
 
-    char c = static_cast<char>(val);
-    if(c == '\r')
-    {
-        char next = static_cast<char>(reader->peek());
-        if (next == '\n')
-        {
-            reader->get(); // consume the '\n'
-        }
-        return '\n';
-    }
+	if(c == '\n')
+	{
+		++newlines_count;
+		offset_in_line = 0;
+	}
 
-    return c;
+	SourcePosition sp{offset_in_file, newlines_count, offset_in_line};
+	return CharWSourcePosition{c.value(), sp};
 }
 
-char CharReader::peek(uint offset)
+int CharReader::read_next_byte()
 {
-    try
-    {
-        while (offset >= static_cast<uint>(buffer.size()))
-        {
-            buffer.push_back(read_next());
-        }
-        return buffer[offset];
-    } catch (...)
-    {
-        throw ReadException("Error while peeking input stream");
-    }
+	if(eof_reached) { return EOF; }
+
+	int val = reader->get();
+	++offset_in_file;
+	++offset_in_line;
+
+	return val;
 }
 
-char CharReader::consume(uint offset)
+std::optional<unsigned char> CharReader::convert(int val) const
 {
-    char result = peek(offset);
-    for (uint i = 0; i <= offset; ++i)
-    {
-        consume_next();
-    }
-    return result;
+	if(val == EOF)
+	{
+		return std::nullopt;
+	}
+
+	return static_cast<unsigned char>(val);
 }
 
-char CharReader::consume_next()
+unsigned char CharReader::peek(uint offset)
 {
-    char c = buffer.front();
-    buffer.erase(buffer.begin());
+	try
+	{
+		while(static_cast<uint>(buffer.size()) <= offset)
+		{
+			std::optional<reading::CharWSourcePosition> next = read_next();
+			if(!next.has_value())
+			{
+				return ' '; // Return a space character to avoid returning optional
+			}
+			buffer.push_back(next.value());
+		}
+		return buffer[offset].c;
+	}
+	catch(...)
+	{
+		throw ReadException{"Error while peeking input stream"};
+	}
+}
 
-    if (c == '\n')
-    {
-        line_number++;
-        column_number = 1;
-    }
-    else
-    {
-        column_number++;
-    }
+unsigned char CharReader::consume(uint offset)
+{
+	unsigned char result = peek(offset);
+	for(uint i = 0; i <= offset; ++i)
+	{
+		consume_from_buffer();
+	}
+	return result;
+}
 
-    return c;
+void CharReader::consume_from_buffer()
+{
+	if(!buffer.empty())
+	{
+		buffer.erase(buffer.begin());
+	}
 }
 
 bool CharReader::end_of_file_reached()
 {
-    return peek() == END_OF_FILE;
+	peek();
+	return buffer.empty();
 }
 
-bool CharReader::consume_if_matches(char match)
+SourcePosition CharReader::get_source_position() const
 {
-    if (peek() == match)
-    {
-        consume();
-        return true;
-    }
-    return false;
+	if(!buffer.empty())
+	{
+		return buffer.front().sp;
+	}
+	return SourcePosition{offset_in_file, newlines_count, offset_in_line};
+}
+
+bool CharReader::consume_if_matches(unsigned char match)
+{
+	if(peek() == match)
+	{
+		consume();
+		return true;
+	}
+	return false;
 }
 
 bool CharReader::consume_all_if_next(const std::string& str)
 {
-    peek(static_cast<int>(str.size()) - 1); // Ensure enough characters in buffer
+	peek(static_cast<int>(str.size()) - 1); // Ensure enough characters in buffer for fast reading
 
-    for (size_t i = 0; i < str.size(); ++i)
-    {
-        if (peek(static_cast<int>(i)) != str[i])
-        {
-            return false;
-        }
-    }
+	for(size_t i = 0; i < str.size(); ++i)
+	{
+		if(peek(static_cast<int>(i)) != str[i])
+		{
+			return false;
+		}
+	}
 
-    consume(static_cast<int>(str.size()) - 1);
-    return true;
-}
-
-uint32_t CharReader::get_line_number() const
-{
-    return line_number;
-}
-
-uint32_t CharReader::get_column_number() const
-{
-    return column_number;
+	consume(static_cast<int>(str.size()) - 1);
+	return true;
 }

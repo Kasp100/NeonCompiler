@@ -9,7 +9,8 @@ void ConsoleAnalysisReporter::report(const AnalysisEntry& entry)
 {
 	out << "[A] "
 		<< analysis_type_to_string(entry.type) << " "
-		<< file << ":" << entry.line << ":" << entry.column;
+		<< file << ":" << std::to_string(entry.source_position.offset_in_file)
+		<< "(" << std::to_string(entry.source_position.newlines_count) << ":" << std::to_string(entry.source_position.offset_in_line) << ")";
 	if(entry.info.has_value())
 	{
 		out << " ";

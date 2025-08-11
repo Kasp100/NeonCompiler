@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <optional>
 #include <string>
+#include "../reading/source_position.hpp"
 
 namespace neon_compiler
 {
@@ -78,24 +79,23 @@ public:
 	explicit Token
 	(
 		TokenType type,
-		uint32_t line,
-		uint32_t column,
-		uint32_t length,
+		reading::SourcePosition source_position,
+		uint length,
 		std::optional<std::string> lexeme = std::nullopt
 	);
 
 	TokenType get_type() const;
-	uint32_t get_line() const;
-	uint32_t get_column() const;
-	uint32_t get_length() const;
-	std::string get_location() const;
+	reading::SourcePosition get_source_position() const;
+	uint get_length() const;
 	std::optional<std::string_view> get_lexeme() const;
+	std::string get_location() const;
 
 	static std::optional<TokenType> keyword_to_token_type(std::string_view word);
 
 private:
 	TokenType type;
-	uint32_t line, column, length;
+	reading::SourcePosition source_position;
+	uint length;
 	std::optional<std::string> lexeme;
 };
 }

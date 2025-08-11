@@ -189,9 +189,9 @@ TEST_CASE("Illegal string literals are disallowed")
 	const std::vector<neon_compiler::lexer::TokenisationError> errors = lexer.take_errors();
 	CHECK(errors.size() == 3);
 
-	CHECK(errors[0].get_message() == error_messages::UNKNOWN_ESCAPE_SEQUENCE);
-	CHECK(errors[1].get_message() == error_messages::NEWLINE_IN_STRING_LITERAL);
-	CHECK(errors[2].get_message() == error_messages::UNTERMINATED_STRING_LITERAL);
+	CHECK(errors[0].message == error_messages::UNKNOWN_ESCAPE_SEQUENCE);
+	CHECK(errors[1].message == error_messages::NEWLINE_IN_STRING_LITERAL);
+	CHECK(errors[2].message == error_messages::UNTERMINATED_STRING_LITERAL);
 }
 
 TEST_CASE("Illegal character literals are disallowed")
@@ -208,7 +208,7 @@ TEST_CASE("Illegal character literals are disallowed")
 	const std::vector<neon_compiler::lexer::TokenisationError> errors = lexer.take_errors();
 	CHECK(errors.size() == 1);
 
-	CHECK(errors[0].get_message() == error_messages::CHARACTER_LITERAL_TOO_LONG);
+	CHECK(errors[0].message == error_messages::CHARACTER_LITERAL_TOO_LONG);
 }
 
 TEST_CASE("Illegal hexadecimal digits aren't allowed")
@@ -225,7 +225,7 @@ TEST_CASE("Illegal hexadecimal digits aren't allowed")
 	const std::vector<neon_compiler::lexer::TokenisationError> errors = lexer.take_errors();
 	CHECK(errors.size() == 1);
 
-	CHECK(errors[0].get_message() == error_messages::ILLEGAL_DIGITS_IN_NUMBER_LITERAL);
+	CHECK(errors[0].message == error_messages::ILLEGAL_DIGITS_IN_NUMBER_LITERAL);
 }
 
 TEST_CASE("Illegal binary digits aren't allowed")
@@ -242,7 +242,7 @@ TEST_CASE("Illegal binary digits aren't allowed")
 	const std::vector<neon_compiler::lexer::TokenisationError> errors = lexer.take_errors();
 	CHECK(errors.size() == 1);
 
-	CHECK(errors[0].get_message() == error_messages::ILLEGAL_DIGITS_IN_NUMBER_LITERAL);
+	CHECK(errors[0].message == error_messages::ILLEGAL_DIGITS_IN_NUMBER_LITERAL);
 }
 
 TEST_CASE("Illegal hexadecimal digits aren't allowed")
@@ -259,7 +259,7 @@ TEST_CASE("Illegal hexadecimal digits aren't allowed")
 	const std::vector<neon_compiler::lexer::TokenisationError> errors = lexer.take_errors();
 	CHECK(errors.size() == 1);
 
-	CHECK(errors[0].get_message() == error_messages::ILLEGAL_DIGITS_IN_NUMBER_LITERAL);
+	CHECK(errors[0].message == error_messages::ILLEGAL_DIGITS_IN_NUMBER_LITERAL);
 }
 
 TEST_CASE("Hexadecimal prefix without digits isn't allowed")
@@ -276,7 +276,7 @@ TEST_CASE("Hexadecimal prefix without digits isn't allowed")
 	const std::vector<neon_compiler::lexer::TokenisationError> errors = lexer.take_errors();
 	CHECK(errors.size() == 1);
 
-	CHECK(errors[0].get_message() == error_messages::NUMBER_BASE_PREFIX_WITHOUT_DIGITS);
+	CHECK(errors[0].message == error_messages::NUMBER_BASE_PREFIX_WITHOUT_DIGITS);
 }
 
 TEST_CASE("Binary prefix without digits isn't allowed")
@@ -293,7 +293,7 @@ TEST_CASE("Binary prefix without digits isn't allowed")
 	const std::vector<neon_compiler::lexer::TokenisationError> errors = lexer.take_errors();
 	CHECK(errors.size() == 1);
 
-	CHECK(errors[0].get_message() == error_messages::NUMBER_BASE_PREFIX_WITHOUT_DIGITS);
+	CHECK(errors[0].message == error_messages::NUMBER_BASE_PREFIX_WITHOUT_DIGITS);
 }
 
 TEST_CASE("Multiple decimal points aren't allowed")
@@ -310,7 +310,7 @@ TEST_CASE("Multiple decimal points aren't allowed")
 	const std::vector<neon_compiler::lexer::TokenisationError> errors = lexer.take_errors();
 	CHECK(errors.size() == 1);
 
-	CHECK(errors[0].get_message() == error_messages::MULTIPLE_DECIMAL_POINTS_IN_NUMBER_LITERAL);
+	CHECK(errors[0].message == error_messages::MULTIPLE_DECIMAL_POINTS_IN_NUMBER_LITERAL);
 }
 
 TEST_CASE("Decimal points in non decimal literals aren't allowed")
@@ -327,6 +327,6 @@ TEST_CASE("Decimal points in non decimal literals aren't allowed")
 	const std::vector<neon_compiler::lexer::TokenisationError> errors = lexer.take_errors();
 	CHECK(errors.size() == 2);
 
-	CHECK(errors[0].get_message() == error_messages::DECIMAL_POINT_IN_NON_DECIMAL_LITERAL);
-	CHECK(errors[1].get_message() == error_messages::DECIMAL_POINT_IN_NON_DECIMAL_LITERAL);
+	CHECK(errors[0].message == error_messages::DECIMAL_POINT_IN_NON_DECIMAL_LITERAL);
+	CHECK(errors[1].message == error_messages::DECIMAL_POINT_IN_NON_DECIMAL_LITERAL);
 }
