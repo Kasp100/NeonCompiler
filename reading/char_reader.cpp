@@ -25,13 +25,14 @@ std::optional<CharWSourcePosition> CharReader::read_next()
 		c = '\n';
 	}
 
+	SourcePosition sp{offset_in_file - 1, newlines_count, offset_in_line - 1};
+
 	if(c == '\n')
 	{
 		++newlines_count;
 		offset_in_line = 0;
 	}
 
-	SourcePosition sp{offset_in_file, newlines_count, offset_in_line};
 	return CharWSourcePosition{c.value(), sp};
 }
 
