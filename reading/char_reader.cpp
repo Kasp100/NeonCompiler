@@ -9,11 +9,14 @@ CharReader::CharReader(std::unique_ptr<std::istream> input_stream)
 
 std::optional<CharWSourcePosition> CharReader::read_next()
 {
+	SourcePosition sp{offset_in_file, newlines_count, offset_in_line};
+
 	std::optional<unsigned char> c = convert(read_next_byte());
 	if(!c.has_value())
 	{
 		return std::nullopt;
 	}
+
 
 	// Normalise newlines
 	if(c == '\r')
@@ -24,8 +27,6 @@ std::optional<CharWSourcePosition> CharReader::read_next()
 		}
 		c = '\n';
 	}
-
-	SourcePosition sp{offset_in_file - 1, newlines_count, offset_in_line - 1};
 
 	if(c == '\n')
 	{
