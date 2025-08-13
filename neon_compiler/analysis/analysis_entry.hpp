@@ -19,6 +19,7 @@ enum class AnalysisEntryType
     LITERAL_STRING,
     DECLARATION,
     REFERENCE,
+    PACKAGE
 };
 
 struct AnalysisEntry

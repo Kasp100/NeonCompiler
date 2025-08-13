@@ -47,6 +47,7 @@ std::string ConsoleAnalysisReporter::analysis_type_to_string(const AnalysisEntry
 		case AnalysisEntryType::LITERAL_STRING: return "LITERAL_STRING";
 		case AnalysisEntryType::DECLARATION: return "DECLARATION";
 		case AnalysisEntryType::REFERENCE: return "REFERENCE";
+		case AnalysisEntryType::PACKAGE: return "PACKAGE";
 		default: return "UNKNOWN";
 	}
 }
