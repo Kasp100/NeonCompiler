@@ -14,6 +14,21 @@ struct Identifier
      * Example 2: `my_variable` in source code becomes "my_variable" (single element) in this vector.
      * It is later determined whether this is a static or non-static reference */
     std::vector<std::string> parts;
+
+    std::string to_string()
+    {
+        std::string s{};
+        bool first = true;
+        for(const std::string& part : parts)
+        {
+            if(!(first = false))
+            {
+                s += "::";
+            }
+            s += part;
+        }
+        return s;
+    }
 };
 
 #endif // IDENTIFIERS_HPP
