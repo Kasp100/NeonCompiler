@@ -29,13 +29,3 @@ bool TokenReader::end_of_file_reached() const
 {
 	return peek().get_type() == TokenType::END_OF_FILE;
 }
-
-bool TokenReader::consume_if_matches(const TokenType& match)
-{
-	bool matching = peek().get_type() == match;
-	if(matching)
-	{
-		consume();
-	}
-	return matching;
-}

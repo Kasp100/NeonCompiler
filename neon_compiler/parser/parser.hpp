@@ -33,8 +33,8 @@ public:
 private:
     neon_compiler::TokenReader reader;
     std::shared_ptr<neon_compiler::analysis::AnalysisReporter> analysis_reporter;
-    void report_token(neon_compiler::analysis::AnalysisEntryType type, const neon_compiler::Token& token, std::optional<std::string> info);
-    std::optional<Identifier> parse_identifier();
+    void report_token(neon_compiler::analysis::AnalysisEntryType type, const neon_compiler::Token& token, std::optional<std::string> info = std::nullopt);
+    std::optional<Identifier> parse_identifier(neon_compiler::analysis::AnalysisEntryType type);
 };
 
 }
