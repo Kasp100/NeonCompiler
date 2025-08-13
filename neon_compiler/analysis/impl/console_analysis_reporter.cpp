@@ -8,12 +8,15 @@ ConsoleAnalysisReporter::ConsoleAnalysisReporter(const std::string& file, std::o
 void ConsoleAnalysisReporter::report(const AnalysisEntry& entry)
 {
 	out << "[A] "
-		<< analysis_type_to_string(entry.type) << " "
-		<< file << ":" << std::to_string(entry.source_position.offset_in_file)
-		<< "(" << std::to_string(entry.source_position.newlines_count) << ":" << std::to_string(entry.source_position.offset_in_line) << ")";
+		<< analysis_type_to_string(entry.type)
+		<< " "
+		<< file
+		<< ", OiF " << std::to_string(entry.source_position.offset_in_file)
+		<< ", NlC " << std::to_string(entry.source_position.newlines_count)
+		<< ", OiL " << std::to_string(entry.source_position.offset_in_line);
 	if(entry.info.has_value())
 	{
-		out << " ";
+		out << ": ";
 		out << escape(entry.info.value());
 	}
 	out << "\n";
