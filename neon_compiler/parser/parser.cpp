@@ -11,26 +11,26 @@ void Parser::run()
 {
 	if(reader.peek().get_type() == TokenType::PACKAGE)
 	{
-		report_token(AnalysisEntryType::KEYWORD, reader.consume());
+		report_token(AnalysisEntryType::KEYWORD, AnalyisSeverity::INFO, reader.consume());
 	}
 	else
 	{
-		report_token(AnalysisEntryType::ERROR, reader.peek(), std::string{error_messages::MISSING_PACKAGE_DECLARATION});
+		report_token(AnalysisEntryType::UNKNOWN, AnalyisSeverity::ERROR, reader.peek(), std::string{error_messages::MISSING_PACKAGE_DECLARATION});
 	}
 
-	std::optional<Identifier> package_id = parse_identifier(AnalysisEntryType::PACKAGE);
+	std::optional<Identifier> package_id = parse_identifier(AnalysisEntryType::PACKAGE, AnalyisSeverity::INFO);
 	if(!package_id.has_value())
 	{
-		report_token(AnalysisEntryType::ERROR, reader.peek(), std::string{error_messages::MISSING_IDENTIFIER});
+		report_token(AnalysisEntryType::UNKNOWN, AnalyisSeverity::ERROR, reader.peek(), std::string{error_messages::MISSING_PACKAGE_DECLARATION});
 	}
 }
 
-void Parser::report_token(AnalysisEntryType type, const Token& token, std::optional<std::string> info)
+void Parser::report_token(AnalysisEntryType type, AnalyisSeverity severity, const Token& token, std::optional<std::string> info)
 {
-	analysis_reporter->report(AnalysisEntry{type, token.get_source_position(), token.get_length(), info});
+	analysis_reporter->report(AnalysisEntry{type, severity, token.get_source_position(), token.get_length(), info});
 }
 
-std::optional<Identifier> Parser::parse_identifier(AnalysisEntryType type)
+std::optional<Identifier> Parser::parse_identifier(AnalysisEntryType type, AnalyisSeverity severity)
 {
 	std::vector<std::string> parts{};
 	std::vector<Token> tokens{};
@@ -60,7 +60,7 @@ std::optional<Identifier> Parser::parse_identifier(AnalysisEntryType type)
 
 	for(const Token& token : tokens)
 	{
-		report_token(type, token, id_string);
+		report_token(type, severity, token, id_string);
 	}
 
 	return id;

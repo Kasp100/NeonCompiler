@@ -9,23 +9,29 @@ namespace neon_compiler::analysis
 
 enum class AnalysisEntryType
 {
-    ERROR,
-    WARNING,
-    INFO,
-    KEYWORD,
-    SYMBOL,
-    LITERAL_NUMBER,
-    LITERAL_CHAR,
-    LITERAL_STRING,
-    DECLARATION,
-    REFERENCE,
-    PACKAGE
+	UNKNOWN,
+	KEYWORD,
+	SYMBOL,
+	LITERAL_NUMBER,
+	LITERAL_CHAR,
+	LITERAL_STRING,
+	DECLARATION,
+	REFERENCE,
+	PACKAGE
+};
+
+enum class AnalyisSeverity
+{
+	INFO,
+	WARNING,
+	ERROR
 };
 
 struct AnalysisEntry
 {
 	const AnalysisEntryType type;
-    const reading::SourcePosition source_position;
+	const AnalyisSeverity severity;
+	const reading::SourcePosition source_position;
 	const uint32_t length;
 	const std::optional<std::string> info;
 };

@@ -8,7 +8,8 @@ ConsoleAnalysisReporter::ConsoleAnalysisReporter(const std::string& file, std::o
 void ConsoleAnalysisReporter::report(const AnalysisEntry& entry)
 {
 	out << "[A] "
-		<< analysis_type_to_string(entry.type)
+		<< analysis_severity_to_string(entry.severity)
+		<< analysis_entry_type_to_string(entry.type)
 		<< " "
 		<< file
 		<< ", OiF " << std::to_string(entry.source_position.offset_in_file)
@@ -36,13 +37,21 @@ std::string ConsoleAnalysisReporter::escape(const std::string& str) const
 	return o;
 }
 
-std::string ConsoleAnalysisReporter::analysis_type_to_string(const AnalysisEntryType analysis_type) const
+std::string ConsoleAnalysisReporter::analysis_severity_to_string(const AnalyisSeverity severity) const
 {
-	switch (analysis_type)
+	switch (severity)
 	{
-		case AnalysisEntryType::ERROR: return "ERROR";
-		case AnalysisEntryType::WARNING: return "WARNING";
-		case AnalysisEntryType::INFO: return "INFO";
+		case AnalyisSeverity::ERROR: return "ERROR";
+		case AnalyisSeverity::WARNING: return "WARNING";
+		case AnalyisSeverity::INFO: return "INFO";
+		default: return "UNKNOWN";
+	}
+}
+
+std::string ConsoleAnalysisReporter::analysis_entry_type_to_string(const AnalysisEntryType entry_type) const
+{
+	switch (entry_type)
+	{
 		case AnalysisEntryType::KEYWORD: return "KEYWORD";
 		case AnalysisEntryType::SYMBOL: return "SYMBOL";
 		case AnalysisEntryType::LITERAL_NUMBER: return "LITERAL_NUMBER";
