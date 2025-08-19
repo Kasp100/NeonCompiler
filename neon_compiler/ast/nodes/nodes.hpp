@@ -133,7 +133,7 @@ struct PureFunction : ASTNode
 	ReferenceType reference_type;
 	/** Parameters */
 	std::vector<ReferenceType> parameters;
-	/** Function body. Empty means it's not implemented (an abstract method). */
+	/** Function body */
 	CodeBlock body;
 
 	void accept(ASTVisitor& visitor) const override
@@ -161,7 +161,7 @@ struct GrammarRule : ASTNode
 	ReferenceType reference_type;
 	/** Pattern to match */
 	std::vector<std::unique_ptr<GrammarPatternPart>> pattern;
-	/** Function body. Empty means it's not implemented (an abstract method). */
+	/** Function body */
 	CodeBlock body;
 
 	void accept(ASTVisitor& visitor) const override
