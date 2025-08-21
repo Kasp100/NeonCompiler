@@ -56,6 +56,8 @@ struct PackageMember : ASTNode {};
 
 struct Type : PackageMember
 {
+	PackageMemberAccess access;
+
 	/** Mapping from reference name to field declaration. */
 	std::unordered_map<std::string, Field> fields;
 	/** Mapping from method name to methods with the same name, but different parameters (overloads). */
@@ -69,14 +71,14 @@ struct Type : PackageMember
 
 struct VariableDeclaration : ASTNode
 {
-    /** Whether this variable can be reassigned after initialisation */
-    bool var;
-    /** The reference type */
+	/** Whether this variable can be reassigned after initialisation */
+	bool var;
+	/** The reference type */
 	ReferenceType reference_type;
-    /** The reference name */
-    std::string reference_name;
-    /** Optional initialisation */
-    std::optional<std::unique_ptr<Expression>> initialisation;
+	/** The reference name */
+	std::string reference_name;
+	/** Optional initialisation */
+	std::optional<std::unique_ptr<Expression>> initialisation;
 
 	void accept(ASTVisitor& visitor) const override
 	{
@@ -148,6 +150,8 @@ struct CodeBlock : ASTNode
 
 struct PureFunctionSet : PackageMember
 {
+	PackageMemberAccess access;
+
 	/** Mapping from function name to functions with the same name, but different parameters (overloads). */
 	std::unordered_map<std::string, std::vector<PureFunction>> methods;
 
@@ -174,6 +178,8 @@ struct PureFunction : ASTNode
 
 struct GrammarSet : PackageMember
 {
+	PackageMemberAccess access;
+
 	/** Grammar set rules */
 	std::vector<GrammarRule> rules;
 
@@ -234,6 +240,8 @@ enum class CompileFunctionScope
 
 struct CompileFunction : PackageMember
 {
+	PackageMemberAccess access;
+
 	/** Where the compile function can be called from. Defines what a compile function can create and view. */
 	CompileFunctionScope scope;
 	/** Compile function body */
