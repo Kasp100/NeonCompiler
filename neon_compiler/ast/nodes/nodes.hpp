@@ -22,6 +22,36 @@ struct Root : ASTNode
 	}
 };
 
+enum class PackageMemberPatternType
+{
+	PACKAGE_MEMBER,
+	PACKAGE_WITHOUT_SUBPACKAGES,
+	PACKAGE_WITH_SUBPACKAGES
+};
+
+struct PackageMemberPattern
+{
+	Identifier package_member_identifier;
+	PackageMemberPatternType type;
+	std::optional<PackageMemberPattern> extends = std::nullopt;
+};
+
+enum class PackageMemberAccessType
+{
+	PUBLIC,
+	PRIVATE,
+	EXCLUSIVE
+};
+
+struct PackageMemberAccess
+{
+	/** The privacy of the package member */
+	PackageMemberAccessType type;
+	/** Empty unless `type == PackageMemberAccessType::EXCLUSIVE`.
+	 * Represents the set of package member patterns that determine who can use. */
+	std::vector<PackageMemberPattern> patterns;
+};
+
 struct PackageMember : ASTNode {};
 
 struct Type : PackageMember
