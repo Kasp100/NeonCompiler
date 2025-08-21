@@ -121,7 +121,7 @@ enum class MutabilityMode
 	BORROW
 };
 
-struct ReferenceType : PackageMember
+struct ReferenceType : ASTNode
 {
 	/** Whether this reference is `own`, `shared`, or `borrow` */
 	MutabilityMode mutability;
