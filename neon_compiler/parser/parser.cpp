@@ -4,8 +4,13 @@ using namespace neon_compiler;
 using namespace neon_compiler::parser;
 using namespace neon_compiler::analysis;
 
-Parser::Parser(std::span<const Token> tokens, std::shared_ptr<neon_compiler::analysis::AnalysisReporter> analysis_reporter)
-	: reader{tokens}, analysis_reporter{analysis_reporter} {}
+Parser::Parser
+(
+	std::span<const Token> tokens,
+	std::shared_ptr<neon_compiler::analysis::AnalysisReporter> analysis_reporter,
+	std::shared_ptr<neon_compiler::ast::nodes::Root> root_node
+) :
+	reader{tokens}, analysis_reporter{analysis_reporter}, root_node{root_node} {}
 
 void Parser::run()
 {

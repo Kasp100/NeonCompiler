@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 #include <string>
+#include "ast/nodes/nodes.hpp"
 #include "../logging/logger.hpp"
 #include "token.hpp"
 
@@ -23,6 +24,7 @@ private:
 	std::shared_ptr<logging::Logger> logger;
 	std::vector<Token> tokens;
 	std::string latest_file;
+	std::shared_ptr<neon_compiler::ast::nodes::Root> root_node;
 };
 
 }

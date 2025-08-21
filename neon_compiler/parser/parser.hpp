@@ -5,6 +5,7 @@
 #include <vector>
 #include <optional>
 #include <string>
+#include "ast/nodes/nodes.hpp"
 #include "../token.hpp"
 #include "../token_reader.hpp"
 #include "../analysis/analysis_entry.hpp"
@@ -28,11 +29,14 @@ namespace error_messages
 class Parser
 {
 public:
-    explicit Parser(std::span<const neon_compiler::Token> tokens, std::shared_ptr<neon_compiler::analysis::AnalysisReporter> analysis_reporter);
+    explicit Parser(std::span<const neon_compiler::Token> tokens, std::shared_ptr<neon_compiler::analysis::AnalysisReporter> analysis_reporter,
+            std::shared_ptr<neon_compiler::ast::nodes::Root> root_node);
     void run();
 private:
     neon_compiler::TokenReader reader;
     std::shared_ptr<neon_compiler::analysis::AnalysisReporter> analysis_reporter;
+    std::shared_ptr<neon_compiler::ast::nodes::Root> root_node;
+
     void report_token(neon_compiler::analysis::AnalysisEntryType type, neon_compiler::analysis::AnalyisSeverity severity,
         const neon_compiler::Token& token, std::optional<std::string> info = std::nullopt);
     std::optional<Identifier> parse_identifier(neon_compiler::analysis::AnalysisEntryType type, neon_compiler::analysis::AnalyisSeverity severity);
