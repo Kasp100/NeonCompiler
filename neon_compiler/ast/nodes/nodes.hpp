@@ -48,7 +48,7 @@ enum class AccessType
 
 struct Access
 {
-	/** The access type: `public`, `private`, `protected` (for methods only), or `exclusive` */
+	/** The access type: `public`, `private`, `protected` (not for package members and non-constant fields), or `exclusive` */
 	AccessType type;
 	/** Empty unless `type == AccessType::EXCLUSIVE`.
 	 * Represents the set of package member patterns that determine who can use. */
