@@ -43,6 +43,7 @@ enum class AccessType
 {
 	PUBLIC,
 	PRIVATE,
+	PROTECTED,
 	EXCLUSIVE
 };
 
