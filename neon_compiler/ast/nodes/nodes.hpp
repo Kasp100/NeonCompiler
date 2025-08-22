@@ -69,7 +69,7 @@ struct Type : PackageMember
 	/** Mapping from reference name to constant declaration. */
 	std::unordered_map<std::string, Constant> constants;
 	/** Mapping from pure function name to pure functions with the same name, but different parameters (overloads). */
-	std::unordered_map<std::string, PureFunction> pure_functions;
+	std::unordered_map<std::string, std::vector<PureFunction>> pure_functions;
 
 	void accept(ASTVisitor& visitor) const override
 	{
