@@ -122,6 +122,19 @@ struct Method : ASTNode
 	}
 };
 
+struct Constant : ASTNode
+{
+	/** The access which determines who can use this constant */
+	Access access;
+	/** The type of this constant */
+	std::string type;
+
+	void accept(ASTVisitor& visitor) const override
+	{
+		visitor.visit(*this);
+	}
+};
+
 enum class MutabilityMode
 {
 	OWN,

@@ -16,6 +16,7 @@ public:
 	virtual void visit(const nodes::VariableDeclaration& node) = 0;
 	virtual void visit(const nodes::Field& node) = 0;
 	virtual void visit(const nodes::Method& node) = 0;
+	virtual void visit(const nodes::Constant& node) = 0;
 	virtual void visit(const nodes::ReferenceType& node) = 0;
 	virtual void visit(const nodes::CodeBlock& node) = 0;
 	virtual void visit(const nodes::DiscardExpression& node) = 0;
