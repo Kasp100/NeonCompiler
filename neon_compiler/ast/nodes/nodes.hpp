@@ -39,18 +39,18 @@ struct PackageMemberPattern
 	std::optional<PackageMemberPattern> extends = std::nullopt;
 };
 
-enum class PackageMemberAccessType
+enum class AccessType
 {
 	PUBLIC,
 	PRIVATE,
 	EXCLUSIVE
 };
 
-struct PackageMemberAccess
+struct Access
 {
-	/** The privacy of the package member */
-	PackageMemberAccessType type;
-	/** Empty unless `type == PackageMemberAccessType::EXCLUSIVE`.
+	/** The access type: `public`, `private`, `protected` (for methods only), or `exclusive` */
+	AccessType type;
+	/** Empty unless `type == AccessType::EXCLUSIVE`.
 	 * Represents the set of package member patterns that determine who can use. */
 	std::vector<PackageMemberPattern> patterns;
 };
@@ -59,8 +59,8 @@ struct PackageMember : ASTNode {};
 
 struct Type : PackageMember
 {
-	PackageMemberAccess access;
-
+	/** The access which determines who can use this package member */
+	Access access;
 	/** Mapping from reference name to field declaration. */
 	std::unordered_map<std::string, Field> fields;
 	/** Mapping from method name to methods with the same name, but different parameters (overloads). */
@@ -104,6 +104,8 @@ struct Field : ASTNode
 
 struct Method : ASTNode
 {
+	/** The access which determines who can use this method */
+	Access access;
 	/** The reference type this method returns. Empty means it's a `void` method. */
 	std::optional<ReferenceType> reference_type;
 	/** Whether this method may mutate the object. */
@@ -153,8 +155,8 @@ struct CodeBlock : ASTNode
 
 struct PureFunctionSet : PackageMember
 {
-	PackageMemberAccess access;
-
+	/** The access which determines who can use this pure function set */
+	Access access;
 	/** Mapping from function name to functions with the same name, but different parameters (overloads). */
 	std::unordered_map<std::string, std::vector<PureFunction>> methods;
 
@@ -166,6 +168,8 @@ struct PureFunctionSet : PackageMember
 
 struct PureFunction : ASTNode
 {
+	/** The access which determines who can use this pure function */
+	Access access;
 	/** The reference type this pure function returns. */
 	ReferenceType reference_type;
 	/** Parameters */
@@ -181,8 +185,8 @@ struct PureFunction : ASTNode
 
 struct GrammarSet : PackageMember
 {
-	PackageMemberAccess access;
-
+	/** The access which determines who can use this grammar set */
+	Access access;
 	/** Grammar set rules */
 	std::vector<GrammarRule> rules;
 
@@ -243,8 +247,8 @@ enum class CompileFunctionScope
 
 struct CompileFunction : PackageMember
 {
-	PackageMemberAccess access;
-
+	/** The access which determines who can use this compile function */
+	Access access;
 	/** Where the compile function can be called from. Defines what a compile function can create and view. */
 	CompileFunctionScope scope;
 	/** Compile function body */
