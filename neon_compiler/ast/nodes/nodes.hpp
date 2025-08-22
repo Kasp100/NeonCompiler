@@ -188,12 +188,12 @@ struct PureFunction : ASTNode
 {
 	/** The access which determines who can use this pure function */
 	Access access;
-	/** The reference type this pure function returns. */
-	ReferenceType reference_type;
-	/** Parameters */
-	std::vector<ReferenceType> parameters;
-	/** Function body */
-	CodeBlock body;
+	/** The immutable tyoe this pure function returns. */
+	std::string return_type;
+	/** Parameters (should be immutable values) */
+	std::vector<VariableDeclaration> parameters;
+	/** Pure function body. Empty means it's not implemented (an abstract pure function). */
+	std::optional<CodeBlock> implementation;
 
 	void accept(ASTVisitor& visitor) const override
 	{
