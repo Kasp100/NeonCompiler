@@ -8,9 +8,10 @@ Parser::Parser
 (
 	std::span<const Token> tokens,
 	std::shared_ptr<neon_compiler::analysis::AnalysisReporter> analysis_reporter,
-	std::shared_ptr<neon_compiler::ast::nodes::Root> root_node
+	std::shared_ptr<neon_compiler::ast::nodes::Root> root_node,
+	std::string_view file
 ) :
-	reader{tokens}, analysis_reporter{analysis_reporter}, root_node{root_node} {}
+	reader{tokens}, analysis_reporter{analysis_reporter}, root_node{root_node}, file{file} {}
 
 void Parser::run()
 {
