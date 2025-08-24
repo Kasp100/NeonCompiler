@@ -51,10 +51,10 @@ std::optional<std::string_view> Token::get_lexeme() const
 std::optional<TokenType> Token::keyword_to_token_type(std::string_view word)
 {
 	     if (word == "pkg")               return TokenType::PACKAGE;
-	else if (word == "public")            return TokenType::VISIBILITY_PUBLIC;
-	else if (word == "private")           return TokenType::VISIBILITY_PRIVATE;
-	else if (word == "protected")         return TokenType::VISIBILITY_PROTECTED;
-	else if (word == "exclusive")         return TokenType::VISIBILITY_EXCLUSIVE;
+	else if (word == "public")            return TokenType::ACCESS_PUBLIC;
+	else if (word == "private")           return TokenType::ACCESS_PRIVATE;
+	else if (word == "protected")         return TokenType::ACCESS_PROTECTED;
+	else if (word == "exclusive")         return TokenType::ACCESS_EXCLUSIVE;
 	else if (word == "pure")              return TokenType::MEMBER_PURE;
 	else if (word == "const")             return TokenType::MEMBER_CONST;
 	else if (word == "mut:")              return TokenType::MUTABLE_REFERENCE;
