@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -std=c++20 -Wall
+CXXFLAGS = -std=c++20 -Wall -fmax-errors=1
 
 # List of package directories
 DEFAULT_PACKAGE_DIRS := . logging file_reading reading neon_compiler neon_compiler/lexer neon_compiler/parser neon_compiler/analysis/impl
