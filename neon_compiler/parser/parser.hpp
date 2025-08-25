@@ -28,6 +28,8 @@ namespace error_messages
             "Keyword `protected` cannot be used for package members (e.g., classes), only for type members.";
     constexpr std::string_view INVALID_FILE_LEVEL_TOKEN =
             "Invalid file level token. See documentation.";
+    constexpr std::string_view INVALID_IMPORT_STATEMENT =
+            "Expected a package member reference (e.g. `my_package::my_class`) in import statement.";
 }
 
 class Parser
@@ -41,13 +43,15 @@ private:
     std::shared_ptr<neon_compiler::analysis::AnalysisReporter> analysis_reporter;
     std::shared_ptr<neon_compiler::ast::nodes::Root> root_node;
     std::string_view file;
+    std::vector<Identifier> imports{};
 
     void report_token(neon_compiler::analysis::AnalysisEntryType type, neon_compiler::analysis::AnalyisSeverity severity,
         const neon_compiler::Token& token, std::optional<std::string> info = std::nullopt);
     std::optional<Identifier> parse_identifier(neon_compiler::analysis::AnalysisEntryType type, neon_compiler::analysis::AnalyisSeverity severity);
     Identifier parse_expected_package_declaration();
+    bool parse_optional_import_statement();
     neon_compiler::ast::nodes::Access parse_access();
-    void Parser::parse_package_member(const neon_compiler::ast::nodes::Access& access);
+    void parse_expected_package_member(const neon_compiler::ast::nodes::Access& access);
 };
 
 }

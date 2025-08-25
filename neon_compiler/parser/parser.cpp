@@ -20,8 +20,13 @@ void Parser::run()
 
 	while(!reader.end_of_file_reached())
 	{
+		if(parse_optional_import_statement())
+		{
+			continue;
+		}
+
 		const Access access = parse_access();
-		parse_package_member(access);
+		parse_expected_package_member(access);
 	}
 }
 
@@ -86,6 +91,26 @@ Identifier Parser::parse_expected_package_declaration()
 	return package_id.value_or(Identifier{});
 }
 
+bool Parser::parse_optional_import_statement()
+{
+	if(reader.peek().get_type() != TokenType::IMPORT)
+	{
+		return;
+	}
+
+	report_token(AnalysisEntryType::KEYWORD, AnalyisSeverity::INFO, reader.consume());
+
+	std::optional<Identifier> package_member_id = parse_identifier(AnalysisEntryType::REFERENCE, AnalyisSeverity::INFO);
+
+	if(!package_member_id.has_value())
+	{
+		report_token(AnalysisEntryType::UNKNOWN, AnalyisSeverity::ERROR, reader.peek(), std::string{error_messages::INVALID_IMPORT_STATEMENT});
+		return;
+	}
+
+	imports.push_back(package_member_id.value());
+}
+
 Access Parser::parse_access()
 {
 	Access access{AccessType::PRIVATE};
@@ -110,7 +135,7 @@ Access Parser::parse_access()
 	return access;
 }
 
-void Parser::parse_package_member(const Access& access)
+void Parser::parse_expected_package_member(const Access& access)
 {
 	if(reader.peek().get_type() == TokenType::PACKAGE_MEMBER_ENTRYPOINT)
 	{
