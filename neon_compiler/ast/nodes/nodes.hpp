@@ -7,10 +7,16 @@
 #include <unordered_map>
 #include <vector>
 #include "../ast_node.hpp"
-#include "statement_nodes.hpp"
+#include "../identifiers.hpp"
 
 namespace neon_compiler::ast::nodes
 {
+
+struct PackageMember : ASTNode {};
+
+struct Statement : ASTNode {};
+
+struct Expression : ASTNode {};
 
 struct Root : ASTNode
 {
@@ -55,8 +61,6 @@ struct Access
 	 * Represents the set of package member patterns that determine who can use. */
 	std::vector<PackageMemberPattern> patterns;
 };
-
-struct PackageMember : ASTNode {};
 
 struct Type : PackageMember
 {

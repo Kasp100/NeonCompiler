@@ -4,6 +4,36 @@
 #include "ast_node.hpp"
 #include "nodes/nodes.hpp"
 
+// forward declarations
+namespace neon_compiler::ast::nodes
+{
+	struct Root;
+	struct Type;
+	struct VariableDeclaration;
+	struct Field;
+	struct Method;
+	struct Constant;
+	struct ReferenceType;
+	struct CodeBlock;
+	struct DiscardExpression;
+	struct LocalDeclaration;
+	struct AutoCall;
+	struct Assignment;
+	struct StaticFunctionCall;
+	struct MethodCall;
+	struct StaticFieldCall;
+	struct ReferenceCall;
+	struct OptFunctionCall;
+	struct OptEmpty;
+	struct PureFunctionSet;
+	struct PureFunction;
+	struct GrammarSet;
+	struct GrammarRule;
+	struct TokenPattern;
+	struct ParameterPattern;
+	struct CompileFunction;
+}
+
 namespace neon_compiler::ast
 {
 

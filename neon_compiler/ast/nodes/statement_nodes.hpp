@@ -4,13 +4,12 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include "nodes.hpp"
 #include "../ast_node.hpp"
 #include "../../token.hpp"
 
 namespace neon_compiler::ast::nodes
 {
-
-struct Statement : ASTNode {};
 
 struct DiscardExpression : Statement
 {
@@ -47,8 +46,6 @@ struct AutoCall : Statement
 		visitor.visit(*this);
 	}
 };
-
-struct Expression : ASTNode {};
 
 struct Assignment : Expression
 {
