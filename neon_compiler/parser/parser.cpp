@@ -3,6 +3,7 @@
 using namespace neon_compiler;
 using namespace neon_compiler::parser;
 using namespace neon_compiler::analysis;
+using namespace neon_compiler::ast::nodes;
 
 Parser::Parser
 (
@@ -28,6 +29,12 @@ void Parser::run()
 	if(!package_id.has_value())
 	{
 		report_token(AnalysisEntryType::UNKNOWN, AnalyisSeverity::ERROR, reader.peek(), std::string{error_messages::MISSING_PACKAGE_DECLARATION});
+	}
+
+	while(!reader.end_of_file_reached())
+	{
+		Access access = parse_access();
+		parse_package_member(access);
 	}
 }
 
@@ -70,4 +77,61 @@ std::optional<Identifier> Parser::parse_identifier(AnalysisEntryType type, Analy
 	}
 
 	return id;
+}
+
+Access Parser::parse_access()
+{
+	Access access{AccessType::PRIVATE};
+	if(reader.peek().get_type() == TokenType::ACCESS_PRIVATE)
+	{
+		report_token(AnalysisEntryType::KEYWORD, AnalyisSeverity::INFO, reader.consume());
+	}
+	else if(reader.peek().get_type() == TokenType::ACCESS_PROTECTED)
+	{
+		report_token(AnalysisEntryType::KEYWORD, AnalyisSeverity::ERROR, reader.consume(), std::string{error_messages::PROTECTED_PACKAGE_MEMBER});
+	}
+	else if(reader.peek().get_type() == TokenType::ACCESS_PUBLIC)
+	{
+		access = Access{AccessType::PUBLIC};
+		report_token(AnalysisEntryType::KEYWORD, AnalyisSeverity::INFO, reader.consume());
+	}
+	else if(reader.peek().get_type() == TokenType::ACCESS_EXCLUSIVE)
+	{
+		access = Access{AccessType::EXCLUSIVE}; // TODO: parse package member pattern (see spec)
+		report_token(AnalysisEntryType::KEYWORD, AnalyisSeverity::INFO, reader.consume());
+	}
+	return access;
+}
+
+void Parser::parse_package_member(const Access& access)
+{
+	if(reader.peek().get_type() == TokenType::PACKAGE_MEMBER_ENTRYPOINT)
+	{
+		report_token(AnalysisEntryType::KEYWORD, AnalyisSeverity::INFO, reader.consume());
+	}
+	else if(reader.peek().get_type() == TokenType::PACKAGE_MEMBER_PURE_FUNCTION_SET)
+	{
+		report_token(AnalysisEntryType::KEYWORD, AnalyisSeverity::INFO, reader.consume());
+	}
+	else if(reader.peek().get_type() == TokenType::PACKAGE_MEMBER_COMPILE_FUNCTION)
+	{
+		report_token(AnalysisEntryType::KEYWORD, AnalyisSeverity::INFO, reader.consume());
+	}
+	else if(reader.peek().get_type() == TokenType::PACKAGE_MEMBER_CLASS)
+	{
+		report_token(AnalysisEntryType::KEYWORD, AnalyisSeverity::INFO, reader.consume());
+	}
+	else if(reader.peek().get_type() == TokenType::MEMBER_ABSTRACT && reader.peek(1).get_type() == TokenType::PACKAGE_MEMBER_CLASS)
+	{
+		report_token(AnalysisEntryType::KEYWORD, AnalyisSeverity::INFO, reader.consume());
+		report_token(AnalysisEntryType::KEYWORD, AnalyisSeverity::INFO, reader.consume());
+	}
+	else if(reader.peek().get_type() == TokenType::PACKAGE_MEMBER_INTERFACE)
+	{
+		report_token(AnalysisEntryType::KEYWORD, AnalyisSeverity::INFO, reader.consume());
+	}
+	else
+	{
+		report_token(AnalysisEntryType::KEYWORD, AnalyisSeverity::ERROR, reader.consume(), std::string{error_messages::INVALID_FILE_LEVEL_TOKEN});
+	}
 }

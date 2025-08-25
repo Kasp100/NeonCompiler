@@ -5,7 +5,7 @@
 #include <vector>
 #include <optional>
 #include <string>
-#include "ast/nodes/nodes.hpp"
+#include "../ast/nodes/nodes.hpp"
 #include "../token.hpp"
 #include "../token_reader.hpp"
 #include "../analysis/analysis_entry.hpp"
@@ -23,7 +23,11 @@ namespace error_messages
 	constexpr std::string_view MISSING_PACKAGE_DECLARATION =
 			"Expected a package declaration. Example: `pkg main::example;`";
 	constexpr std::string_view MISSING_IDENTIFIER =
-			"Expected an identifier; keywords or other tokens cannot be used here.";
+			"Expected an identifier. Keywords or other tokens cannot be used here.";
+    constexpr std::string_view PROTECTED_PACKAGE_MEMBER =
+            "Keyword `protected` cannot be used for package members (e.g., classes), only for type members.";
+    constexpr std::string_view INVALID_FILE_LEVEL_TOKEN =
+            "Invalid file level token. See documentation.";
 }
 
 class Parser
@@ -41,6 +45,8 @@ private:
     void report_token(neon_compiler::analysis::AnalysisEntryType type, neon_compiler::analysis::AnalyisSeverity severity,
         const neon_compiler::Token& token, std::optional<std::string> info = std::nullopt);
     std::optional<Identifier> parse_identifier(neon_compiler::analysis::AnalysisEntryType type, neon_compiler::analysis::AnalyisSeverity severity);
+    neon_compiler::ast::nodes::Access parse_access();
+    void Parser::parse_package_member(const neon_compiler::ast::nodes::Access& access);
 };
 
 }
