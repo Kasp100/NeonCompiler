@@ -33,6 +33,7 @@ struct Root : ASTNode
 
 enum class PackageMemberPatternType
 {
+	INHERITANCE_ONLY,
 	PACKAGE_MEMBER,
 	PACKAGE_WITHOUT_SUBPACKAGES,
 	PACKAGE_WITH_SUBPACKAGES
@@ -40,9 +41,9 @@ enum class PackageMemberPatternType
 
 struct PackageMemberPattern
 {
-	Identifier package_member_identifier;
 	PackageMemberPatternType type;
-	std::optional<PackageMemberPattern> extends = std::nullopt;
+	std::optional<Identifier> package_member_identifier; // Empty if type is INHERITANCE_ONLY.
+	std::optional<Identifier> supertype = std::nullopt; // Present if matching by inheritance
 };
 
 enum class AccessType
