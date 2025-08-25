@@ -2,8 +2,11 @@
 
 using namespace neon_compiler::analysis::impl;
 
-ConsoleAnalysisReporter::ConsoleAnalysisReporter(const std::string& file, std::ostream& output)
-		: file{file}, out(output) {}
+ConsoleAnalysisReporter::ConsoleAnalysisReporter(const std::string& file, std::ostream& out)
+		: file{file}, out(out)
+{
+	out << "[AH]\t\t\tI\tY\tX\tL\n";
+}
 	
 void ConsoleAnalysisReporter::report(const AnalysisEntry& entry)
 {
@@ -11,14 +14,17 @@ void ConsoleAnalysisReporter::report(const AnalysisEntry& entry)
 		<< analysis_severity_to_string(entry.severity)
 		<< " "
 		<< analysis_entry_type_to_string(entry.type)
-		<< " "
-		<< file
-		<< ", OiF " << std::to_string(entry.source_position.offset_in_file)
-		<< ", NlC " << std::to_string(entry.source_position.newlines_count)
-		<< ", OiL " << std::to_string(entry.source_position.offset_in_line);
+		<< "\t"
+		<< std::to_string(entry.source_position.offset_in_file)
+		<< "\t"
+		<< std::to_string(entry.source_position.newlines_count)
+		<< "\t"
+		<< std::to_string(entry.source_position.offset_in_line)
+		<< "\t"
+		<< std::to_string(entry.length)
+		<< "\t";
 	if(entry.info.has_value())
 	{
-		out << ": ";
 		out << escape(entry.info.value());
 	}
 	out << "\n";

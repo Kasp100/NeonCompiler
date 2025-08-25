@@ -10,7 +10,7 @@ namespace neon_compiler::analysis::impl
 class ConsoleAnalysisReporter : public neon_compiler::analysis::AnalysisReporter
 {
 public:
-	explicit ConsoleAnalysisReporter(const std::string& file, std::ostream& output = std::cout);
+	explicit ConsoleAnalysisReporter(const std::string& file, std::ostream& out = std::cout);
 	void report(const AnalysisEntry& entry) override;
 private:
 	std::string file;
