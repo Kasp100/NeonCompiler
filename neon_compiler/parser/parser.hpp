@@ -45,6 +45,7 @@ private:
     void report_token(neon_compiler::analysis::AnalysisEntryType type, neon_compiler::analysis::AnalyisSeverity severity,
         const neon_compiler::Token& token, std::optional<std::string> info = std::nullopt);
     std::optional<Identifier> parse_identifier(neon_compiler::analysis::AnalysisEntryType type, neon_compiler::analysis::AnalyisSeverity severity);
+    Identifier parse_expected_package_declaration();
     neon_compiler::ast::nodes::Access parse_access();
     void Parser::parse_package_member(const neon_compiler::ast::nodes::Access& access);
 };

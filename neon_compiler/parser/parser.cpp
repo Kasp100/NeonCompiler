@@ -16,24 +16,11 @@ Parser::Parser
 
 void Parser::run()
 {
-	if(reader.peek().get_type() == TokenType::PACKAGE)
-	{
-		report_token(AnalysisEntryType::KEYWORD, AnalyisSeverity::INFO, reader.consume());
-	}
-	else
-	{
-		report_token(AnalysisEntryType::UNKNOWN, AnalyisSeverity::ERROR, reader.peek(), std::string{error_messages::MISSING_PACKAGE_DECLARATION});
-	}
-
-	std::optional<Identifier> package_id = parse_identifier(AnalysisEntryType::PACKAGE, AnalyisSeverity::INFO);
-	if(!package_id.has_value())
-	{
-		report_token(AnalysisEntryType::UNKNOWN, AnalyisSeverity::ERROR, reader.peek(), std::string{error_messages::MISSING_PACKAGE_DECLARATION});
-	}
+	const Identifier package = parse_expected_package_declaration();
 
 	while(!reader.end_of_file_reached())
 	{
-		Access access = parse_access();
+		const Access access = parse_access();
 		parse_package_member(access);
 	}
 }
@@ -77,6 +64,26 @@ std::optional<Identifier> Parser::parse_identifier(AnalysisEntryType type, Analy
 	}
 
 	return id;
+}
+
+Identifier Parser::parse_expected_package_declaration()
+{
+	if(reader.peek().get_type() == TokenType::PACKAGE)
+	{
+		report_token(AnalysisEntryType::KEYWORD, AnalyisSeverity::INFO, reader.consume());
+	}
+	else
+	{
+		report_token(AnalysisEntryType::UNKNOWN, AnalyisSeverity::ERROR, reader.peek(), std::string{error_messages::MISSING_PACKAGE_DECLARATION});
+	}
+
+	std::optional<Identifier> package_id = parse_identifier(AnalysisEntryType::PACKAGE, AnalyisSeverity::INFO);
+	if(!package_id.has_value())
+	{
+		report_token(AnalysisEntryType::UNKNOWN, AnalyisSeverity::ERROR, reader.peek(), std::string{error_messages::MISSING_PACKAGE_DECLARATION});
+	}
+
+	return package_id.value_or(Identifier{});
 }
 
 Access Parser::parse_access()

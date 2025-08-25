@@ -13,7 +13,7 @@ struct Identifier
 	 * This is unambiguously static.
 	 * Example 2: `my_variable` in source code becomes "my_variable" (single element) in this vector.
 	 * It is later determined whether this is a static or non-static reference */
-	std::vector<std::string> parts;
+	std::vector<std::string> parts = std::vector<std::string>{};
 
 	std::string to_string()
 	{
