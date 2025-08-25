@@ -9,6 +9,7 @@ void ConsoleAnalysisReporter::report(const AnalysisEntry& entry)
 {
 	out << "[A] "
 		<< analysis_severity_to_string(entry.severity)
+		<< " "
 		<< analysis_entry_type_to_string(entry.type)
 		<< " "
 		<< file
