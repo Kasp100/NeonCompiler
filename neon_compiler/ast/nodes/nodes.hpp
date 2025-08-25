@@ -8,6 +8,7 @@
 #include <vector>
 #include "../ast_node.hpp"
 #include "../identifiers.hpp"
+#include "../../token.hpp"
 
 namespace neon_compiler::ast::nodes
 {
@@ -82,6 +83,38 @@ struct Type : PackageMember
 	}
 };
 
+struct CodeBlock : ASTNode
+{
+	std::vector<std::unique_ptr<Statement>> statements;
+
+	void accept(ASTVisitor& visitor) const override
+	{
+		visitor.visit(*this);
+	}
+};
+
+enum class MutabilityMode
+{
+	OWN,
+	SHARED,
+	BORROW
+};
+
+struct ReferenceType : ASTNode
+{
+	/** Whether this reference is `own`, `shared`, or `borrow` */
+	MutabilityMode mutability;
+	/** Whether mutations are allowed through this reference */
+	bool mut;
+	/** The name of the type */
+	std::string type;
+
+	void accept(ASTVisitor& visitor) const override
+	{
+		visitor.visit(*this);
+	}
+};
+
 struct VariableDeclaration : ASTNode
 {
 	/** Whether this variable can be reassigned after initialisation */
@@ -144,38 +177,6 @@ struct Constant : ASTNode
 	}
 };
 
-enum class MutabilityMode
-{
-	OWN,
-	SHARED,
-	BORROW
-};
-
-struct ReferenceType : ASTNode
-{
-	/** Whether this reference is `own`, `shared`, or `borrow` */
-	MutabilityMode mutability;
-	/** Whether mutations are allowed through this reference */
-	bool mut;
-	/** The name of the type */
-	std::string type;
-
-	void accept(ASTVisitor& visitor) const override
-	{
-		visitor.visit(*this);
-	}
-};
-
-struct CodeBlock : ASTNode
-{
-	std::vector<std::unique_ptr<Statement>> statements;
-
-	void accept(ASTVisitor& visitor) const override
-	{
-		visitor.visit(*this);
-	}
-};
-
 struct PureFunctionSet : PackageMember
 {
 	/** The access which determines who can use this pure function set */
@@ -219,29 +220,12 @@ struct GrammarSet : PackageMember
 	}
 };
 
-struct GrammarRule : ASTNode
-{
-	/** Subordination: e.g. `+` has a higher subordination (less precedence) than `*` */
-	uint subordination;
-	/** The reference type this pure function returns. */
-	ReferenceType reference_type;
-	/** Pattern to match */
-	std::vector<std::unique_ptr<GrammarPatternPart>> pattern;
-	/** Function body */
-	CodeBlock body;
-
-	void accept(ASTVisitor& visitor) const override
-	{
-		visitor.visit(*this);
-	}
-};
-
 struct GrammarPatternPart : ASTNode {};
 
 struct TokenPattern : GrammarPatternPart
 {
 	/** Token that needs to match */
-	Token token;
+	neon_compiler::Token token;
 
 	void accept(ASTVisitor& visitor) const override
 	{
@@ -253,6 +237,23 @@ struct ParameterPattern : GrammarPatternPart
 {
 	/** Parameter */
 	VariableDeclaration parameter;
+
+	void accept(ASTVisitor& visitor) const override
+	{
+		visitor.visit(*this);
+	}
+};
+
+struct GrammarRule : ASTNode
+{
+	/** Subordination: e.g. `+` has a higher subordination (less precedence) than `*` */
+	uint subordination;
+	/** The reference type this pure function returns. */
+	ReferenceType reference_type;
+	/** Pattern to match */
+	std::vector<std::unique_ptr<GrammarPatternPart>> pattern;
+	/** Function body */
+	CodeBlock body;
 
 	void accept(ASTVisitor& visitor) const override
 	{
