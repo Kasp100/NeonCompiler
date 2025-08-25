@@ -95,7 +95,7 @@ bool Parser::parse_optional_import_statement()
 {
 	if(reader.peek().get_type() != TokenType::IMPORT)
 	{
-		return;
+		return false;
 	}
 
 	report_token(AnalysisEntryType::KEYWORD, AnalyisSeverity::INFO, reader.consume());
@@ -105,10 +105,11 @@ bool Parser::parse_optional_import_statement()
 	if(!package_member_id.has_value())
 	{
 		report_token(AnalysisEntryType::UNKNOWN, AnalyisSeverity::ERROR, reader.peek(), std::string{error_messages::INVALID_IMPORT_STATEMENT});
-		return;
+		return true;
 	}
 
 	imports.push_back(package_member_id.value());
+	return true;
 }
 
 Access Parser::parse_access()
