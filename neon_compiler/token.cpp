@@ -51,6 +51,7 @@ std::optional<std::string_view> Token::get_lexeme() const
 std::optional<TokenType> Token::keyword_to_token_type(std::string_view word)
 {
 	     if (word == "pkg")               return TokenType::PACKAGE;
+	else if (word == "import")            return TokenType::IMPORT;
 	else if (word == "public")            return TokenType::ACCESS_PUBLIC;
 	else if (word == "private")           return TokenType::ACCESS_PRIVATE;
 	else if (word == "protected")         return TokenType::ACCESS_PROTECTED;
