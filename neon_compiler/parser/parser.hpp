@@ -30,6 +30,14 @@ namespace error_messages
             "Invalid file level token. See documentation.";
     constexpr std::string_view INVALID_IMPORT_STATEMENT =
             "Expected a package member reference (e.g. `my_package::my_class`) in import statement.";
+    constexpr std::string_view INVALID_DECLARATION_NAME =
+            "Invalid name for this declaration. Keywords or other tokens cannot be used here.";
+}
+
+namespace error_recovery
+{
+    constexpr std::string_view PLACEHOLDER_NAME =
+            "err_name";
 }
 
 class Parser
@@ -52,6 +60,7 @@ private:
     bool parse_optional_import_statement();
     neon_compiler::ast::nodes::Access parse_access();
     void parse_expected_package_member(const neon_compiler::ast::nodes::Access& access);
+    std::string parse_expected_declaration_name(AnalysisEntryType analysis_entry_type);
 };
 
 }

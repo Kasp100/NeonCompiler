@@ -168,3 +168,18 @@ void Parser::parse_expected_package_member(const Access& access)
 		report_token(AnalysisEntryType::KEYWORD, AnalyisSeverity::ERROR, reader.consume(), std::string{error_messages::INVALID_FILE_LEVEL_TOKEN});
 	}
 }
+
+std::string Parser::parse_expected_declaration_name(AnalysisEntryType analysis_entry_type)
+{
+	if(reader.peek().get_type() == TokenType::IDENTIFIER)
+	{
+		std::string name{reader.peek().get_lexeme().value()};
+		report_token(analysis_entry_type, AnalyisSeverity::INFO, reader.consume());
+		return name;
+	}
+	else
+	{
+		report_token(AnalysisEntryType::UNKNOWN, AnalyisSeverity::ERROR, reader.consume(), std::string{error_messages::INVALID_DECLARATION_NAME});
+		return std::string{error_recovery::PLACEHOLDER_NAME};
+	}
+}
