@@ -60,7 +60,7 @@ private:
     bool parse_optional_import_statement();
     neon_compiler::ast::nodes::Access parse_access();
     void parse_expected_package_member(const neon_compiler::ast::nodes::Access& access);
-    std::string parse_expected_declaration_name(AnalysisEntryType analysis_entry_type);
+    std::string parse_expected_declaration_name(neon_compiler::analysis::AnalysisEntryType analysis_entry_type);
 };
 
 }
