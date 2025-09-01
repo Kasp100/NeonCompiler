@@ -60,7 +60,8 @@ std::string ConsoleAnalysisReporter::analysis_entry_type_to_string(const Analysi
 	switch (entry_type)
 	{
 		case AnalysisEntryType::KEYWORD: return "KEYWORD";
-		case AnalysisEntryType::SYMBOL: return "SYMBOL";
+		case AnalysisEntryType::SEPARATOR: return "SEPARATOR";
+		case AnalysisEntryType::OPERATOR: return "OPERATOR";
 		case AnalysisEntryType::LITERAL_NUMBER: return "LITERAL_NUMBER";
 		case AnalysisEntryType::LITERAL_CHAR: return "LITERAL_CHAR";
 		case AnalysisEntryType::LITERAL_STRING: return "LITERAL_STRING";
