@@ -60,6 +60,7 @@ std::optional<TokenType> Token::keyword_to_token_type(std::string_view word)
 	else if (word == "const")             return TokenType::MEMBER_CONST;
 	else if (word == "mut:")              return TokenType::MUTABLE_REFERENCE;
 	else if (word == "mut")               return TokenType::MUTABLE_DECLARATION;
+	else if (word == "var")               return TokenType::VAR;
 	else if (word == "opt")               return TokenType::REF_TYPE_OPTIONAL;
 	else if (word == "own")               return TokenType::REF_TYPE_OWN;
 	else if (word == "shared")            return TokenType::REF_TYPE_SHARED;
