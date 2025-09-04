@@ -145,6 +145,11 @@ struct Field : ASTNode
 	}
 };
 
+struct ParemeterDeclarationList
+{
+	std::vector<VariableDeclaration> parameters;
+};
+
 struct Method : ASTNode
 {
 	/** The access which determines who can use this method */
@@ -154,7 +159,7 @@ struct Method : ASTNode
 	/** Whether this method may mutate the object. */
 	bool mutating;
 	/** Parameters */
-	std::vector<VariableDeclaration> parameters;
+	ParemeterDeclarationList parameters;
 	/** Method body. Empty means it's not implemented (an abstract method). */
 	std::optional<CodeBlock> implementation;
 
@@ -197,7 +202,7 @@ struct PureFunction : ASTNode
 	/** The immutable tyoe this pure function returns. */
 	std::string return_type;
 	/** Parameters (should be immutable values) */
-	std::vector<VariableDeclaration> parameters;
+	ParemeterDeclarationList parameters;
 	/** Pure function body. Empty means it's not implemented (an abstract pure function). */
 	std::optional<CodeBlock> implementation;
 
