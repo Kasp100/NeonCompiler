@@ -201,7 +201,7 @@ struct PureFunction : ASTNode
 {
 	/** The access which determines who can use this pure function */
 	Access access;
-	/** The immutable tyoe this pure function returns. */
+	/** The immutable type this pure function returns. */
 	std::string return_type;
 	/** Parameters (should be immutable values) */
 	ParemeterDeclarationList parameters;
