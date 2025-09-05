@@ -176,7 +176,7 @@ struct Constant : ASTNode
 	/** The access which determines who can use this constant */
 	Access access;
 	/** The type of this constant */
-	std::string type;
+	ReferenceType type;
 
 	void accept(ASTVisitor& visitor) const override
 	{
@@ -202,7 +202,7 @@ struct PureFunction : ASTNode
 	/** The access which determines who can use this pure function */
 	Access access;
 	/** The immutable type this pure function returns. */
-	std::string return_type;
+	ReferenceType return_type;
 	/** Parameters (should be immutable values) */
 	ParemeterDeclarationList parameters;
 	/** Pure function body. Empty means it's not implemented (an abstract pure function). */
