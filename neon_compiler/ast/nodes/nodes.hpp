@@ -102,6 +102,8 @@ enum class MutabilityMode
 
 struct ReferenceType : ASTNode
 {
+	/** Whether the reference is optional */
+	bool opt;
 	/** Whether this reference is `own`, `shared`, or `borrow` */
 	MutabilityMode mutability;
 	/** Whether mutations are allowed through this reference */
