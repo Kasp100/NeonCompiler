@@ -111,6 +111,9 @@ struct ReferenceType : ASTNode
 	/** The name of the type */
 	std::string type;
 
+	ReferenceType(bool opt, MutabilityMode mutability, bool mut, std::string type)
+		: opt{opt}, mutability{mutability}, mut{mut}, type{std::move(type)} {}
+
 	void accept(ASTVisitor& visitor) const override
 	{
 		visitor.visit(*this);
