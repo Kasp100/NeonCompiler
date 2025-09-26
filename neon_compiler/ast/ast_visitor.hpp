@@ -8,6 +8,7 @@
 namespace neon_compiler::ast::nodes
 {
 	struct Root;
+	struct Entrypoint;
 	struct Type;
 	struct VariableDeclaration;
 	struct Field;
@@ -42,6 +43,7 @@ class ASTVisitor
 public:
 	virtual ~ASTVisitor() = default;
 	virtual void visit(const nodes::Root& node) = 0;
+	virtual void visit(const nodes::Entrypoint& node) = 0;
 	virtual void visit(const nodes::Type& node) = 0;
 	virtual void visit(const nodes::VariableDeclaration& node) = 0;
 	virtual void visit(const nodes::Field& node) = 0;

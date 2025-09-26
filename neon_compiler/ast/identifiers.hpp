@@ -4,6 +4,9 @@
 #include <vector>
 #include <string>
 
+namespace neon_compiler::ast
+{
+
 struct Identifier
 {
 	/** Parts that together make an identifier.
@@ -34,5 +37,7 @@ struct Identifier
 		return s;
 	}
 };
+
+}
 
 #endif // IDENTIFIERS_HPP

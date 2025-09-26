@@ -16,7 +16,7 @@ Parser::Parser
 
 void Parser::run()
 {
-	const Identifier package = parse_expected_package_declaration();
+	package = parse_expected_package_declaration();
 
 	while(!reader.end_of_file_reached())
 	{
@@ -35,7 +35,15 @@ void Parser::report_token(AnalysisEntryType type, AnalyisSeverity severity, cons
 	analysis_reporter->report(AnalysisEntry{type, severity, token.get_source_position(), token.get_length(), info});
 }
 
-std::optional<Identifier> Parser::parse_identifier(AnalysisEntryType type, AnalyisSeverity severity)
+void Parser::append_ast(std::unique_ptr<PackageMember> node, const std::string& identifier)
+{
+	const std::string full_identifier{package.to_string() + "::" + identifier};
+
+	root_node->file_package_members[std::string{file}].push_back(full_identifier);
+	root_node->package_members[full_identifier] = std::move(node);
+}
+
+std::optional<neon_compiler::ast::Identifier> Parser::parse_identifier(AnalysisEntryType type, AnalyisSeverity severity)
 {
 	std::vector<std::string> parts{};
 	std::vector<Token> tokens{};
@@ -60,7 +68,7 @@ std::optional<Identifier> Parser::parse_identifier(AnalysisEntryType type, Analy
 	}
 	while(continue_reading);
 
-	Identifier id{parts};
+	neon_compiler::ast::Identifier id{parts};
 	std::string id_string = id.to_string();
 
 	for(const Token& token : tokens)
@@ -71,7 +79,7 @@ std::optional<Identifier> Parser::parse_identifier(AnalysisEntryType type, Analy
 	return id;
 }
 
-Identifier Parser::parse_expected_package_declaration()
+neon_compiler::ast::Identifier Parser::parse_expected_package_declaration()
 {
 	if(reader.peek().get_type() == TokenType::PACKAGE)
 	{
@@ -82,13 +90,13 @@ Identifier Parser::parse_expected_package_declaration()
 		report_token(AnalysisEntryType::UNKNOWN, AnalyisSeverity::ERROR, reader.peek(), std::string{error_messages::MISSING_PACKAGE_DECLARATION});
 	}
 
-	std::optional<Identifier> package_id = parse_identifier(AnalysisEntryType::PACKAGE, AnalyisSeverity::INFO);
+	std::optional<neon_compiler::ast::Identifier> package_id = parse_identifier(AnalysisEntryType::PACKAGE, AnalyisSeverity::INFO);
 	if(!package_id.has_value())
 	{
 		report_token(AnalysisEntryType::UNKNOWN, AnalyisSeverity::ERROR, reader.peek(), std::string{error_messages::MISSING_PACKAGE_DECLARATION});
 	}
 
-	return package_id.value_or(Identifier{});
+	return package_id.value_or(neon_compiler::ast::Identifier{});
 }
 
 bool Parser::parse_optional_import_statement()
@@ -100,7 +108,7 @@ bool Parser::parse_optional_import_statement()
 
 	report_token(AnalysisEntryType::KEYWORD, AnalyisSeverity::INFO, reader.consume());
 
-	std::optional<Identifier> package_member_id = parse_identifier(AnalysisEntryType::REFERENCE, AnalyisSeverity::INFO);
+	std::optional<neon_compiler::ast::Identifier> package_member_id = parse_identifier(AnalysisEntryType::REFERENCE, AnalyisSeverity::INFO);
 
 	if(!package_member_id.has_value())
 	{
@@ -141,6 +149,7 @@ void Parser::parse_expected_package_member(const Access& access)
 	if(reader.peek().get_type() == TokenType::PACKAGE_MEMBER_ENTRYPOINT)
 	{
 		report_token(AnalysisEntryType::KEYWORD, AnalyisSeverity::INFO, reader.consume());
+		parse_expected_entrypoint(access);
 	}
 	else if(reader.peek().get_type() == TokenType::PACKAGE_MEMBER_PURE_FUNCTION_SET)
 	{
@@ -181,5 +190,152 @@ std::string Parser::parse_expected_declaration_name(AnalysisEntryType analysis_e
 	{
 		report_token(AnalysisEntryType::UNKNOWN, AnalyisSeverity::ERROR, reader.consume(), std::string{error_messages::INVALID_DECLARATION_NAME});
 		return std::string{error_recovery::PLACEHOLDER_NAME};
+	}
+}
+
+void Parser::parse_expected_entrypoint(const Access& access)
+{
+	const std::string name = parse_expected_declaration_name(AnalysisEntryType::DECLARATION);
+
+	if(reader.peek().get_type() == TokenType::BRACKET_ROUND_OPEN)
+	{
+		report_token(AnalysisEntryType::SEPARATOR, AnalyisSeverity::INFO, reader.consume());
+	}
+
+	if(reader.peek().get_type() == TokenType::BRACKET_CURLY_OPEN)
+	{
+		report_token(AnalysisEntryType::SEPARATOR, AnalyisSeverity::INFO, reader.consume());
+	}
+
+	std::optional<ParemeterDeclarationList> parameters = parse_parameter_declarations();
+
+	CodeBlock body{std::vector<std::unique_ptr<Statement>>{}}; // TODO: Parse body
+
+	std::unique_ptr<PackageMember> package_member = std::make_unique<Entrypoint>(access, parameters, body);
+
+	append_ast(std::move(package_member), name);
+}
+
+std::optional<ParemeterDeclarationList> Parser::parse_parameter_declarations()
+{
+	ParemeterDeclarationList param_decl_list{};
+	bool first{true};
+
+	while(!reader.end_of_file_reached())
+	{
+		if(reader.peek().get_type() == TokenType::BRACKET_ROUND_CLOSE)
+		{
+			report_token(AnalysisEntryType::SEPARATOR, AnalyisSeverity::INFO, reader.consume());
+			break;
+		}
+		else if(!first)
+		{
+			if(reader.peek().get_type() == TokenType::COMMA)
+			{
+				report_token(AnalysisEntryType::SEPARATOR, AnalyisSeverity::INFO, reader.consume());
+			}
+			else
+			{
+				report_token(AnalysisEntryType::UNKNOWN, AnalyisSeverity::ERROR, reader.consume(), std::string{error_messages::INVALID_PARAMETER_DECLARATION});
+				continue;
+			}
+		}
+
+		first = false;
+
+		std::optional<VariableDeclaration> var_decl = parse_variable_declaration(MutabilityMode::BORROW);
+
+		if(!var_decl.has_value())
+		{
+			report_token(AnalysisEntryType::UNKNOWN, AnalyisSeverity::ERROR, reader.consume(), std::string{error_messages::INVALID_PARAMETER_DECLARATION});
+			continue;
+		}
+
+		param_decl_list.parameters.push_back(var_decl.value());
+	}
+}
+
+std::optional<VariableDeclaration> Parser::parse_variable_declaration(MutabilityMode default_mutability_mode)
+{
+	bool var{reader.peek().get_type() == TokenType::VAR};
+
+	if(var)
+	{
+		report_token(AnalysisEntryType::KEYWORD, AnalyisSeverity::INFO, reader.consume());
+	}
+
+	std::optional<ReferenceType> ref_type = parse_reference_type(default_mutability_mode);
+
+	std::string ref_name{error_recovery::PLACEHOLDER_NAME};
+	if(reader.peek().get_type() == TokenType::IDENTIFIER)
+	{
+		ref_name = reader.consume().get_lexeme().value();
+	}
+	else
+	{
+		report_token(AnalysisEntryType::UNKNOWN, AnalyisSeverity::ERROR, reader.consume(), std::string{error_messages::MISSING_IDENTIFIER});
+	}
+
+	if(ref_type.has_value())
+	{
+		return VariableDeclaration{var, ref_type.value(), ref_name}; // TODO: parse optional expression for initialisation
+	}
+	else if(var)
+	{
+		report_token(AnalysisEntryType::UNKNOWN, AnalyisSeverity::ERROR, reader.consume(), std::string{error_messages::INVALID_VARIABLE_DECLARATION});
+
+		ReferenceType valid_ref_type{false, default_mutability_mode, false, std::string{error_recovery::PLACEHOLDER_NAME}};
+
+		return VariableDeclaration{var, valid_ref_type, ref_name};
+	}
+	else
+	{
+		return std::nullopt;
+	}
+}
+
+std::optional<ReferenceType> Parser::parse_reference_type(MutabilityMode default_mutability_mode)
+{
+	bool opt{reader.peek().get_type() == TokenType::REF_TYPE_OPTIONAL};
+
+	if(opt)
+	{
+		report_token(AnalysisEntryType::KEYWORD, AnalyisSeverity::INFO, reader.consume());
+	}
+
+	TokenType tt{reader.peek().get_type()};
+
+	MutabilityMode mm{default_mutability_mode};
+	bool implicit_mutability_mode{false};
+
+	switch (tt)
+	{
+		case TokenType::REF_TYPE_OWN:     mm = MutabilityMode::OWN;         break;
+		case TokenType::REF_TYPE_SHARED:  mm = MutabilityMode::SHARED;      break;
+		case TokenType::REF_TYPE_BORROW:  mm = MutabilityMode::BORROW;      break;
+		default:                          implicit_mutability_mode = true;  break;
+	}
+
+	bool mut{reader.peek().get_type() == TokenType::MUTABLE_REFERENCE};
+
+	if(mut)
+	{
+		report_token(AnalysisEntryType::KEYWORD, AnalyisSeverity::INFO, reader.consume());
+	}
+
+	if(reader.peek().get_type() == TokenType::IDENTIFIER)
+	{
+		report_token(AnalysisEntryType::REFERENCE, AnalyisSeverity::INFO, reader.consume());
+		std::string type_name{reader.consume().get_lexeme().value()};
+		return ReferenceType{opt, mm, mut, type_name};
+	}
+	else if(opt || mut || !implicit_mutability_mode)
+	{
+		report_token(AnalysisEntryType::UNKNOWN, AnalyisSeverity::ERROR, reader.consume(), std::string{error_messages::INVALID_REFERENCE_TYPE});
+		return ReferenceType{opt, mm, mut, std::string{error_recovery::PLACEHOLDER_NAME}};
+	}
+	else
+	{
+		return std::nullopt;
 	}
 }

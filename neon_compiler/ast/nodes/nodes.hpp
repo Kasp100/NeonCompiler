@@ -64,35 +64,6 @@ struct Access
 	std::vector<PackageMemberPattern> patterns;
 };
 
-struct Type : PackageMember
-{
-	/** The access which determines who can use this package member */
-	Access access;
-	/** Mapping from reference name to field declaration. */
-	std::unordered_map<std::string, Field> fields;
-	/** Mapping from method name to methods with the same name, but different parameters (overloads). */
-	std::unordered_map<std::string, std::vector<Method>> methods;
-	/** Mapping from reference name to constant declaration. */
-	std::unordered_map<std::string, Constant> constants;
-	/** Mapping from pure function name to pure functions with the same name, but different parameters (overloads). */
-	std::unordered_map<std::string, std::vector<PureFunction>> pure_functions;
-
-	void accept(ASTVisitor& visitor) const override
-	{
-		visitor.visit(*this);
-	}
-};
-
-struct CodeBlock : ASTNode
-{
-	std::vector<std::unique_ptr<Statement>> statements;
-
-	void accept(ASTVisitor& visitor) const override
-	{
-		visitor.visit(*this);
-	}
-};
-
 enum class MutabilityMode
 {
 	OWN,
@@ -140,6 +111,62 @@ struct VariableDeclaration : ASTNode
 	}
 };
 
+struct ParemeterDeclarationList
+{
+	std::vector<VariableDeclaration> parameters;
+};
+
+struct CodeBlock : ASTNode
+{
+	std::vector<std::unique_ptr<Statement>> statements;
+
+	CodeBlock(std::vector<std::unique_ptr<Statement>>&& statements)
+		: statements{std::move(statements)} {}
+
+	void accept(ASTVisitor& visitor) const override
+	{
+		visitor.visit(*this);
+	}
+};
+
+struct Entrypoint : PackageMember
+{
+	/** The access which determines who can use this entrypoint.
+	 * However, it can always be used as application entrypoint by the compiler, hence the name. */
+	Access access;
+	/** Optional parameters */
+	std::optional<ParemeterDeclarationList> parameters;
+	/** Code to run when called */
+	CodeBlock body;
+
+	Entrypoint(Access access, std::optional<ParemeterDeclarationList> parameters, CodeBlock body)
+		: access{access}, parameters{parameters}, body{body} {}
+
+	void accept(ASTVisitor& visitor) const override
+	{
+		visitor.visit(*this);
+	}
+};
+
+struct Type : PackageMember
+{
+	/** The access which determines who can use this package member */
+	Access access;
+	/** Mapping from reference name to field declaration. */
+	std::unordered_map<std::string, Field> fields;
+	/** Mapping from method name to methods with the same name, but different parameters (overloads). */
+	std::unordered_map<std::string, std::vector<Method>> methods;
+	/** Mapping from reference name to constant declaration. */
+	std::unordered_map<std::string, Constant> constants;
+	/** Mapping from pure function name to pure functions with the same name, but different parameters (overloads). */
+	std::unordered_map<std::string, std::vector<PureFunction>> pure_functions;
+
+	void accept(ASTVisitor& visitor) const override
+	{
+		visitor.visit(*this);
+	}
+};
+
 struct Field : ASTNode
 {
 	/** Whether it is reassignable after construction */
@@ -151,11 +178,6 @@ struct Field : ASTNode
 	{
 		visitor.visit(*this);
 	}
-};
-
-struct ParemeterDeclarationList
-{
-	std::vector<VariableDeclaration> parameters;
 };
 
 struct Method : ASTNode
