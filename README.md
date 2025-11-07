@@ -29,7 +29,7 @@ Neoncode combines **object-oriented** and **functional** programming paradigms t
 
 #### Private Fields
 Fields in non-serialisable types are **inaccessible from outside code** (i.e., private).  
-Auto-generated getters and setters make data access safe and explicit.
+Manual or auto-generated getters and setters make data access safe and explicit.
 
 ### Strictly Pure Functions
 The compiler enforces purity for functions marked `pure`.
