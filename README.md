@@ -44,7 +44,7 @@ They may contain:
 **C interoperability** enables Neoncode to directly use existing C libraries and codebases.
 
 ### Metaprogramming
-Neoncode supports compile-time metaprogramming and code generation through **compiler functions** — functions written in Neoncode that operate on the **AST (Abstract Syntax Tree)**.  
+Neoncode supports compile-time metaprogramming and code generation through "**compile functions**" — functions written in Neoncode that operate on the **AST (Abstract Syntax Tree)**.  
 Compile function calls are explicit and use the `auto:` prefix.
 
 ### Custom Grammar
