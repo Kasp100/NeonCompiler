@@ -253,6 +253,8 @@ std::optional<ParemeterDeclarationList> Parser::parse_parameter_declarations()
 
 		param_decl_list.parameters.push_back(var_decl.value());
 	}
+
+    return param_decl_list;
 }
 
 std::optional<VariableDeclaration> Parser::parse_variable_declaration(MutabilityMode default_mutability_mode)

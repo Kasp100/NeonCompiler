@@ -49,8 +49,13 @@ namespace error_recovery
 class Parser
 {
 public:
-	explicit Parser(std::span<const neon_compiler::Token> tokens, std::shared_ptr<neon_compiler::analysis::AnalysisReporter> analysis_reporter,
-		std::shared_ptr<neon_compiler::ast::nodes::Root> root_node, std::string_view file);
+	explicit Parser
+    (
+        std::span<const neon_compiler::Token> tokens,
+        std::shared_ptr<neon_compiler::analysis::AnalysisReporter> analysis_reporter,
+		std::shared_ptr<neon_compiler::ast::nodes::Root> root_node,
+        std::string_view file
+    );
 	void run();
 private:
 	neon_compiler::TokenReader reader;
