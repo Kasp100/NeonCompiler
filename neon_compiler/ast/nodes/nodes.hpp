@@ -140,7 +140,7 @@ struct Entrypoint : PackageMember
 	CodeBlock body;
 
 	Entrypoint(Access access, std::optional<ParemeterDeclarationList> parameters, CodeBlock body)
-		: access{access}, parameters{parameters}, body{body} {}
+		: access{access}, parameters{std::move(parameters)}, body{std::move(body)} {}
 
 	void accept(ASTVisitor& visitor) const override
 	{

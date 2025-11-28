@@ -211,7 +211,7 @@ void Parser::parse_expected_entrypoint(const Access& access)
 
 	CodeBlock body{std::vector<std::unique_ptr<Statement>>{}}; // TODO: Parse body
 
-	std::unique_ptr<PackageMember> package_member = std::make_unique<Entrypoint>(access, parameters, body);
+	std::unique_ptr<PackageMember> package_member = std::make_unique<Entrypoint>(access, std::move(parameters), std::move(body));
 
 	append_ast(std::move(package_member), name);
 }
@@ -251,7 +251,7 @@ std::optional<ParemeterDeclarationList> Parser::parse_parameter_declarations()
 			continue;
 		}
 
-		param_decl_list.parameters.push_back(var_decl.value());
+		param_decl_list.parameters.push_back(std::move(var_decl.value()));
 	}
 
     return param_decl_list;
