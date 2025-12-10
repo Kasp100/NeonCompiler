@@ -96,6 +96,15 @@ neon_compiler::ast::Identifier Parser::parse_expected_package_declaration()
 		report_token(AnalysisEntryType::UNKNOWN, AnalyisSeverity::ERROR, reader.peek(), std::string{error_messages::MISSING_PACKAGE_DECLARATION});
 	}
 
+	if(reader.peek().get_type() == TokenType::END_STATEMENT)
+	{
+		report_token(AnalysisEntryType::SEPARATOR, AnalyisSeverity::INFO, reader.consume());
+	}
+	else
+	{
+		report_token(AnalysisEntryType::UNKNOWN, AnalyisSeverity::ERROR, reader.peek(), std::string{error_messages::MISSING_SEMICOLON});
+	}
+
 	return package_id.value_or(neon_compiler::ast::Identifier{});
 }
 

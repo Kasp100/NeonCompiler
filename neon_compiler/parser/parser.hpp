@@ -38,6 +38,8 @@ namespace error_messages
 		"Expected a variable declaration, e.g. `var int age`.";
 	constexpr std::string_view INVALID_PARAMETER_DECLARATION =
 		"Expected a parameter declaration, e.g. `shared mut:string_builder sb`. Terminate with `)` and separate parameter declarations with `,`.";
+	constexpr std::string_view MISSING_SEMICOLON =
+		"Missing a semicolon.";
 }
 
 namespace error_recovery
