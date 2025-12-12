@@ -33,11 +33,11 @@ namespace error_messages
 	constexpr std::string_view INVALID_DECLARATION_NAME =
 		"Invalid name for this declaration. Keywords or other tokens cannot be used here.";
 	constexpr std::string_view INVALID_REFERENCE_TYPE =
-		"Expected a reference type and type name, e.g. `opt shared mut:string_builder`.";
+		"Expected a reference type and type name, e.g. `opt shared mut:array<int> arr`.";
 	constexpr std::string_view INVALID_VARIABLE_DECLARATION =
 		"Expected a variable declaration, e.g. `var int age`.";
 	constexpr std::string_view INVALID_PARAMETER_DECLARATION =
-		"Expected a parameter declaration, e.g. `shared mut:string_builder sb`. Terminate with `)` and separate parameter declarations with `,`.";
+		"Expected a parameter declaration, e.g. `shared mut:array<int> arr`. Terminate with `)` and separate parameter declarations with `,`.";
 	constexpr std::string_view MISSING_SEMICOLON =
 		"Missing a semicolon.";
 }
