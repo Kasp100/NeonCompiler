@@ -327,6 +327,11 @@ std::optional<ReferenceType> Parser::parse_reference_type(MutabilityMode default
 		default:                          implicit_mutability_mode = true;  break;
 	}
 
+	if(!implicit_mutability_mode)
+	{
+		report_token(AnalysisEntryType::KEYWORD, AnalyisSeverity::INFO, reader.consume());
+	}
+
 	bool mut{reader.peek().get_type() == TokenType::MUTABLE_REFERENCE};
 
 	if(mut)
