@@ -341,7 +341,7 @@ std::optional<ReferenceType> Parser::parse_reference_type(MutabilityMode default
 
 	if(reader.peek().get_type() == TokenType::IDENTIFIER)
 	{
-		report_token(AnalysisEntryType::REFERENCE, AnalyisSeverity::INFO, reader.consume());
+		report_token(AnalysisEntryType::REFERENCE, AnalyisSeverity::INFO, reader.peek());
 		std::string type_name{reader.consume().get_lexeme().value()};
 		return ReferenceType{opt, mm, mut, type_name};
 	}
