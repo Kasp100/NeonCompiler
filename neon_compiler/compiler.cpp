@@ -12,7 +12,10 @@
 using namespace neon_compiler;
 
 Compiler::Compiler(std::shared_ptr<logging::Logger> logger)
-	: logger{logger}, tokens{} {}
+	: logger{logger}, tokens{}
+{
+	root_node = std::make_shared<neon_compiler::ast::nodes::Root>();
+}
 
 void Compiler::read_file(std::unique_ptr<std::istream> stream, std::string_view file_name)
 {
