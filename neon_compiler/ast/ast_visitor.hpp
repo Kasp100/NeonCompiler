@@ -19,6 +19,7 @@ namespace neon_compiler::ast::nodes
 	struct DiscardExpression;
 	struct LocalDeclaration;
 	struct AutoCall;
+	struct Return;
 	struct Assignment;
 	struct StaticFunctionCall;
 	struct MethodCall;
@@ -54,6 +55,7 @@ public:
 	virtual void visit(const nodes::DiscardExpression& node) = 0;
 	virtual void visit(const nodes::LocalDeclaration& node) = 0;
 	virtual void visit(const nodes::AutoCall& node) = 0;
+	virtual void visit(const nodes::Return& node) = 0;
 	virtual void visit(const nodes::Assignment& node) = 0;
 	virtual void visit(const nodes::StaticFunctionCall& node) = 0;
 	virtual void visit(const nodes::MethodCall& node) = 0;

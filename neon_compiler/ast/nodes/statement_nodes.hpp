@@ -47,6 +47,17 @@ struct AutoCall : Statement
 	}
 };
 
+struct Return : Statement
+{
+    /** Optional return value. `nullptr` means void is returned. */
+	std::unique_ptr<Expression> value;
+
+	void accept(ASTVisitor& visitor) const override
+	{
+		visitor.visit(*this);
+	}
+};
+
 struct Assignment : Expression
 {
     /** Reference being assigned */
