@@ -75,12 +75,12 @@ struct StaticFunctionCall : Expression
 
 struct MethodCall : Expression
 {
-	/** The object on which the method is called. Empty if the object is "this". */
-	std::optional<std::unique_ptr<Expression>> callee;
+	/** The object on which the method is called. `nullptr` means the object is "this". */
+	std::unique_ptr<Expression> receiver;
 	/** The name of a specific method. */
 	std::string method_name;
 	/** Parameter values */
-	std::vector<std::unique_ptr<Expression>> parameters;
+	std::vector<std::unique_ptr<Expression>> arguments;
 
 	void accept(ASTVisitor& visitor) const override
 	{
