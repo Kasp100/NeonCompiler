@@ -52,6 +52,9 @@ struct Return : Statement
     /** Optional return value. `nullptr` means void is returned. */
 	std::unique_ptr<Expression> value;
 
+	Return(std::unique_ptr<Expression> value)
+		: value(std::move(value)) {}
+
 	void accept(ASTVisitor& visitor) const override
 	{
 		visitor.visit(*this);
