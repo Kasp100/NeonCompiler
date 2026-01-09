@@ -9,8 +9,8 @@ namespace neon_compiler::ast
 class ASTNode
 {
 public:
-    virtual ~ASTNode() = default;
-    virtual void accept(ASTVisitor &visitor) const = 0;
+	virtual ~ASTNode() = default;
+	virtual void accept(ASTVisitor &visitor) const = 0;
 };
 
 }
