@@ -218,7 +218,7 @@ void Parser::parse_expected_entrypoint(const Access& access)
 
 	std::optional<ParemeterDeclarationList> parameters = parse_parameter_declarations();
 
-	CodeBlock body{std::vector<std::unique_ptr<Statement>>{}}; // TODO: Parse body
+	CodeBlock body = parse_expected_code_block();
 
 	std::unique_ptr<PackageMember> package_member = std::make_unique<Entrypoint>(access, std::move(parameters), std::move(body));
 
@@ -354,4 +354,56 @@ std::optional<ReferenceType> Parser::parse_reference_type(MutabilityMode default
 	{
 		return std::nullopt;
 	}
+}
+
+CodeBlock Parser::parse_expected_code_block()
+{
+	std::vector<std::unique_ptr<Statement>> statements{};
+
+	if(reader.peek().get_type() == TokenType::BRACKET_CURLY_OPEN)
+	{
+		report_token(AnalysisEntryType::SEPARATOR, AnalyisSeverity::INFO, reader.consume());
+	}
+	else
+	{
+		report_token(AnalysisEntryType::UNKNOWN, AnalyisSeverity::ERROR, reader.consume(), std::string{error_messages::MISSING_CODE_BLOCK});
+		return CodeBlock{std::move(statements)};
+	}
+
+	while(!reader.end_of_file_reached())
+	{
+		if(reader.peek().get_type() == TokenType::BRACKET_CURLY_CLOSE)
+		{
+			report_token(AnalysisEntryType::SEPARATOR, AnalyisSeverity::INFO, reader.consume());
+			break;
+		}
+		else if(reader.peek().get_type() == TokenType::STMT_RETURN)
+		{
+			report_token(AnalysisEntryType::KEYWORD, AnalyisSeverity::INFO, reader.consume());
+			std::unique_ptr<Expression> value = parse_optional_expression();
+
+			if(reader.peek().get_type() == TokenType::END_STATEMENT)
+			{
+				report_token(AnalysisEntryType::SEPARATOR, AnalyisSeverity::INFO, reader.consume());
+			}
+			else
+			{
+				report_token(AnalysisEntryType::UNKNOWN, AnalyisSeverity::ERROR, reader.consume(), std::string{error_messages::MISSING_SEMICOLON});
+			}
+
+			std::unique_ptr<Statement> statement = std::make_unique<Return>(std::move(value));
+			statements.push_back(std::move(statement));
+		}
+		else
+		{
+			report_token(AnalysisEntryType::UNKNOWN, AnalyisSeverity::ERROR, reader.consume());
+		}
+	}
+
+	return CodeBlock{std::move(statements)};
+}
+
+std::unique_ptr<Expression> Parser::parse_optional_expression()
+{
+	return nullptr;
 }

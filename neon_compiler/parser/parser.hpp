@@ -6,6 +6,7 @@
 #include <optional>
 #include <string>
 #include "../ast/nodes/nodes.hpp"
+#include "../ast/nodes/statement_nodes.hpp"
 #include "../token.hpp"
 #include "../token_reader.hpp"
 #include "../analysis/analysis_entry.hpp"
@@ -40,6 +41,8 @@ namespace error_messages
 		"Expected a parameter declaration, e.g. `shared mut:array<int> arr`. Terminate with `)` and separate parameter declarations with `,`.";
 	constexpr std::string_view MISSING_SEMICOLON =
 		"Missing a semicolon.";
+	constexpr std::string_view MISSING_CODE_BLOCK =
+		"Expected a code block, starting with `{` and ending with `}`.";
 }
 
 namespace error_recovery
@@ -83,6 +86,8 @@ private:
 	std::optional<neon_compiler::ast::nodes::ParemeterDeclarationList> parse_parameter_declarations();
 	std::optional<neon_compiler::ast::nodes::VariableDeclaration> parse_variable_declaration(neon_compiler::ast::nodes::MutabilityMode default_mutability_mode);
 	std::optional<neon_compiler::ast::nodes::ReferenceType> parse_reference_type(neon_compiler::ast::nodes::MutabilityMode default_mutability_mode);
+	neon_compiler::ast::nodes::CodeBlock parse_expected_code_block();
+	std::unique_ptr<neon_compiler::ast::nodes::Expression> parse_optional_expression();
 };
 
 }
