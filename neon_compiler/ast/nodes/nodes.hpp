@@ -136,12 +136,12 @@ struct Entrypoint : PackageMember
 	/** The access which determines who can use this entrypoint.
 	 * However, it can always be used as application entrypoint by the compiler, hence the name. */
 	Access access;
-	/** Optional parameters */
-	std::optional<ParemeterDeclarationList> parameters;
+	/** Parameters */
+	ParemeterDeclarationList parameters;
 	/** Code to run when called */
 	CodeBlock body;
 
-	Entrypoint(Access access, std::optional<ParemeterDeclarationList> parameters, CodeBlock body)
+	Entrypoint(Access access, ParemeterDeclarationList parameters, CodeBlock body)
 		: access{access}, parameters{std::move(parameters)}, body{std::move(body)} {}
 
 	void accept(ASTVisitor& visitor) const override
