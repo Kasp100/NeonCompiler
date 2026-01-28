@@ -30,6 +30,11 @@ void Parser::run()
 	}
 }
 
+std::shared_ptr<neon_compiler::ast::nodes::Root> Parser::get_root_node() const
+{
+	return root_node;
+}
+
 void Parser::report_token(AnalysisEntryType type, AnalyisSeverity severity, const Token& token, std::optional<std::string> info)
 {
 	analysis_reporter->report(AnalysisEntry{type, severity, token.get_source_position(), token.get_length(), info});

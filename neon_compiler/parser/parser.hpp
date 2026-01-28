@@ -62,6 +62,7 @@ public:
         std::string_view file
     );
 	void run();
+	std::shared_ptr<neon_compiler::ast::nodes::Root> get_root_node() const;
 private:
 	neon_compiler::TokenReader reader;
 	std::shared_ptr<neon_compiler::analysis::AnalysisReporter> analysis_reporter;

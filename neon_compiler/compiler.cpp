@@ -8,6 +8,8 @@
 #include "parser/parser.hpp"
 #include "analysis/analysis_reporter.hpp"
 #include "analysis/impl/console_analysis_reporter.hpp"
+#include "ast/ast_visitor.hpp"
+#include "ast/impl/ast_printer.hpp"
 
 using namespace neon_compiler;
 
@@ -67,4 +69,11 @@ void Compiler::generate_analysis() const
 
 	parser::Parser parser{tokens_view, reporter, root_node, latest_file};
 	parser.run();
+
+	ast::impl::ASTPrinter printer{};
+	printer.visit(*parser.get_root_node());
+
+	//std::unique_ptr<ast::ASTVisitor> ast_visitor = std::make_unique<ast::impl::ASTPrinter>();
+
+
 }
