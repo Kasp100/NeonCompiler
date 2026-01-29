@@ -211,17 +211,7 @@ void Parser::parse_expected_entrypoint(const Access& access)
 {
 	const std::string name = parse_expected_declaration_name(AnalysisEntryType::DECLARATION);
 
-	if(reader.peek().get_type() == TokenType::BRACKET_ROUND_OPEN)
-	{
-		report_token(AnalysisEntryType::SEPARATOR, AnalyisSeverity::INFO, reader.consume());
-	}
-
-	if(reader.peek().get_type() == TokenType::BRACKET_CURLY_OPEN)
-	{
-		report_token(AnalysisEntryType::SEPARATOR, AnalyisSeverity::INFO, reader.consume());
-	}
-
-	std::optional<ParemeterDeclarationList> parameters = parse_parameter_declarations();
+	ParemeterDeclarationList parameters = parse_parameter_declarations();
 
 	CodeBlock body = parse_expected_code_block();
 
@@ -230,9 +220,19 @@ void Parser::parse_expected_entrypoint(const Access& access)
 	append_ast(std::move(package_member), name);
 }
 
-std::optional<ParemeterDeclarationList> Parser::parse_parameter_declarations()
+ParemeterDeclarationList Parser::parse_parameter_declarations()
 {
 	ParemeterDeclarationList param_decl_list{};
+
+	if(reader.peek().get_type() == TokenType::BRACKET_ROUND_OPEN)
+	{
+		report_token(AnalysisEntryType::SEPARATOR, AnalyisSeverity::INFO, reader.consume());
+	}
+	else
+	{
+		return param_decl_list;
+	}
+
 	bool first{true};
 
 	while(!reader.end_of_file_reached())
