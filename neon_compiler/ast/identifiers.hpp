@@ -18,7 +18,7 @@ struct Identifier
 	 * It is later determined whether this is a static or non-static reference */
 	std::vector<std::string> parts = std::vector<std::string>{};
 
-	std::string to_string()
+	std::string to_string() const
 	{
 		std::string s{};
 		bool first = true;
