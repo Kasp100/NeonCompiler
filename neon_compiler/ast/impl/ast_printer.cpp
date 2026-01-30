@@ -163,16 +163,44 @@ void ASTPrinter::print_access(const nodes::Access& a)
 		break;
 	case nodes::AccessType::EXCLUSIVE:
 		std::cout << "exclusive {";
-		// TODO
-		
-		/*for(const nodes::PackageMemberPattern& pmp : a.patterns)
+
+		bool first{true};
+		for(const nodes::PackageMemberPattern& pmp : a.patterns)
 		{
-			
-		}*/
+			if(first) { first = false; }
+			else { std::cout << ", "; }
+
+			print_package_member_pattern(pmp);
+		}
 		
-		std::cout << "}";
+		std::cout << " }";
+		break;
+	}
+}
+
+void ASTPrinter::print_package_member_pattern(const nodes::PackageMemberPattern& pmp)
+{
+	// TODO: Align with newest spec
+	
+	if(pmp.package_member_identifier.has_value())
+	{
+		std::cout << " " << pmp.package_member_identifier.value().to_string();
+	}
+
+	switch (pmp.type)
+	{
+	case nodes::PackageMemberPatternType::PACKAGE_WITHOUT_SUBPACKAGES:
+		std::cout << "*";
+		break;
+	case nodes::PackageMemberPatternType::PACKAGE_WITH_SUBPACKAGES:
+		std::cout << "...";
 		break;
 	default:
 		break;
+	}
+
+	if(pmp.supertype.has_value())
+	{
+		std::cout << " extends " << pmp.supertype.value().to_string();
 	}
 }

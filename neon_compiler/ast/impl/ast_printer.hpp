@@ -38,7 +38,8 @@ public:
 	void visit(const nodes::ParameterPattern& node) override;
 	void visit(const nodes::CompileFunction& node) override;
 private:
-	static void print_access(const nodes::Access& access);
+	static void print_access(const nodes::Access& a);
+	static void print_package_member_pattern(const nodes::PackageMemberPattern& pmp);
 };
 
 }

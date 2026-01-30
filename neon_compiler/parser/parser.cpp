@@ -152,10 +152,89 @@ Access Parser::parse_access()
 	}
 	else if(reader.peek().get_type() == TokenType::ACCESS_EXCLUSIVE)
 	{
-		access = Access{AccessType::EXCLUSIVE}; // TODO: parse package member pattern (see spec)
 		report_token(AnalysisEntryType::KEYWORD, AnalyisSeverity::INFO, reader.consume());
+
+		if(reader.peek().get_type() == TokenType::BRACKET_CURLY_OPEN)
+		{
+			report_token(AnalysisEntryType::SEPARATOR, AnalyisSeverity::INFO, reader.consume());
+		}
+		else
+		{
+			report_token(AnalysisEntryType::UNKNOWN, AnalyisSeverity::ERROR, reader.consume(), std::string{error_messages::MISSING_PACKAGE_MEMBER_PATTERNS});
+		}
+
+		std::vector<PackageMemberPattern> patterns{};
+
+		patterns.push_back(parse_package_member_pattern());
+		while(reader.peek().get_type() == TokenType::COMMA)
+		{
+			report_token(AnalysisEntryType::SEPARATOR, AnalyisSeverity::INFO, reader.consume());
+			patterns.push_back(parse_package_member_pattern());
+		}
+
+		access = Access{AccessType::EXCLUSIVE, patterns};
+
+		if(reader.peek().get_type() == TokenType::BRACKET_CURLY_CLOSE)
+		{
+			report_token(AnalysisEntryType::SEPARATOR, AnalyisSeverity::INFO, reader.consume());
+		}
+		else
+		{
+			report_token(AnalysisEntryType::UNKNOWN, AnalyisSeverity::ERROR, reader.consume(), std::string{error_messages::INVALID_PACKAGE_MEMBER_PATTERN__EXPECTED_CLOSING_BRACKET});
+		}
 	}
 	return access;
+}
+
+PackageMemberPattern Parser::parse_package_member_pattern()
+{
+	// TODO: Align with newest spec
+	// Didn't work before
+	std::optional<ast::Identifier> package_member_identifier = parse_identifier(AnalysisEntryType::REFERENCE, AnalyisSeverity::INFO);
+
+	PackageMemberPatternType type = PackageMemberPatternType::PACKAGE_MEMBER;
+	if
+	(
+		reader.peek(0).get_type() == TokenType::CUSTOM_TOKEN && reader.peek(0).get_lexeme() == ":" &&
+		reader.peek(1).get_type() == TokenType::CUSTOM_TOKEN && reader.peek(1).get_lexeme() == ":" &&
+		reader.peek(2).get_type() == TokenType::CUSTOM_TOKEN && reader.peek(2).get_lexeme() == "*"
+	)
+	{
+		report_token(AnalysisEntryType::REFERENCE, AnalyisSeverity::INFO, reader.consume());
+		report_token(AnalysisEntryType::REFERENCE, AnalyisSeverity::INFO, reader.consume());
+		report_token(AnalysisEntryType::REFERENCE, AnalyisSeverity::INFO, reader.consume());
+		type = PackageMemberPatternType::PACKAGE_WITHOUT_SUBPACKAGES;
+	}
+	else if
+	(
+		reader.peek(0).get_type() == TokenType::CUSTOM_TOKEN && reader.peek(0).get_lexeme() == ":" &&
+		reader.peek(1).get_type() == TokenType::CUSTOM_TOKEN && reader.peek(1).get_lexeme() == ":" &&
+		reader.peek(0).get_type() == TokenType::CUSTOM_TOKEN && reader.peek(2).get_lexeme() == "." &&
+		reader.peek(1).get_type() == TokenType::CUSTOM_TOKEN && reader.peek(3).get_lexeme() == "." &&
+		reader.peek(2).get_type() == TokenType::CUSTOM_TOKEN && reader.peek(4).get_lexeme() == "."
+	)
+	{
+		report_token(AnalysisEntryType::REFERENCE, AnalyisSeverity::INFO, reader.consume());
+		report_token(AnalysisEntryType::REFERENCE, AnalyisSeverity::INFO, reader.consume());
+		report_token(AnalysisEntryType::REFERENCE, AnalyisSeverity::INFO, reader.consume());
+		report_token(AnalysisEntryType::REFERENCE, AnalyisSeverity::INFO, reader.consume());
+		report_token(AnalysisEntryType::REFERENCE, AnalyisSeverity::INFO, reader.consume());
+		type = PackageMemberPatternType::PACKAGE_WITH_SUBPACKAGES;
+	}
+
+	if(reader.peek().get_type() != TokenType::INHERITANCE_EXTENDS) { return PackageMemberPattern{type, package_member_identifier}; }
+	report_token(AnalysisEntryType::KEYWORD, AnalyisSeverity::INFO, reader.consume());
+
+	std::optional<ast::Identifier> supertype = parse_identifier(AnalysisEntryType::REFERENCE, AnalyisSeverity::INFO);
+	if(supertype.has_value())
+	{
+		return PackageMemberPattern{package_member_identifier.has_value() ? PackageMemberPatternType::INHERITANCE_ONLY : type, package_member_identifier, supertype};
+	}
+	else
+	{
+		report_token(AnalysisEntryType::UNKNOWN, AnalyisSeverity::ERROR, reader.consume(), std::string{error_messages::MISSING_SECOND_PACKAGE_MEMBER_PATTERN});
+		return PackageMemberPattern{type, package_member_identifier};
+	}
 }
 
 void Parser::parse_expected_package_member(const Access& access)

@@ -43,6 +43,12 @@ namespace error_messages
 		"Missing a semicolon.";
 	constexpr std::string_view MISSING_CODE_BLOCK =
 		"Expected a code block, starting with `{` and ending with `}`.";
+	constexpr std::string_view MISSING_SECOND_PACKAGE_MEMBER_PATTERN =
+		"Expected a second package member pattern here.";
+	constexpr std::string_view MISSING_PACKAGE_MEMBER_PATTERNS =
+		"Expected package member patterns, starting with `{` and ending with `}`.";
+	constexpr std::string_view INVALID_PACKAGE_MEMBER_PATTERN__EXPECTED_CLOSING_BRACKET =
+		"Invalid package member pattern, expected `}`.";
 }
 
 namespace error_recovery
@@ -81,6 +87,7 @@ private:
 	neon_compiler::ast::Identifier parse_expected_package_declaration();
 	bool parse_optional_import_statement();
 	neon_compiler::ast::nodes::Access parse_access();
+	neon_compiler::ast::nodes::PackageMemberPattern parse_package_member_pattern();
 	void parse_expected_package_member(const neon_compiler::ast::nodes::Access& access);
 	std::string parse_expected_declaration_name(neon_compiler::analysis::AnalysisEntryType analysis_entry_type);
 	void parse_expected_entrypoint(const neon_compiler::ast::nodes::Access& access);
