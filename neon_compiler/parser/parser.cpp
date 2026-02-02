@@ -188,39 +188,31 @@ Access Parser::parse_access()
 
 PackageMemberPattern Parser::parse_package_member_pattern()
 {
-	// TODO: Align with newest spec
-	// Didn't work before
-	std::optional<ast::Identifier> package_member_identifier = parse_identifier(AnalysisEntryType::REFERENCE, AnalyisSeverity::INFO);
-
 	PackageMemberPatternType type = PackageMemberPatternType::PACKAGE_MEMBER;
-	if
-	(
-		reader.peek(0).get_type() == TokenType::CUSTOM_TOKEN && reader.peek(0).get_lexeme() == ":" &&
-		reader.peek(1).get_type() == TokenType::CUSTOM_TOKEN && reader.peek(1).get_lexeme() == ":" &&
-		reader.peek(2).get_type() == TokenType::CUSTOM_TOKEN && reader.peek(2).get_lexeme() == "*"
-	)
+	if(reader.peek().get_type() == TokenType::SHALLOW)
 	{
-		report_token(AnalysisEntryType::REFERENCE, AnalyisSeverity::INFO, reader.consume());
-		report_token(AnalysisEntryType::REFERENCE, AnalyisSeverity::INFO, reader.consume());
-		report_token(AnalysisEntryType::REFERENCE, AnalyisSeverity::INFO, reader.consume());
+		report_token(AnalysisEntryType::KEYWORD, AnalyisSeverity::INFO, reader.consume());
 		type = PackageMemberPatternType::PACKAGE_WITHOUT_SUBPACKAGES;
 	}
-	else if
-	(
-		reader.peek(0).get_type() == TokenType::CUSTOM_TOKEN && reader.peek(0).get_lexeme() == ":" &&
-		reader.peek(1).get_type() == TokenType::CUSTOM_TOKEN && reader.peek(1).get_lexeme() == ":" &&
-		reader.peek(0).get_type() == TokenType::CUSTOM_TOKEN && reader.peek(2).get_lexeme() == "." &&
-		reader.peek(1).get_type() == TokenType::CUSTOM_TOKEN && reader.peek(3).get_lexeme() == "." &&
-		reader.peek(2).get_type() == TokenType::CUSTOM_TOKEN && reader.peek(4).get_lexeme() == "."
-	)
+	else if(reader.peek().get_type() == TokenType::DEEP)
 	{
-		report_token(AnalysisEntryType::REFERENCE, AnalyisSeverity::INFO, reader.consume());
-		report_token(AnalysisEntryType::REFERENCE, AnalyisSeverity::INFO, reader.consume());
-		report_token(AnalysisEntryType::REFERENCE, AnalyisSeverity::INFO, reader.consume());
-		report_token(AnalysisEntryType::REFERENCE, AnalyisSeverity::INFO, reader.consume());
-		report_token(AnalysisEntryType::REFERENCE, AnalyisSeverity::INFO, reader.consume());
+		report_token(AnalysisEntryType::KEYWORD, AnalyisSeverity::INFO, reader.consume());
 		type = PackageMemberPatternType::PACKAGE_WITH_SUBPACKAGES;
 	}
+
+	if(type != PackageMemberPatternType::PACKAGE_MEMBER)
+	{
+		if(reader.peek().get_type() == TokenType::PACKAGE)
+		{
+			report_token(AnalysisEntryType::KEYWORD, AnalyisSeverity::INFO, reader.consume());
+		}
+		else
+		{
+			report_token(AnalysisEntryType::UNKNOWN, AnalyisSeverity::ERROR, reader.consume(), std::string{error_messages::INVALID_PACKAGE_MEMBER_PATTERN__EXPECTED_PKG});
+		}
+	}
+
+	std::optional<ast::Identifier> package_member_identifier = parse_identifier(AnalysisEntryType::REFERENCE, AnalyisSeverity::INFO);
 
 	if(reader.peek().get_type() != TokenType::INHERITANCE_EXTENDS) { return PackageMemberPattern{type, package_member_identifier}; }
 	report_token(AnalysisEntryType::KEYWORD, AnalyisSeverity::INFO, reader.consume());

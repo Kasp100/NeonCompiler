@@ -19,12 +19,12 @@ namespace neon_compiler::parser
 namespace error_messages
 {
 	constexpr std::string_view UNEXPECTED_END_OF_FILE =
-			"Unexpected end of file: a terminating token is missing. "
+		"Unexpected end of file: a terminating token is missing. "
 		"Statements are terminated with `;` and blocks with `}`.";
 	constexpr std::string_view MISSING_PACKAGE_DECLARATION =
-			"Expected a package declaration. Example: `pkg main::example;`";
+		"Expected a package declaration. Example: `pkg main::example;`";
 	constexpr std::string_view MISSING_IDENTIFIER =
-			"Expected an identifier. Keywords or other tokens cannot be used here.";
+		"Expected an identifier. Keywords or other tokens cannot be used here.";
 	constexpr std::string_view PROTECTED_PACKAGE_MEMBER =
 		"Keyword `protected` cannot be used for package members (e.g., classes), only for type members.";
 	constexpr std::string_view INVALID_FILE_LEVEL_TOKEN =
@@ -49,6 +49,8 @@ namespace error_messages
 		"Expected package member patterns, starting with `{` and ending with `}`.";
 	constexpr std::string_view INVALID_PACKAGE_MEMBER_PATTERN__EXPECTED_CLOSING_BRACKET =
 		"Invalid package member pattern, expected `}`.";
+	constexpr std::string_view INVALID_PACKAGE_MEMBER_PATTERN__EXPECTED_PKG =
+		"Invalid package member pattern, expected `pkg` after `shallow` or `deep`.";
 }
 
 namespace error_recovery

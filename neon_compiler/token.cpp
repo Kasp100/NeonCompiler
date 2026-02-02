@@ -56,6 +56,8 @@ std::optional<TokenType> Token::keyword_to_token_type(std::string_view word)
 	else if (word == "private")           return TokenType::ACCESS_PRIVATE;
 	else if (word == "protected")         return TokenType::ACCESS_PROTECTED;
 	else if (word == "exclusive")         return TokenType::ACCESS_EXCLUSIVE;
+	else if (word == "shallow")           return TokenType::SHALLOW;
+	else if (word == "deep")              return TokenType::DEEP;
 	else if (word == "pure")              return TokenType::MEMBER_PURE;
 	else if (word == "const")             return TokenType::MEMBER_CONST;
 	else if (word == "mut:")              return TokenType::MUTABLE_REFERENCE;

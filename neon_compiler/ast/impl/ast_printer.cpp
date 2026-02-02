@@ -162,7 +162,7 @@ void ASTPrinter::print_access(const nodes::Access& a)
 		std::cout << "protected";
 		break;
 	case nodes::AccessType::EXCLUSIVE:
-		std::cout << "exclusive {";
+		std::cout << "exclusive { ";
 
 		bool first{true};
 		for(const nodes::PackageMemberPattern& pmp : a.patterns)
@@ -180,27 +180,26 @@ void ASTPrinter::print_access(const nodes::Access& a)
 
 void ASTPrinter::print_package_member_pattern(const nodes::PackageMemberPattern& pmp)
 {
-	// TODO: Align with newest spec
-	
-	if(pmp.package_member_identifier.has_value())
-	{
-		std::cout << " " << pmp.package_member_identifier.value().to_string();
-	}
-
 	switch (pmp.type)
 	{
 	case nodes::PackageMemberPatternType::PACKAGE_WITHOUT_SUBPACKAGES:
-		std::cout << "*";
+		std::cout << "shallow pkg ";
 		break;
 	case nodes::PackageMemberPatternType::PACKAGE_WITH_SUBPACKAGES:
-		std::cout << "...";
+		std::cout << "deep pkg ";
 		break;
 	default:
 		break;
 	}
+	
+	if(pmp.package_member_identifier.has_value())
+	{
+		std::cout << pmp.package_member_identifier.value().to_string();
+	}
 
 	if(pmp.supertype.has_value())
 	{
-		std::cout << " extends " << pmp.supertype.value().to_string();
+		if(pmp.package_member_identifier.has_value()) { std::cout << " "; }
+		std::cout << "extends " << pmp.supertype.value().to_string();
 	}
 }
