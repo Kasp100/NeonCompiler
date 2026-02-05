@@ -60,10 +60,10 @@ std::optional<TokenType> Token::keyword_to_token_type(std::string_view word)
 	else if (word == "deep")              return TokenType::DEEP;
 	else if (word == "pure")              return TokenType::MEMBER_PURE;
 	else if (word == "const")             return TokenType::MEMBER_CONST;
-	else if (word == "mut:")              return TokenType::MUTABLE_REFERENCE;
-	else if (word == "mut")               return TokenType::MUTABLE_DECLARATION;
+	else if (word == "mut")               return TokenType::MUT;
 	else if (word == "var")               return TokenType::VAR;
-	else if (word == "opt")               return TokenType::REF_TYPE_OPTIONAL;
+	else if (word == "opt")               return TokenType::OPTIONAL;
+	else if (word == "auto")              return TokenType::AUTO;
 	else if (word == "own")               return TokenType::REF_TYPE_OWN;
 	else if (word == "shared")            return TokenType::REF_TYPE_SHARED;
 	else if (word == "borrow")            return TokenType::REF_TYPE_BORROW;
@@ -86,8 +86,6 @@ std::optional<TokenType> Token::keyword_to_token_type(std::string_view word)
 	else if (word == "serialisable")      return TokenType::DECL_TYPE_SERIALISABLE;
 	else if (word == "true")              return TokenType::BOOL_TRUE;
 	else if (word == "false")             return TokenType::BOOL_FALSE;
-	else if (word == "opt:")              return TokenType::CALL_OPTIONAL;
-	else if (word == "auto:")             return TokenType::CALL_COMPILE_FUNCTION;
 	else if (word == "void")              return TokenType::RETURN_TYPE_VOID;
 	else if (word == "if")                return TokenType::STMT_IF;
 	else if (word == "else")              return TokenType::STMT_ELSE;

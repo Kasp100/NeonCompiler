@@ -41,11 +41,13 @@ TEST_CASE("Keywords are parsed correctly")
 	CHECK(lexer.take_errors().size() == 0);
 
 	const std::vector<neon_compiler::Token> tokens = lexer.take_tokens();
-	CHECK(tokens.size() == 3);
+	CHECK(tokens.size() == 5);
 
 	CHECK(tokens[0].get_type() == neon_compiler::TokenType::PACKAGE);
 	CHECK(tokens[1].get_type() == neon_compiler::TokenType::PACKAGE_MEMBER_INTERFACE);
-	CHECK(tokens[2].get_type() == neon_compiler::TokenType::MUTABLE_REFERENCE);
+	CHECK(tokens[2].get_type() == neon_compiler::TokenType::MUT);
+	CHECK(tokens[3].get_type() == neon_compiler::TokenType::COLON);
+	CHECK(tokens[4].get_type() == neon_compiler::TokenType::END_OF_FILE);
 }
 
 TEST_CASE("String literals are parsed correctly")
@@ -62,13 +64,14 @@ TEST_CASE("String literals are parsed correctly")
 	CHECK(lexer.take_errors().size() == 0);
 
 	const std::vector<neon_compiler::Token> tokens = lexer.take_tokens();
-	CHECK(tokens.size() == 3);
+	CHECK(tokens.size() == 4);
 
 	CHECK(tokens[0].get_type() == neon_compiler::TokenType::LITERAL_STRING);
 	CHECK(tokens[0].get_lexeme().value() == "strings");
 	CHECK(tokens[1].get_type() == neon_compiler::TokenType::COMMA);
 	CHECK(tokens[2].get_type() == neon_compiler::TokenType::LITERAL_STRING);
 	CHECK(tokens[2].get_lexeme().value() == "testing");
+	CHECK(tokens[3].get_type() == neon_compiler::TokenType::END_OF_FILE);
 }
 
 TEST_CASE("Character literals are parsed correctly")
@@ -85,7 +88,7 @@ TEST_CASE("Character literals are parsed correctly")
 	CHECK(lexer.take_errors().size() == 0);
 
 	const std::vector<neon_compiler::Token> tokens = lexer.take_tokens();
-	CHECK(tokens.size() == 3);
+	CHECK(tokens.size() == 4);
 
 	CHECK(tokens[0].get_type() == neon_compiler::TokenType::LITERAL_CHARACTER);
 	CHECK(tokens[0].get_lexeme().value() == "c");
@@ -93,6 +96,7 @@ TEST_CASE("Character literals are parsed correctly")
 	CHECK(tokens[1].get_lexeme().value() == "'");
 	CHECK(tokens[2].get_type() == neon_compiler::TokenType::LITERAL_CHARACTER);
 	CHECK(tokens[2].get_lexeme().value() == "\n");
+	CHECK(tokens[3].get_type() == neon_compiler::TokenType::END_OF_FILE);
 }
 
 TEST_CASE("Decimal number literals are parsed correctly")
@@ -109,10 +113,11 @@ TEST_CASE("Decimal number literals are parsed correctly")
 	CHECK(lexer.take_errors().size() == 0);
 
 	const std::vector<neon_compiler::Token> tokens = lexer.take_tokens();
-	CHECK(tokens.size() == 1);
+	CHECK(tokens.size() == 2);
 
 	CHECK(tokens[0].get_type() == neon_compiler::TokenType::LITERAL_NUMBER);
 	CHECK(tokens[0].get_lexeme().value() == "105788");
+	CHECK(tokens[1].get_type() == neon_compiler::TokenType::END_OF_FILE);
 }
 
 TEST_CASE("Floating point decimal number literals are parsed correctly")
@@ -129,10 +134,11 @@ TEST_CASE("Floating point decimal number literals are parsed correctly")
 	CHECK(lexer.take_errors().size() == 0);
 
 	const std::vector<neon_compiler::Token> tokens = lexer.take_tokens();
-	CHECK(tokens.size() == 1);
+	CHECK(tokens.size() == 2);
 
 	CHECK(tokens[0].get_type() == neon_compiler::TokenType::LITERAL_NUMBER);
 	CHECK(tokens[0].get_lexeme().value() == "105788.7501");
+	CHECK(tokens[1].get_type() == neon_compiler::TokenType::END_OF_FILE);
 }
 
 TEST_CASE("Hexadecimal number literals are parsed correctly")
@@ -149,10 +155,11 @@ TEST_CASE("Hexadecimal number literals are parsed correctly")
 	CHECK(lexer.take_errors().size() == 0);
 
 	const std::vector<neon_compiler::Token> tokens = lexer.take_tokens();
-	CHECK(tokens.size() == 1);
+	CHECK(tokens.size() == 2);
 
 	CHECK(tokens[0].get_type() == neon_compiler::TokenType::LITERAL_NUMBER);
 	CHECK(tokens[0].get_lexeme().value() == "0x758a0b71");
+	CHECK(tokens[1].get_type() == neon_compiler::TokenType::END_OF_FILE);
 }
 
 TEST_CASE("Binary number literals are parsed correctly")
@@ -169,10 +176,11 @@ TEST_CASE("Binary number literals are parsed correctly")
 	CHECK(lexer.take_errors().size() == 0);
 
 	const std::vector<neon_compiler::Token> tokens = lexer.take_tokens();
-	CHECK(tokens.size() == 1);
+	CHECK(tokens.size() == 2);
 
 	CHECK(tokens[0].get_type() == neon_compiler::TokenType::LITERAL_NUMBER);
 	CHECK(tokens[0].get_lexeme().value() == "0b1011000100101110");
+	CHECK(tokens[1].get_type() == neon_compiler::TokenType::END_OF_FILE);
 }
 
 TEST_CASE("Illegal string literals are disallowed")

@@ -96,11 +96,6 @@ void Lexer::read_and_tokenise_word()
 	}
 	while (is_alpha(c) || is_digit(NumberNotation::DECIMAL, c) || c == '_');
 
-	if(reader->peek() == ':')
-	{
-		lexeme += reader->consume();
-	}
-
 	tokenise_word(sp, lexeme);
 }
 
@@ -390,6 +385,7 @@ std::optional<neon_compiler::TokenType> Lexer::convert_single_char_token(unsigne
 		case '>': return TokenType::GREATER_THAN;
 		case ';': return TokenType::END_STATEMENT;
 		case ',': return TokenType::COMMA;
+		case ':': return TokenType::COLON;
 		default: return std::nullopt;
 	}
 }
