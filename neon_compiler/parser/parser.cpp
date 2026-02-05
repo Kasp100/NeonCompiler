@@ -383,7 +383,7 @@ std::optional<VariableDeclaration> Parser::parse_variable_declaration(Mutability
 
 std::optional<ReferenceType> Parser::parse_reference_type(MutabilityMode default_mutability_mode)
 {
-	bool opt{reader.peek().get_type() == TokenType::REF_TYPE_OPTIONAL};
+	bool opt{reader.peek().get_type() == TokenType::OPTIONAL};
 
 	if(opt)
 	{
@@ -408,7 +408,7 @@ std::optional<ReferenceType> Parser::parse_reference_type(MutabilityMode default
 		report_token(AnalysisEntryType::KEYWORD, AnalyisSeverity::INFO, reader.consume());
 	}
 
-	bool mut{reader.peek().get_type() == TokenType::MUTABLE_REFERENCE};
+	bool mut{reader.peek().get_type() == TokenType::MUT};
 
 	if(mut)
 	{
