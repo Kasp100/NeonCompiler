@@ -413,6 +413,7 @@ std::optional<ReferenceType> Parser::parse_reference_type(MutabilityMode default
 	if(mut)
 	{
 		report_token(AnalysisEntryType::KEYWORD, AnalyisSeverity::INFO, reader.consume());
+		if(reader.peek().get_type() == TokenType::COLON) { report_token(AnalysisEntryType::SEPARATOR, AnalyisSeverity::INFO, reader.consume()); }
 	}
 
 	if(reader.peek().get_type() == TokenType::IDENTIFIER)
