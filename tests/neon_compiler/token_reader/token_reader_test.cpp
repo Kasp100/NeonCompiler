@@ -11,7 +11,6 @@ static const std::vector<Token> TEST_TOKENS
 	Token{TokenType::PACKAGE, reading::SourcePosition{0, 0, 0}, 0},
 	Token{TokenType::IDENTIFIER, reading::SourcePosition{0, 0, 0}, 0},
 	Token{TokenType::END_STATEMENT, reading::SourcePosition{0, 0, 0}, 0},
-	Token{TokenType::PACKAGE_MEMBER_CLASS, reading::SourcePosition{0, 0, 0}, 0},
 	Token{TokenType::IDENTIFIER, reading::SourcePosition{0, 0, 0}, 0},
 	Token{TokenType::END_OF_FILE, reading::SourcePosition{0, 0, 0}, 0}
 };
@@ -26,14 +25,11 @@ TEST_CASE("Token reader works")
 	CHECK(tr.peek().get_type() == TokenType::PACKAGE);
 	CHECK(tr.peek(1).get_type() == TokenType::IDENTIFIER);
 	CHECK(tr.peek(2).get_type() == TokenType::END_STATEMENT);
-	CHECK(tr.peek(3).get_type() == TokenType::PACKAGE_MEMBER_CLASS);
 	CHECK(tr.peek(9).get_type() == TokenType::END_OF_FILE);
 	CHECK(tr.end_of_file_reached() == false);
 	CHECK(tr.consume().get_type() == TokenType::PACKAGE);
 	CHECK(tr.consume(1).get_type() == TokenType::END_STATEMENT);
 	CHECK(tr.end_of_file_reached() == false);
-	CHECK(tr.consume_if_matches(TokenType::PACKAGE_MEMBER_CLASS) == true);
-	CHECK(tr.consume_if_matches(TokenType::INHERITANCE_EXTENDS) == false);
 	CHECK(tr.consume().get_type() == TokenType::IDENTIFIER);
 	CHECK(tr.end_of_file_reached() == true);
 	CHECK(tr.consume().get_type() == TokenType::END_OF_FILE);
