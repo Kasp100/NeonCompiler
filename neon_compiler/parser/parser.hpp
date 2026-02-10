@@ -86,13 +86,13 @@ private:
 	void append_ast(std::unique_ptr<neon_compiler::ast::nodes::PackageMember> node, const std::string& identifier);
 
 	std::optional<neon_compiler::ast::Identifier> parse_identifier(neon_compiler::analysis::AnalysisEntryType type, neon_compiler::analysis::AnalyisSeverity severity);
-	neon_compiler::ast::Identifier parse_expected_package_declaration();
-	bool parse_optional_import_statement();
+	void parse_and_register_expected_package_declaration();
+	void parse_and_register_import_statement();
 	neon_compiler::ast::nodes::Access parse_access();
 	neon_compiler::ast::nodes::PackageMemberPattern parse_package_member_pattern();
 	void parse_expected_package_member(const neon_compiler::ast::nodes::Access& access);
 	std::string parse_expected_declaration_name(neon_compiler::analysis::AnalysisEntryType analysis_entry_type);
-	void parse_expected_entrypoint(const neon_compiler::ast::nodes::Access& access);
+	void parse_and_register_expected_entrypoint(const neon_compiler::ast::nodes::Access& access);
 	neon_compiler::ast::nodes::ParemeterDeclarationList parse_parameter_declarations();
 	std::optional<neon_compiler::ast::nodes::VariableDeclaration> parse_variable_declaration(neon_compiler::ast::nodes::MutabilityMode default_mutability_mode);
 	std::optional<neon_compiler::ast::nodes::ReferenceType> parse_reference_type(neon_compiler::ast::nodes::MutabilityMode default_mutability_mode);

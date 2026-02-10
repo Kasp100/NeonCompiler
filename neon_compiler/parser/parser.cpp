@@ -16,17 +16,19 @@ Parser::Parser
 
 void Parser::run()
 {
-	package = parse_expected_package_declaration();
+	parse_and_register_expected_package_declaration();
 
 	while(!reader.end_of_file_reached())
 	{
-		if(parse_optional_import_statement())
+		if(reader.peek().get_type() == TokenType::IMPORT)
 		{
-			continue;
+			parse_and_register_import_statement();
 		}
-
-		const Access access = parse_access();
-		parse_expected_package_member(access);
+		else
+		{
+			const Access access = parse_access(); // `private` if no keyword is present.
+			parse_expected_package_member(access);
+		}
 	}
 }
 
@@ -84,7 +86,7 @@ std::optional<neon_compiler::ast::Identifier> Parser::parse_identifier(AnalysisE
 	return id;
 }
 
-neon_compiler::ast::Identifier Parser::parse_expected_package_declaration()
+void Parser::parse_and_register_expected_package_declaration()
 {
 	if(reader.peek().get_type() == TokenType::PACKAGE)
 	{
@@ -110,16 +112,12 @@ neon_compiler::ast::Identifier Parser::parse_expected_package_declaration()
 		report_token(AnalysisEntryType::UNKNOWN, AnalyisSeverity::ERROR, reader.peek(), std::string{error_messages::MISSING_SEMICOLON});
 	}
 
-	return package_id.value_or(neon_compiler::ast::Identifier{});
+	package = package_id.value_or(neon_compiler::ast::Identifier{});
 }
 
-bool Parser::parse_optional_import_statement()
+void Parser::parse_and_register_import_statement()
 {
-	if(reader.peek().get_type() != TokenType::IMPORT)
-	{
-		return false;
-	}
-
+	// At this point, IMPORT should be guaranteed
 	report_token(AnalysisEntryType::KEYWORD, AnalyisSeverity::INFO, reader.consume());
 
 	std::optional<neon_compiler::ast::Identifier> package_member_id = parse_identifier(AnalysisEntryType::REFERENCE, AnalyisSeverity::INFO);
@@ -127,11 +125,10 @@ bool Parser::parse_optional_import_statement()
 	if(!package_member_id.has_value())
 	{
 		report_token(AnalysisEntryType::UNKNOWN, AnalyisSeverity::ERROR, reader.peek(), std::string{error_messages::INVALID_IMPORT_STATEMENT});
-		return true;
+		return;
 	}
 
 	imports.push_back(package_member_id.value());
-	return true;
 }
 
 Access Parser::parse_access()
@@ -234,7 +231,7 @@ void Parser::parse_expected_package_member(const Access& access)
 	if(reader.peek().get_type() == TokenType::PACKAGE_MEMBER_ENTRYPOINT)
 	{
 		report_token(AnalysisEntryType::KEYWORD, AnalyisSeverity::INFO, reader.consume());
-		parse_expected_entrypoint(access);
+		parse_and_register_expected_entrypoint(access);
 	}
 	else if(reader.peek().get_type() == TokenType::PACKAGE_MEMBER_PURE_FUNCTION_SET)
 	{
@@ -278,7 +275,7 @@ std::string Parser::parse_expected_declaration_name(AnalysisEntryType analysis_e
 	}
 }
 
-void Parser::parse_expected_entrypoint(const Access& access)
+void Parser::parse_and_register_expected_entrypoint(const Access& access)
 {
 	const std::string name = parse_expected_declaration_name(AnalysisEntryType::DECLARATION);
 
