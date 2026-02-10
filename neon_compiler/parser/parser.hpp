@@ -96,8 +96,9 @@ private:
 	neon_compiler::ast::nodes::ParemeterDeclarationList parse_parameter_declarations();
 	std::optional<neon_compiler::ast::nodes::VariableDeclaration> parse_variable_declaration(neon_compiler::ast::nodes::MutabilityMode default_mutability_mode);
 	std::optional<neon_compiler::ast::nodes::ReferenceType> parse_reference_type(neon_compiler::ast::nodes::MutabilityMode default_mutability_mode);
-	neon_compiler::ast::nodes::CodeBlock parse_expected_code_block();
-	std::unique_ptr<neon_compiler::ast::nodes::Expression> parse_optional_expression();
+	neon_compiler::ast::nodes::CodeBlock parse_code_block_til_end();
+	std::unique_ptr<neon_compiler::ast::nodes::Statement> parse_return_statement();
+	std::unique_ptr<neon_compiler::ast::nodes::Expression> parse_expression();
 };
 
 }

@@ -284,7 +284,17 @@ void Parser::parse_expected_entrypoint(const Access& access)
 
 	ParemeterDeclarationList parameters = parse_parameter_declarations();
 
-	CodeBlock body = parse_expected_code_block();
+	CodeBlock body = CodeBlock{std::vector<std::unique_ptr<Statement>>{}};
+
+	if(reader.peek().get_type() == TokenType::BRACKET_CURLY_OPEN)
+	{
+		report_token(AnalysisEntryType::SEPARATOR, AnalyisSeverity::INFO, reader.consume());
+		body = parse_code_block_til_end();
+	}
+	else
+	{
+		report_token(AnalysisEntryType::UNKNOWN, AnalyisSeverity::ERROR, reader.consume(), std::string{error_messages::MISSING_CODE_BLOCK});
+	}
 
 	std::unique_ptr<PackageMember> package_member = std::make_unique<Entrypoint>(access, std::move(parameters), std::move(body));
 
@@ -433,19 +443,10 @@ std::optional<ReferenceType> Parser::parse_reference_type(MutabilityMode default
 	}
 }
 
-CodeBlock Parser::parse_expected_code_block()
+CodeBlock Parser::parse_code_block_til_end()
 {
+	// At this point, a `{` should already be consumed
 	std::vector<std::unique_ptr<Statement>> statements{};
-
-	if(reader.peek().get_type() == TokenType::BRACKET_CURLY_OPEN)
-	{
-		report_token(AnalysisEntryType::SEPARATOR, AnalyisSeverity::INFO, reader.consume());
-	}
-	else
-	{
-		report_token(AnalysisEntryType::UNKNOWN, AnalyisSeverity::ERROR, reader.consume(), std::string{error_messages::MISSING_CODE_BLOCK});
-		return CodeBlock{std::move(statements)};
-	}
 
 	while(!reader.end_of_file_reached())
 	{
@@ -456,20 +457,7 @@ CodeBlock Parser::parse_expected_code_block()
 		}
 		else if(reader.peek().get_type() == TokenType::STMT_RETURN)
 		{
-			report_token(AnalysisEntryType::KEYWORD, AnalyisSeverity::INFO, reader.consume());
-			std::unique_ptr<Expression> value = parse_optional_expression();
-
-			if(reader.peek().get_type() == TokenType::END_STATEMENT)
-			{
-				report_token(AnalysisEntryType::SEPARATOR, AnalyisSeverity::INFO, reader.consume());
-			}
-			else
-			{
-				report_token(AnalysisEntryType::UNKNOWN, AnalyisSeverity::ERROR, reader.consume(), std::string{error_messages::MISSING_SEMICOLON});
-			}
-
-			std::unique_ptr<Statement> statement = std::make_unique<Return>(std::move(value));
-			statements.push_back(std::move(statement));
+			statements.push_back(std::move(parse_return_statement()));
 		}
 		else
 		{
@@ -480,7 +468,31 @@ CodeBlock Parser::parse_expected_code_block()
 	return CodeBlock{std::move(statements)};
 }
 
-std::unique_ptr<Expression> Parser::parse_optional_expression()
+std::unique_ptr<Statement> Parser::parse_return_statement()
+{
+	// At this point, STMT_RETURN should be guaranteed
+	report_token(AnalysisEntryType::KEYWORD, AnalyisSeverity::INFO, reader.consume());
+
+	std::unique_ptr<Expression> value = nullptr;
+	
+	if(reader.peek().get_type() != TokenType::END_STATEMENT)
+	{
+		value = parse_expression();
+	}
+
+	if(reader.peek().get_type() == TokenType::END_STATEMENT)
+	{
+		report_token(AnalysisEntryType::SEPARATOR, AnalyisSeverity::INFO, reader.consume());
+	}
+	else
+	{
+		report_token(AnalysisEntryType::UNKNOWN, AnalyisSeverity::ERROR, reader.consume(), std::string{error_messages::MISSING_SEMICOLON});
+	}
+
+	return std::make_unique<Return>(std::move(value));
+}
+
+std::unique_ptr<Expression> Parser::parse_expression()
 {
 	return nullptr;
 }
