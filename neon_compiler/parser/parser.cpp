@@ -237,6 +237,10 @@ void Parser::parse_expected_package_member(const Access& access)
 	{
 		report_token(AnalysisEntryType::KEYWORD, AnalyisSeverity::INFO, reader.consume());
 	}
+	else if(reader.peek().get_type() == TokenType::PACKAGE_MEMBER_EXPRESSION_GRAMMAR)
+	{
+		report_token(AnalysisEntryType::KEYWORD, AnalyisSeverity::INFO, reader.consume());
+	}
 	else if(reader.peek().get_type() == TokenType::PACKAGE_MEMBER_COMPILE_FUNCTION)
 	{
 		report_token(AnalysisEntryType::KEYWORD, AnalyisSeverity::INFO, reader.consume());
