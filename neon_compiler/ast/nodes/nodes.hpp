@@ -244,12 +244,15 @@ struct PureFunction : ASTNode
 	}
 };
 
-struct GrammarSet : PackageMember
+struct ExpressionGrammar : PackageMember
 {
-	/** The access which determines who can use this grammar set */
+	/** The access which determines who can use this expression grammar */
 	Access access;
-	/** Grammar set rules */
-	std::vector<GrammarRule> rules;
+	/** Expression grammar set rules */
+	std::vector<ExpressionGrammarRule> rules;
+
+	ExpressionGrammar(Access access, std::vector<ExpressionGrammarRule> rules)
+		: access{access}, rules{rules} {}
 
 	void accept(ASTVisitor& visitor) const override
 	{
@@ -257,9 +260,9 @@ struct GrammarSet : PackageMember
 	}
 };
 
-struct GrammarPatternPart : ASTNode {};
+struct ExpressionGrammarPatternPart : ASTNode {};
 
-struct TokenPattern : GrammarPatternPart
+struct TokenPattern : ExpressionGrammarPatternPart
 {
 	/** Token that needs to match */
 	neon_compiler::Token token;
@@ -270,7 +273,7 @@ struct TokenPattern : GrammarPatternPart
 	}
 };
 
-struct ParameterPattern : GrammarPatternPart
+struct ParameterPattern : ExpressionGrammarPatternPart
 {
 	/** Parameter */
 	VariableDeclaration parameter;
@@ -281,14 +284,14 @@ struct ParameterPattern : GrammarPatternPart
 	}
 };
 
-struct GrammarRule : ASTNode
+struct ExpressionGrammarRule : ASTNode
 {
 	/** Subordination: e.g. `+` has a higher subordination (less precedence) than `*` */
 	uint subordination;
 	/** The reference type this pure function returns. */
 	ReferenceType reference_type;
 	/** Pattern to match */
-	std::vector<std::unique_ptr<GrammarPatternPart>> pattern;
+	std::vector<std::unique_ptr<ExpressionGrammarPatternPart>> pattern;
 	/** Function body */
 	CodeBlock body;
 
