@@ -93,6 +93,7 @@ private:
 	void parse_expected_package_member(const neon_compiler::ast::nodes::Access& access);
 	std::string parse_expected_declaration_name(neon_compiler::analysis::AnalysisEntryType analysis_entry_type);
 	void parse_and_register_expected_entrypoint(const neon_compiler::ast::nodes::Access& access);
+	void parse_and_register_expected_expression_grammar(const neon_compiler::ast::nodes::Access& access);
 	neon_compiler::ast::nodes::ParemeterDeclarationList parse_parameter_declarations();
 	std::optional<neon_compiler::ast::nodes::VariableDeclaration> parse_variable_declaration(neon_compiler::ast::nodes::MutabilityMode default_mutability_mode);
 	std::optional<neon_compiler::ast::nodes::ReferenceType> parse_reference_type(neon_compiler::ast::nodes::MutabilityMode default_mutability_mode);

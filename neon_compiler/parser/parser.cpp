@@ -240,6 +240,7 @@ void Parser::parse_expected_package_member(const Access& access)
 	else if(reader.peek().get_type() == TokenType::PACKAGE_MEMBER_EXPRESSION_GRAMMAR)
 	{
 		report_token(AnalysisEntryType::KEYWORD, AnalyisSeverity::INFO, reader.consume());
+		parse_and_register_expected_expression_grammar(access);
 	}
 	else if(reader.peek().get_type() == TokenType::PACKAGE_MEMBER_COMPILE_FUNCTION)
 	{
@@ -298,6 +299,50 @@ void Parser::parse_and_register_expected_entrypoint(const Access& access)
 	}
 
 	std::unique_ptr<PackageMember> package_member = std::make_unique<Entrypoint>(access, std::move(parameters), std::move(body));
+
+	append_ast(std::move(package_member), name);
+}
+
+void Parser::parse_and_register_expected_expression_grammar(const Access& access)
+{
+	const std::string name = parse_expected_declaration_name(AnalysisEntryType::DECLARATION);
+
+	if(reader.peek().get_type() == TokenType::BRACKET_CURLY_OPEN)
+	{
+		report_token(AnalysisEntryType::SEPARATOR, AnalyisSeverity::INFO, reader.consume());
+	}
+	else
+	{
+		report_token(AnalysisEntryType::UNKNOWN, AnalyisSeverity::ERROR, reader.consume(), std::string{error_messages::MISSING_CODE_BLOCK});
+	}
+
+	while(reader.peek().get_type() == TokenType::LITERAL_NUMBER || reader.peek().get_type() == TokenType::IDENTIFIER)
+	{
+		uint subordination = 0;
+		if(reader.peek().get_type() == TokenType::LITERAL_NUMBER)
+		{
+			report_token(AnalysisEntryType::LITERAL_NUMBER, AnalyisSeverity::INFO, reader.peek());
+			subordination = std::stoi(std::string{reader.consume().get_lexeme().value()});
+		}
+
+		std::optional<ReferenceType> return_value = parse_reference_type(MutabilityMode::BORROW);
+		if(!return_value.has_value())
+		{
+			report_token(AnalysisEntryType::UNKNOWN, AnalyisSeverity::ERROR, reader.consume(), std::string{error_messages::INVALID_REFERENCE_TYPE});
+		}
+
+		// TODO: complete expression grammar parsing
+		while(!reader.end_of_file_reached() && reader.peek().get_type() != TokenType::BRACKET_CURLY_OPEN)
+		{
+			if(reader.peek().get_type() == TokenType::BRACKET_ROUND_OPEN)
+			{
+				std::optional<VariableDeclaration> parameter = parse_variable_declaration(MutabilityMode::BORROW);
+				
+			}
+		}
+	}
+
+	std::unique_ptr<PackageMember> package_member = std::make_unique<ExpressionGrammar>(access, nullptr);
 
 	append_ast(std::move(package_member), name);
 }
