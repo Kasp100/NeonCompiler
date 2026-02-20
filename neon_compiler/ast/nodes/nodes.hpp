@@ -266,6 +266,9 @@ struct TokenPattern : ExpressionGrammarPatternPart
 {
 	/** Token that needs to match */
 	neon_compiler::Token token;
+	
+	TokenPattern(Token token)
+	: token{token} {}
 
 	void accept(ASTVisitor& visitor) const override
 	{
@@ -277,6 +280,9 @@ struct ParameterPattern : ExpressionGrammarPatternPart
 {
 	/** Parameter */
 	VariableDeclaration parameter;
+	
+	ParameterPattern(VariableDeclaration&& parameter)
+	: parameter{std::move(parameter)} {}
 
 	void accept(ASTVisitor& visitor) const override
 	{
@@ -294,6 +300,9 @@ struct ExpressionGrammarRule : ASTNode
 	std::vector<std::unique_ptr<ExpressionGrammarPatternPart>> pattern;
 	/** Function body */
 	CodeBlock body;
+
+	ExpressionGrammarRule(uint subordination, ReferenceType reference_type,	std::vector<std::unique_ptr<ExpressionGrammarPatternPart>>&& pattern, CodeBlock&& body)
+	: subordination{subordination}, reference_type{reference_type}, pattern{std::move(pattern)}, body{std::move(body)} {}
 
 	void accept(ASTVisitor& visitor) const override
 	{

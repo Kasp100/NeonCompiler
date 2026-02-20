@@ -51,12 +51,16 @@ namespace error_messages
 		"Invalid package member pattern, expected `}`.";
 	constexpr std::string_view INVALID_PACKAGE_MEMBER_PATTERN__EXPECTED_PKG =
 		"Invalid package member pattern, expected `pkg` after `shallow` or `deep`.";
+	constexpr std::string_view INVALID_PACKAGE_MEMBER_PATTERN_PART__EXPECTED_CLOSING_BRACKET =
+		"Expected the parameter declaration to end here with `)`.";
 }
 
 namespace error_recovery
 {
 	constexpr std::string_view PLACEHOLDER_NAME =
 		"err_name";
+	constexpr std::string_view PLACEHOLDER_TYPE =
+		"err_type";
 }
 
 class Parser

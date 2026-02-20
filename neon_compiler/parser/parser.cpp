@@ -303,6 +303,7 @@ void Parser::parse_and_register_expected_entrypoint(const Access& access)
 	append_ast(std::move(package_member), name);
 }
 
+// TODO: write tests for this
 void Parser::parse_and_register_expected_expression_grammar(const Access& access)
 {
 	const std::string name = parse_expected_declaration_name(AnalysisEntryType::DECLARATION);
@@ -315,6 +316,8 @@ void Parser::parse_and_register_expected_expression_grammar(const Access& access
 	{
 		report_token(AnalysisEntryType::UNKNOWN, AnalyisSeverity::ERROR, reader.consume(), std::string{error_messages::MISSING_CODE_BLOCK});
 	}
+
+	std::vector<ExpressionGrammarRule> rules{};
 
 	while(reader.peek().get_type() == TokenType::LITERAL_NUMBER || reader.peek().get_type() == TokenType::IDENTIFIER)
 	{
@@ -331,18 +334,60 @@ void Parser::parse_and_register_expected_expression_grammar(const Access& access
 			report_token(AnalysisEntryType::UNKNOWN, AnalyisSeverity::ERROR, reader.consume(), std::string{error_messages::INVALID_REFERENCE_TYPE});
 		}
 
-		// TODO: complete expression grammar parsing
+		std::vector<std::unique_ptr<ExpressionGrammarPatternPart>> pattern{};
+
 		while(!reader.end_of_file_reached() && reader.peek().get_type() != TokenType::BRACKET_CURLY_OPEN)
 		{
+			report_token(AnalysisEntryType::SEPARATOR, AnalyisSeverity::INFO, reader.consume());
+
+			// TODO: put rest of `while` loop in new function
+
 			if(reader.peek().get_type() == TokenType::BRACKET_ROUND_OPEN)
 			{
-				std::optional<VariableDeclaration> parameter = parse_variable_declaration(MutabilityMode::BORROW);
-				
+				report_token(AnalysisEntryType::SEPARATOR, AnalyisSeverity::INFO, reader.consume());
+
+				VariableDeclaration parameter = parse_variable_declaration(MutabilityMode::BORROW)
+					.value_or
+					(
+						VariableDeclaration{false, ReferenceType{false, MutabilityMode::BORROW, false, std::string{error_recovery::PLACEHOLDER_TYPE}},
+						std::string{error_recovery::PLACEHOLDER_NAME}}
+					);
+
+				std::unique_ptr<ParameterPattern> parameter_pattern = std::make_unique<ParameterPattern>(parameter);
+				pattern.emplace_back(std::move(parameter_pattern));
+
+				if(reader.peek().get_type() == TokenType::BRACKET_ROUND_CLOSE)
+				{
+					report_token(AnalysisEntryType::SEPARATOR, AnalyisSeverity::INFO, reader.consume());
+				}
+				else
+				{
+					report_token(AnalysisEntryType::UNKNOWN, AnalyisSeverity::ERROR, reader.consume(), std::string{error_messages::INVALID_PACKAGE_MEMBER_PATTERN_PART__EXPECTED_CLOSING_BRACKET});
+				}
+			}
+			else
+			{
+				report_token(AnalysisEntryType::KEYWORD, AnalyisSeverity::INFO, reader.peek());
+				std::unique_ptr<TokenPattern> token_pattern = std::make_unique<TokenPattern>(reader.consume());
+				pattern.emplace_back(std::move(token_pattern));
 			}
 		}
+
+		if(reader.end_of_file_reached()) { return; }
+
+		report_token(AnalysisEntryType::SEPARATOR, AnalyisSeverity::INFO, reader.consume()); // Consume the `{`
+		CodeBlock body = parse_code_block_til_end();
+
+		rules.emplace_back
+		(
+			subordination,
+			return_value.value_or(ReferenceType{false, MutabilityMode::BORROW, false, std::string{error_recovery::PLACEHOLDER_TYPE}}),
+			std::move(pattern),
+			std::move(body)
+		);
 	}
 
-	std::unique_ptr<PackageMember> package_member = std::make_unique<ExpressionGrammar>(access, nullptr);
+	std::unique_ptr<PackageMember> package_member = std::make_unique<ExpressionGrammar>(access, std::move(rules));
 
 	append_ast(std::move(package_member), name);
 }
