@@ -16,7 +16,7 @@ private:
 	std::string file;
 	std::ostream& out;
 	std::string escape(const std::string& str) const;
-	std::string analysis_severity_to_string(const AnalyisSeverity severity) const;
+	std::string analysis_severity_to_string(const AnalysisSeverity severity) const;
 	std::string analysis_entry_type_to_string(const AnalysisEntryType entry_type) const;
 };
 

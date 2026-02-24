@@ -113,7 +113,7 @@ struct VariableDeclaration : ASTNode
 	}
 };
 
-struct ParemeterDeclarationList
+struct ParameterDeclarationList
 {
 	std::vector<VariableDeclaration> parameters;
 };
@@ -137,11 +137,11 @@ struct Entrypoint : PackageMember
 	 * However, it can always be used as application entrypoint by the compiler, hence the name. */
 	Access access;
 	/** Parameters */
-	ParemeterDeclarationList parameters;
+	ParameterDeclarationList parameters;
 	/** Code to run when called */
 	CodeBlock body;
 
-	Entrypoint(Access access, ParemeterDeclarationList parameters, CodeBlock body)
+	Entrypoint(Access access, ParameterDeclarationList parameters, CodeBlock body)
 		: access{access}, parameters{std::move(parameters)}, body{std::move(body)} {}
 
 	void accept(ASTVisitor& visitor) const override
@@ -191,7 +191,7 @@ struct Method : ASTNode
 	/** Whether this method may mutate the object. */
 	bool mutating;
 	/** Parameters */
-	ParemeterDeclarationList parameters;
+	ParameterDeclarationList parameters;
 	/** Method body. Empty means it's not implemented (an abstract method). */
 	std::optional<CodeBlock> implementation;
 
@@ -234,7 +234,7 @@ struct PureFunction : ASTNode
 	/** The immutable type this pure function returns. */
 	ReferenceType return_type;
 	/** Parameters (should be immutable values) */
-	ParemeterDeclarationList parameters;
+	ParameterDeclarationList parameters;
 	/** Pure function body. Empty means it's not implemented (an abstract pure function). */
 	std::optional<CodeBlock> implementation;
 

@@ -44,13 +44,13 @@ std::string ConsoleAnalysisReporter::escape(const std::string& str) const
 	return o;
 }
 
-std::string ConsoleAnalysisReporter::analysis_severity_to_string(const AnalyisSeverity severity) const
+std::string ConsoleAnalysisReporter::analysis_severity_to_string(const AnalysisSeverity severity) const
 {
 	switch (severity)
 	{
-		case AnalyisSeverity::ERROR: return "ERROR";
-		case AnalyisSeverity::WARNING: return "WARNING";
-		case AnalyisSeverity::INFO: return "INFO";
+		case AnalysisSeverity::ERROR: return "ERROR";
+		case AnalysisSeverity::WARNING: return "WARNING";
+		case AnalysisSeverity::INFO: return "INFO";
 		default: return "UNKNOWN";
 	}
 }

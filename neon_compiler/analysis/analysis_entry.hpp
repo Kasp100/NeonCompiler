@@ -21,7 +21,7 @@ enum class AnalysisEntryType
 	PACKAGE
 };
 
-enum class AnalyisSeverity
+enum class AnalysisSeverity
 {
 	INFO,
 	WARNING,
@@ -31,7 +31,7 @@ enum class AnalyisSeverity
 struct AnalysisEntry
 {
 	const AnalysisEntryType type;
-	const AnalyisSeverity severity;
+	const AnalysisSeverity severity;
 	const reading::SourcePosition source_position;
 	const uint32_t length;
 	const std::optional<std::string> info;

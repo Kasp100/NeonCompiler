@@ -84,12 +84,12 @@ private:
 	std::vector<neon_compiler::ast::Identifier> imports{};
 
 	void report_token(
-			neon_compiler::analysis::AnalysisEntryType type, neon_compiler::analysis::AnalyisSeverity severity,
+			neon_compiler::analysis::AnalysisEntryType type, neon_compiler::analysis::AnalysisSeverity severity,
 			const neon_compiler::Token& token, std::optional<std::string> info = std::nullopt);
 
 	void append_ast(std::unique_ptr<neon_compiler::ast::nodes::PackageMember> node, const std::string& identifier);
 
-	std::optional<neon_compiler::ast::Identifier> parse_identifier(neon_compiler::analysis::AnalysisEntryType type, neon_compiler::analysis::AnalyisSeverity severity);
+	std::optional<neon_compiler::ast::Identifier> parse_identifier(neon_compiler::analysis::AnalysisEntryType type, neon_compiler::analysis::AnalysisSeverity severity);
 	void parse_and_register_expected_package_declaration();
 	void parse_and_register_import_statement();
 	neon_compiler::ast::nodes::Access parse_access();
@@ -99,10 +99,10 @@ private:
 	void parse_and_register_expected_entrypoint(const neon_compiler::ast::nodes::Access& access);
 	void parse_and_register_expected_expression_grammar(const neon_compiler::ast::nodes::Access& access);
 	std::vector<std::unique_ptr<neon_compiler::ast::nodes::ExpressionGrammarPatternPart>> parse_expression_grammar_pattern();
-	neon_compiler::ast::nodes::ParemeterDeclarationList parse_parameter_declarations();
+	neon_compiler::ast::nodes::ParameterDeclarationList parse_parameter_declarations();
 	std::optional<neon_compiler::ast::nodes::VariableDeclaration> parse_variable_declaration(neon_compiler::ast::nodes::MutabilityMode default_mutability_mode);
 	std::optional<neon_compiler::ast::nodes::ReferenceType> parse_reference_type(neon_compiler::ast::nodes::MutabilityMode default_mutability_mode);
-	neon_compiler::ast::nodes::CodeBlock parse_code_block_til_end();
+	neon_compiler::ast::nodes::CodeBlock parse_code_block_until_end();
 	std::unique_ptr<neon_compiler::ast::nodes::Statement> parse_return_statement();
 	std::unique_ptr<neon_compiler::ast::nodes::Expression> parse_expression();
 };
