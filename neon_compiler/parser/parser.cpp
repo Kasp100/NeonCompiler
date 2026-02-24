@@ -393,7 +393,7 @@ std::vector<std::unique_ptr<ExpressionGrammarPatternPart>> Parser::parse_express
 		}
 	}
 
-	return std::move(pattern);
+	return pattern;
 }
 
 ParemeterDeclarationList Parser::parse_parameter_declarations()
