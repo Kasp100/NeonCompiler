@@ -281,7 +281,7 @@ struct ParameterPattern : ExpressionGrammarPatternPart
 	/** Parameter */
 	VariableDeclaration parameter;
 	
-	ParameterPattern(VariableDeclaration&& parameter)
+	ParameterPattern(VariableDeclaration& parameter)
 	: parameter{std::move(parameter)} {}
 
 	void accept(ASTVisitor& visitor) const override
