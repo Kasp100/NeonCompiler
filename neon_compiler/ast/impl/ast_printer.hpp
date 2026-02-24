@@ -32,8 +32,8 @@ public:
 	void visit(const nodes::OptEmpty& node) override;
 	void visit(const nodes::PureFunctionSet& node) override;
 	void visit(const nodes::PureFunction& node) override;
-	void visit(const nodes::GrammarSet& node) override;
-	void visit(const nodes::GrammarRule& node) override;
+	void visit(const nodes::ExpressionGrammar& node) override;
+	void visit(const nodes::ExpressionGrammarRule& node) override;
 	void visit(const nodes::TokenPattern& node) override;
 	void visit(const nodes::ParameterPattern& node) override;
 	void visit(const nodes::CompileFunction& node) override;

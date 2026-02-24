@@ -123,12 +123,12 @@ void ASTPrinter::visit(const nodes::PureFunction& node)
 
 }
 
-void ASTPrinter::visit(const nodes::GrammarSet& node)
+void ASTPrinter::visit(const nodes::ExpressionGrammar& node)
 {
 
 }
 
-void ASTPrinter::visit(const nodes::GrammarRule& node)
+void ASTPrinter::visit(const nodes::ExpressionGrammarRule& node)
 {
 
 }
