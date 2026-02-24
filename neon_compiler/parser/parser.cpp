@@ -270,7 +270,7 @@ std::string Parser::parse_expected_declaration_name(AnalysisEntryType analysis_e
 	if(reader.peek().get_type() == TokenType::IDENTIFIER)
 	{
 		std::string name{reader.peek().get_lexeme().value()};
-		report_token(analysis_entry_type, AnalysisSeverity::INFO, reader.consume());
+		report_token(analysis_entry_type, AnalysisSeverity::INFO, reader.consume(), name);
 		return name;
 	}
 	else
