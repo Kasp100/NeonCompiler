@@ -251,8 +251,8 @@ struct ExpressionGrammar : PackageMember
 	/** Expression grammar set rules */
 	std::vector<ExpressionGrammarRule> rules;
 
-	ExpressionGrammar(Access access, std::vector<ExpressionGrammarRule> rules)
-		: access{access}, rules{rules} {}
+	ExpressionGrammar(Access access, std::vector<ExpressionGrammarRule>&& rules)
+		: access{access}, rules{std::move(rules)} {}
 
 	void accept(ASTVisitor& visitor) const override
 	{
