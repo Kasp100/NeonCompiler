@@ -53,6 +53,8 @@ namespace error_messages
 		"Invalid package member pattern, expected `pkg` after `shallow` or `deep`.";
 	constexpr std::string_view INVALID_PACKAGE_MEMBER_PATTERN_PART__EXPECTED_CLOSING_BRACKET =
 		"Expected the parameter declaration to end here with `)`.";
+	constexpr std::string_view INVALID_EXPRESSION_GRAMMAR_RULE_OR_MISSING_CLOSING_BRACKET =
+		"Invalid expression grammar rule or missing `}`. See documentation for custom expression grammar.";
 }
 
 namespace error_recovery

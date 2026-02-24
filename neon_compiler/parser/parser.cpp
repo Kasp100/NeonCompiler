@@ -349,6 +349,16 @@ void Parser::parse_and_register_expected_expression_grammar(const Access& access
 		);
 	}
 
+	if(reader.peek().get_type() == TokenType::BRACKET_CURLY_CLOSE)
+	{
+		report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
+	}
+	else
+	{
+		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(), std::string{error_messages::INVALID_EXPRESSION_GRAMMAR_RULE_OR_MISSING_CLOSING_BRACKET});
+		// TODO: go to synchronisation token (create a helper method for this)
+	}
+
 	std::unique_ptr<PackageMember> package_member = std::make_unique<ExpressionGrammar>(access, std::move(rules));
 
 	append_ast(std::move(package_member), name);
