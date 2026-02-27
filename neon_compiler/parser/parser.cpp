@@ -599,5 +599,14 @@ std::unique_ptr<Statement> Parser::parse_return_statement()
 
 std::unique_ptr<Expression> Parser::parse_expression()
 {
-	return nullptr;
+	std::vector<Token> expression_tokens{};
+
+	while(!reader.end_of_file_reached() &&
+		// Check token types that end expressions
+		reader.peek().get_type() != TokenType::END_STATEMENT &&
+		reader.peek().get_type() != TokenType::COMMA &&
+		reader.peek().get_type() != TokenType::BRACKET_ROUND_CLOSE)
+	{
+		expression_tokens.push_back(reader.consume());
+	}
 }
