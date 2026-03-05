@@ -74,56 +74,44 @@ struct Assignment : Expression
 	}
 };
 
-struct StaticFunctionCall : Expression
+/** Represents an function call on a value from an expression.
+ * Example: `background_colour.darker()`, here `background_colour` is a simple read expression */
+struct ObjectFunctionCall : Expression
 {
-	/** The path and name of a specific static function, relative to the current package member. */
-	std::string function_path;
+    /** The object */
+    std::unique_ptr<Expression> object;
+    /** Function name */
+    std::string function_name;
 	/** Parameter values */
 	std::vector<std::unique_ptr<Expression>> parameters;
-
-	void accept(ASTVisitor& visitor) const override
-	{
-		visitor.visit(*this);
-	}
 };
 
-struct MethodCall : Expression
+/** Represents a read from a value from an expression.
+ * Example: `background_colour.red`, here `background_colour` is a simple read expression */
+struct ObjectReadExpression : Expression
 {
-	/** The object on which the method is called. `nullptr` means the object is "this". */
-	std::unique_ptr<Expression> receiver;
-	/** The name of a specific method. */
-	std::string method_name;
+    /** The object */
+    std::unique_ptr<Expression> object;
+    /** Reference name */
+    std::string reference_name;
+};
+
+/** Represents a simple call to a constructor, pure function, method (if this is inside a type), or entrypoint.
+ * Example: `fs_path("/home/user")`, here an instance of `ps_path` (a type) is made by calling the constructor,
+ * which takes a single string. */
+struct FunctionCall : Expression
+{
+    /** Function name */
+    std::string function_name;
 	/** Parameter values */
-	std::vector<std::unique_ptr<Expression>> arguments;
-
-	void accept(ASTVisitor& visitor) const override
-	{
-		visitor.visit(*this);
-	}
+	std::vector<std::unique_ptr<Expression>> parameters;
 };
 
-struct StaticFieldCall : Expression
+/** Represents a read from local variable, a constant, or a field (if this is inside a class), e.g. `speed` */
+struct ReadExpression : Expression
 {
-	/** The path and name of a specific static field, relative to the current package member. */
-	std::string static_field_path;
-
-	void accept(ASTVisitor& visitor) const override
-	{
-		visitor.visit(*this);
-	}
-};
-
-struct ReferenceCall : Expression
-{
-	/** The object on which the field is called. Empty if the object is "this". */
-	std::optional<std::unique_ptr<Expression>> callee;
-	/** The name of a specific field, local variable, or constant. */
-	std::string reference_name;
-
-	void accept(ASTVisitor& visitor) const override
-	{
-		visitor.visit(*this);
-	}
+    /** Reference name */
+    std::string reference_name;
 };
 
 struct OptFunctionCall : Expression
