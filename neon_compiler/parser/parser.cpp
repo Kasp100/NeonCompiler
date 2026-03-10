@@ -454,7 +454,7 @@ ParameterDeclarationList Parser::parse_parameter_declarations()
 		param_decl_list.parameters.push_back(std::move(var_decl.value()));
 	}
 
-    return param_decl_list;
+	return param_decl_list;
 }
 
 std::optional<VariableDeclaration> Parser::parse_variable_declaration(MutabilityMode default_mutability_mode)
@@ -601,12 +601,32 @@ std::unique_ptr<Expression> Parser::parse_expression()
 {
 	std::vector<Token> expression_tokens{};
 
+	bool postfix_brackets{false};
+	bool postfix_dot{false};
+
 	while(!reader.end_of_file_reached() &&
 		// Check token types that end expressions
 		reader.peek().get_type() != TokenType::END_STATEMENT &&
 		reader.peek().get_type() != TokenType::COMMA &&
 		reader.peek().get_type() != TokenType::BRACKET_ROUND_CLOSE)
 	{
+		if(reader.peek().get_type() == TokenType::BRACKET_ROUND_OPEN) { postfix_brackets = true; break; }
+		if(reader.peek().get_type() == TokenType::DOT) { postfix_dot = true; break; }
 		expression_tokens.push_back(reader.consume());
 	}
+
+	bool postfix = postfix_brackets || postfix_dot;
+
+	if(postfix)
+	{
+		report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
+	}
+
+	if(expression_tokens.size() < 1)
+	{
+		return nullptr;
+	}
+
+	// TODO
+	return nullptr;
 }
