@@ -85,6 +85,17 @@ struct ObjectFunctionCall : Expression
 	/** Parameter values */
 	std::vector<std::unique_ptr<Expression>> parameters;
 
+	ObjectFunctionCall
+	(
+		std::unique_ptr<Expression> object,
+		std::string function_name,
+		std::vector<std::unique_ptr<Expression>> parameters
+	) :
+		object(std::move(object)),
+		function_name(std::move(function_name)),
+		parameters(std::move(parameters))
+	{}
+
 	void accept(ASTVisitor& visitor) const override
 	{
 		visitor.visit(*this);
@@ -99,6 +110,15 @@ struct ObjectReadExpression : Expression
 	std::unique_ptr<Expression> object;
 	/** Reference name */
 	std::string reference_name;
+
+	ObjectReadExpression
+	(
+		std::unique_ptr<Expression> object,
+		std::string reference_name
+	) :
+		object(std::move(object)),
+		reference_name(std::move(reference_name))
+	{}
 
 	void accept(ASTVisitor& visitor) const override
 	{
@@ -116,6 +136,15 @@ struct FunctionCall : Expression
 	/** Parameter values */
 	std::vector<std::unique_ptr<Expression>> parameters;
 
+	FunctionCall
+	(
+		std::string function_name,
+		std::vector<std::unique_ptr<Expression>> parameters
+	) :
+		function_name(std::move(function_name)),
+		parameters(std::move(parameters))
+	{}
+
 	void accept(ASTVisitor& visitor) const override
 	{
 		visitor.visit(*this);
@@ -127,6 +156,13 @@ struct ReadExpression : Expression
 {
 	/** Reference name */
 	std::string reference_name;
+
+	ReadExpression
+	(
+		std::string reference_namereference_name
+	) :
+		reference_name(std::move(reference_name))
+	{}
 
 	void accept(ASTVisitor& visitor) const override
 	{
