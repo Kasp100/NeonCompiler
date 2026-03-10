@@ -13,7 +13,7 @@ namespace neon_compiler::ast::nodes
 
 struct DiscardExpression : Statement
 {
-    /** The expression which will be evaluated, discarding the result. Typically done with `void` calls. */
+	/** The expression which will be evaluated, discarding the result. Typically done with `void` calls. */
 	std::unique_ptr<Expression> expression;
 
 	void accept(ASTVisitor& visitor) const override
@@ -25,7 +25,7 @@ struct DiscardExpression : Statement
 struct LocalDeclaration : Statement
 {
 	/** The variable declaration within this statement */
-    VariableDeclaration variable_declaration;
+	VariableDeclaration variable_declaration;
 
 	void accept(ASTVisitor& visitor) const override
 	{
@@ -49,7 +49,7 @@ struct AutoCall : Statement
 
 struct Return : Statement
 {
-    /** Optional return value. `nullptr` means void is returned. */
+	/** Optional return value. `nullptr` means void is returned. */
 	std::unique_ptr<Expression> value;
 
 	Return(std::unique_ptr<Expression> value)
@@ -63,9 +63,9 @@ struct Return : Statement
 
 struct Assignment : Expression
 {
-    /** Reference being assigned */
-    std::string variable_name;
-    /** New value */
+	/** Reference being assigned */
+	std::string variable_name;
+	/** New value */
 	std::unique_ptr<Expression> expression;
 
 	void accept(ASTVisitor& visitor) const override
@@ -78,22 +78,32 @@ struct Assignment : Expression
  * Example: `background_colour.darker()`, here `background_colour` is a simple read expression */
 struct ObjectFunctionCall : Expression
 {
-    /** The object */
-    std::unique_ptr<Expression> object;
-    /** Function name */
-    std::string function_name;
+	/** The object */
+	std::unique_ptr<Expression> object;
+	/** Function name */
+	std::string function_name;
 	/** Parameter values */
 	std::vector<std::unique_ptr<Expression>> parameters;
+
+	void accept(ASTVisitor& visitor) const override
+	{
+		visitor.visit(*this);
+	}
 };
 
 /** Represents a read from a value from an expression.
  * Example: `background_colour.red`, here `background_colour` is a simple read expression */
 struct ObjectReadExpression : Expression
 {
-    /** The object */
-    std::unique_ptr<Expression> object;
-    /** Reference name */
-    std::string reference_name;
+	/** The object */
+	std::unique_ptr<Expression> object;
+	/** Reference name */
+	std::string reference_name;
+
+	void accept(ASTVisitor& visitor) const override
+	{
+		visitor.visit(*this);
+	}
 };
 
 /** Represents a simple call to a constructor, pure function, method (if this is inside a type), or entrypoint.
@@ -101,17 +111,27 @@ struct ObjectReadExpression : Expression
  * which takes a single string. */
 struct FunctionCall : Expression
 {
-    /** Function name */
-    std::string function_name;
+	/** Function name */
+	std::string function_name;
 	/** Parameter values */
 	std::vector<std::unique_ptr<Expression>> parameters;
+
+	void accept(ASTVisitor& visitor) const override
+	{
+		visitor.visit(*this);
+	}
 };
 
 /** Represents a read from local variable, a constant, or a field (if this is inside a class), e.g. `speed` */
 struct ReadExpression : Expression
 {
-    /** Reference name */
-    std::string reference_name;
+	/** Reference name */
+	std::string reference_name;
+
+	void accept(ASTVisitor& visitor) const override
+	{
+		visitor.visit(*this);
+	}
 };
 
 struct OptFunctionCall : Expression

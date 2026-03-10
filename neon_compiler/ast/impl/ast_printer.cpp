@@ -83,22 +83,22 @@ void ASTPrinter::visit(const nodes::Assignment& node)
 
 }
 
-void ASTPrinter::visit(const nodes::StaticFunctionCall& node)
+void ASTPrinter::visit(const nodes::ObjectFunctionCall& node)
 {
 
 }
 
-void ASTPrinter::visit(const nodes::MethodCall& node)
+void ASTPrinter::visit(const nodes::ObjectReadExpression& node)
 {
 
 }
 
-void ASTPrinter::visit(const nodes::StaticFieldCall& node)
+void ASTPrinter::visit(const nodes::FunctionCall& node)
 {
 
 }
 
-void ASTPrinter::visit(const nodes::ReferenceCall& node)
+void ASTPrinter::visit(const nodes::ReadExpression& node)
 {
 
 }
