@@ -104,14 +104,14 @@ struct ObjectFunctionCall : Expression
 
 /** Represents a read from a value from an expression.
  * Example: `background_colour.red`, here `background_colour` is a simple read expression */
-struct ObjectReadExpression : Expression
+struct ObjectRead : Expression
 {
 	/** The object */
 	std::unique_ptr<Expression> object;
 	/** Reference name */
 	std::string reference_name;
 
-	ObjectReadExpression
+	ObjectRead
 	(
 		std::unique_ptr<Expression> object,
 		std::string reference_name
@@ -152,12 +152,12 @@ struct FunctionCall : Expression
 };
 
 /** Represents a read from local variable, a constant, or a field (if this is inside a class), e.g. `speed` */
-struct ReadExpression : Expression
+struct SimpleRead : Expression
 {
 	/** Reference name */
 	std::string reference_name;
 
-	ReadExpression
+	SimpleRead
 	(
 		std::string reference_namereference_name
 	) :

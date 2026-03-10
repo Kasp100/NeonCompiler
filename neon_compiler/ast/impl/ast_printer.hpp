@@ -25,9 +25,9 @@ public:
 	void visit(const nodes::Return& node) override;
 	void visit(const nodes::Assignment& node) override;
 	void visit(const nodes::ObjectFunctionCall& node) override;
-	void visit(const nodes::ObjectReadExpression& node) override;
+	void visit(const nodes::ObjectRead& node) override;
 	void visit(const nodes::FunctionCall& node) override;
-	void visit(const nodes::ReadExpression& node) override;
+	void visit(const nodes::SimpleRead& node) override;
 	void visit(const nodes::OptFunctionCall& node) override;
 	void visit(const nodes::OptEmpty& node) override;
 	void visit(const nodes::PureFunctionSet& node) override;

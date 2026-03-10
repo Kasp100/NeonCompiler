@@ -22,9 +22,9 @@ namespace neon_compiler::ast::nodes
 	struct Return;
 	struct Assignment;
 	struct ObjectFunctionCall;
-	struct ObjectReadExpression;
+	struct ObjectRead;
 	struct FunctionCall;
-	struct ReadExpression;
+	struct SimpleRead;
 	struct OptFunctionCall;
 	struct OptEmpty;
 	struct PureFunctionSet;
@@ -58,9 +58,9 @@ public:
 	virtual void visit(const nodes::Return& node) = 0;
 	virtual void visit(const nodes::Assignment& node) = 0;
 	virtual void visit(const nodes::ObjectFunctionCall& node) = 0;
-	virtual void visit(const nodes::ObjectReadExpression& node) = 0;
+	virtual void visit(const nodes::ObjectRead& node) = 0;
 	virtual void visit(const nodes::FunctionCall& node) = 0;
-	virtual void visit(const nodes::ReadExpression& node) = 0;
+	virtual void visit(const nodes::SimpleRead& node) = 0;
 	virtual void visit(const nodes::OptFunctionCall& node) = 0;
 	virtual void visit(const nodes::OptEmpty& node) = 0;
 	virtual void visit(const nodes::PureFunctionSet& node) = 0;

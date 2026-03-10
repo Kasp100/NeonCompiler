@@ -88,7 +88,7 @@ void ASTPrinter::visit(const nodes::ObjectFunctionCall& node)
 
 }
 
-void ASTPrinter::visit(const nodes::ObjectReadExpression& node)
+void ASTPrinter::visit(const nodes::ObjectRead& node)
 {
 
 }
@@ -98,7 +98,7 @@ void ASTPrinter::visit(const nodes::FunctionCall& node)
 
 }
 
-void ASTPrinter::visit(const nodes::ReadExpression& node)
+void ASTPrinter::visit(const nodes::SimpleRead& node)
 {
 
 }
