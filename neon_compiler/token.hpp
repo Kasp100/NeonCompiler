@@ -26,6 +26,7 @@ enum class TokenType
 	END_STATEMENT,
 	COMMA,
 	COLON,
+	DOT,
 	PACKAGE,
 	IMPORT,
 	STATIC_ACCESSOR,
