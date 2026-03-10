@@ -63,10 +63,17 @@ struct Return : Statement
 
 struct Assignment : Expression
 {
-	/** Reference being assigned */
-	std::string variable_name;
-	/** New value */
-	std::unique_ptr<Expression> expression;
+	std::unique_ptr<Expression> target;
+	std::unique_ptr<Expression> value;
+
+	Assignment
+	(
+		std::unique_ptr<Expression> target,
+		std::unique_ptr<Expression> value
+	) :
+		target(std::move(target)),
+		value(std::move(value))
+	{}
 
 	void accept(ASTVisitor& visitor) const override
 	{
