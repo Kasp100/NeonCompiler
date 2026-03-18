@@ -627,6 +627,28 @@ std::unique_ptr<Expression> Parser::parse_expression()
 		return nullptr;
 	}
 
+	int parsing_idx = 0;
+
+	std::string identifier{};
+	while(parsing_idx < expression_tokens.size() && expression_tokens[parsing_idx].get_type() == TokenType::IDENTIFIER)
+	{
+		identifier += reader.peek().get_lexeme().value();
+		report_token(AnalysisEntryType::REFERENCE, AnalysisSeverity::INFO, expression_tokens[parsing_idx]);
+		parsing_idx++;
+
+		if(parsing_idx < expression_tokens.size() && expression_tokens[parsing_idx].get_type() == TokenType::STATIC_ACCESSOR)
+		{
+			identifier += "::";
+			reader.peek();
+			report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, expression_tokens[parsing_idx]);
+			parsing_idx++;
+		}
+		else
+		{
+			break;
+		}
+	}
+
 	// TODO
 	return nullptr;
 }
