@@ -598,7 +598,7 @@ std::unique_ptr<Statement> Parser::parse_return_statement()
 }
 
 std::unique_ptr<Expression> Parser::parse_expression()
-{
+{/*
 	std::vector<Token> expression_tokens{};
 
 	bool postfix_brackets{false};
@@ -647,7 +647,7 @@ std::unique_ptr<Expression> Parser::parse_expression()
 		{
 			break;
 		}
-	}
+	}*/
 
 	// TODO
 	return nullptr;
