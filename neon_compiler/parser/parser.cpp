@@ -39,7 +39,7 @@ std::shared_ptr<neon_compiler::ast::nodes::Root> Parser::get_root_node() const
 
 void Parser::report_token(AnalysisEntryType type, AnalysisSeverity severity, const Token& token, std::optional<std::string> info)
 {
-	analysis_reporter->report(AnalysisEntry{type, severity, token.get_source_position(), token.get_length(), info});
+	analysis_reporter->report(AnalysisEntry{file, type, severity, token.get_source_position(), token.get_length(), info});
 }
 
 void Parser::append_ast(std::unique_ptr<PackageMember> node, const std::string& identifier)

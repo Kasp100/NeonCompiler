@@ -11,6 +11,8 @@ ConsoleAnalysisReporter::ConsoleAnalysisReporter(const std::string& file, std::o
 void ConsoleAnalysisReporter::report(const AnalysisEntry& entry)
 {
 	out << "[A] "
+		<< entry.file
+		<< " "
 		<< analysis_severity_to_string(entry.severity)
 		<< " "
 		<< analysis_entry_type_to_string(entry.type)

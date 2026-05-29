@@ -30,6 +30,7 @@ enum class AnalysisSeverity
 
 struct AnalysisEntry
 {
+	const std::string_view file;
 	const AnalysisEntryType type;
 	const AnalysisSeverity severity;
 	const reading::SourcePosition source_position;
