@@ -370,8 +370,6 @@ std::vector<std::unique_ptr<ExpressionGrammarPatternPart>> Parser::parse_express
 
 	while(!reader.end_of_file_reached() && reader.peek().get_type() != TokenType::BRACKET_CURLY_OPEN)
 	{
-		report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
-
 		if(reader.peek().get_type() == TokenType::BRACKET_ROUND_OPEN)
 		{
 			report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
