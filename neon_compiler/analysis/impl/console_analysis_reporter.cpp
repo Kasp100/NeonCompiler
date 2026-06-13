@@ -5,7 +5,7 @@ using namespace neon_compiler::analysis::impl;
 ConsoleAnalysisReporter::ConsoleAnalysisReporter(const std::string& file, std::ostream& out)
 		: file{file}, out(out)
 {
-	out << "[AH] file, offset_in_file, newlines_count, offset_in_line, length\n";
+	out << "[AH] file, severity, entry_type, offset_in_file, newlines_count, offset_in_line, length\n";
 }
 	
 void ConsoleAnalysisReporter::report(const AnalysisEntry& entry)
