@@ -469,6 +469,7 @@ std::optional<VariableDeclaration> Parser::parse_variable_declaration(Mutability
 	std::string ref_name{error_recovery::PLACEHOLDER_NAME};
 	if(reader.peek().get_type() == TokenType::IDENTIFIER)
 	{
+		report_token(AnalysisEntryType::DECLARATION, AnalysisSeverity::INFO, reader.peek());
 		ref_name = reader.consume().get_lexeme().value();
 	}
 	else
