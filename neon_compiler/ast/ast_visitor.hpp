@@ -29,8 +29,8 @@ namespace neon_compiler::ast::nodes
 	struct OptEmpty;
 	struct PureFunctionSet;
 	struct PureFunction;
-	struct ExpressionGrammar;
-	struct ExpressionGrammarRule;
+	struct OperatorFunctionSet;
+	struct OperatorFunction;
 	struct TokenPattern;
 	struct ParameterPattern;
 	struct CompileFunction;
@@ -68,8 +68,8 @@ public:
 	virtual void visit(const nodes::OptEmpty& node) = 0;
 	virtual void visit(const nodes::PureFunctionSet& node) = 0;
 	virtual void visit(const nodes::PureFunction& node) = 0;
-	virtual void visit(const nodes::ExpressionGrammar& node) = 0;
-	virtual void visit(const nodes::ExpressionGrammarRule& node) = 0;
+	virtual void visit(const nodes::OperatorFunctionSet& node) = 0;
+	virtual void visit(const nodes::OperatorFunction& node) = 0;
 	virtual void visit(const nodes::TokenPattern& node) = 0;
 	virtual void visit(const nodes::ParameterPattern& node) = 0;
 	virtual void visit(const nodes::CompileFunction& node) = 0;

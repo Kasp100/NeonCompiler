@@ -237,10 +237,10 @@ void Parser::parse_expected_package_member(const Access& access)
 	{
 		report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
 	}
-	else if(reader.peek().get_type() == TokenType::PACKAGE_MEMBER_EXPRESSION_GRAMMAR)
+	else if(reader.peek().get_type() == TokenType::PACKAGE_MEMBER_OPERATOR_FUNCTION_SET)
 	{
 		report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
-		parse_and_register_expected_expression_grammar(access);
+		parse_and_register_expected_operator_function_set(access);
 	}
 	else if(reader.peek().get_type() == TokenType::PACKAGE_MEMBER_COMPILE_FUNCTION)
 	{
@@ -304,7 +304,7 @@ void Parser::parse_and_register_expected_entrypoint(const Access& access)
 }
 
 // TODO: write tests for this
-void Parser::parse_and_register_expected_expression_grammar(const Access& access)
+void Parser::parse_and_register_expected_operator_function_set(const Access& access)
 {
 	const std::string name = parse_expected_declaration_name(AnalysisEntryType::DECLARATION);
 
@@ -317,32 +317,24 @@ void Parser::parse_and_register_expected_expression_grammar(const Access& access
 		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(), std::string{error_messages::MISSING_CODE_BLOCK});
 	}
 
-	std::vector<ExpressionGrammarRule> rules{};
+	std::vector<OperatorFunction> functions{};
 
-	while(reader.peek().get_type() == TokenType::LITERAL_NUMBER || reader.peek().get_type() == TokenType::IDENTIFIER)
+	while(reader.peek().get_type() == TokenType::IDENTIFIER)
 	{
-		uint subordination = 0;
-		if(reader.peek().get_type() == TokenType::LITERAL_NUMBER)
-		{
-			report_token(AnalysisEntryType::LITERAL_NUMBER, AnalysisSeverity::INFO, reader.peek());
-			subordination = std::stoi(std::string{reader.consume().get_lexeme().value()});
-		}
-
 		std::optional<ReferenceType> return_value = parse_reference_type(MutabilityMode::BORROW);
 		if(!return_value.has_value())
 		{
 			report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(), std::string{error_messages::INVALID_REFERENCE_TYPE});
 		}
 
-		std::vector<std::unique_ptr<ExpressionGrammarPatternPart>> pattern = parse_expression_grammar_pattern();
+		std::vector<std::unique_ptr<OperatorFunctionPatternPart>> pattern = parse_operator_function_pattern();
 		if(reader.end_of_file_reached()) { return; }
 
 		report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume()); // Consume the `{`
 		CodeBlock body = parse_code_block_until_end();
 
-		rules.emplace_back
+		functions.emplace_back
 		(
-			subordination,
 			return_value.value_or(ReferenceType{false, MutabilityMode::BORROW, false, std::string{error_recovery::PLACEHOLDER_TYPE}}),
 			std::move(pattern),
 			std::move(body)
@@ -355,18 +347,18 @@ void Parser::parse_and_register_expected_expression_grammar(const Access& access
 	}
 	else
 	{
-		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(), std::string{error_messages::INVALID_EXPRESSION_GRAMMAR_RULE_OR_MISSING_CLOSING_BRACKET});
+		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(), std::string{error_messages::INVALID_OPERATOR_FUNCTION_SET_RULE_OR_MISSING_CLOSING_BRACKET});
 		// TODO: go to synchronisation token (create a helper method for this)
 	}
 
-	std::unique_ptr<PackageMember> package_member = std::make_unique<ExpressionGrammar>(access, std::move(rules));
+	std::unique_ptr<PackageMember> package_member = std::make_unique<OperatorFunctionSet>(access, std::move(functions));
 
 	append_ast(std::move(package_member), name);
 }
 
-std::vector<std::unique_ptr<ExpressionGrammarPatternPart>> Parser::parse_expression_grammar_pattern()
+std::vector<std::unique_ptr<OperatorFunctionPatternPart>> Parser::parse_operator_function_pattern()
 {
-	std::vector<std::unique_ptr<ExpressionGrammarPatternPart>> pattern{};
+	std::vector<std::unique_ptr<OperatorFunctionPatternPart>> pattern{};
 
 	while(!reader.end_of_file_reached() && reader.peek().get_type() != TokenType::BRACKET_CURLY_OPEN)
 	{

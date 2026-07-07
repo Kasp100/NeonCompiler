@@ -244,15 +244,15 @@ struct PureFunction : ASTNode
 	}
 };
 
-struct ExpressionGrammar : PackageMember
+struct OperatorFunctionSet : PackageMember
 {
 	/** The access which determines who can use this expression grammar */
 	Access access;
 	/** Expression grammar set rules */
-	std::vector<ExpressionGrammarRule> rules;
+	std::vector<OperatorFunction> functions;
 
-	ExpressionGrammar(Access access, std::vector<ExpressionGrammarRule>&& rules)
-		: access{access}, rules{std::move(rules)} {}
+	OperatorFunctionSet(Access access, std::vector<OperatorFunction>&& functions)
+		: access{access}, functions{std::move(functions)} {}
 
 	void accept(ASTVisitor& visitor) const override
 	{
@@ -260,9 +260,9 @@ struct ExpressionGrammar : PackageMember
 	}
 };
 
-struct ExpressionGrammarPatternPart : ASTNode {};
+struct OperatorFunctionPatternPart : ASTNode {};
 
-struct TokenPattern : ExpressionGrammarPatternPart
+struct TokenPattern : OperatorFunctionPatternPart
 {
 	/** Token that needs to match */
 	neon_compiler::Token token;
@@ -276,7 +276,7 @@ struct TokenPattern : ExpressionGrammarPatternPart
 	}
 };
 
-struct ParameterPattern : ExpressionGrammarPatternPart
+struct ParameterPattern : OperatorFunctionPatternPart
 {
 	/** Parameter */
 	VariableDeclaration parameter;
@@ -290,19 +290,17 @@ struct ParameterPattern : ExpressionGrammarPatternPart
 	}
 };
 
-struct ExpressionGrammarRule : ASTNode
+struct OperatorFunction : ASTNode
 {
-	/** Subordination: e.g. `+` has a higher subordination (less precedence) than `*` */
-	uint subordination;
 	/** The reference type this pure function returns. */
 	ReferenceType reference_type;
 	/** Pattern to match */
-	std::vector<std::unique_ptr<ExpressionGrammarPatternPart>> pattern;
+	std::vector<std::unique_ptr<OperatorFunctionPatternPart>> pattern;
 	/** Function body */
 	CodeBlock body;
 
-	ExpressionGrammarRule(uint subordination, ReferenceType reference_type,	std::vector<std::unique_ptr<ExpressionGrammarPatternPart>>&& pattern, CodeBlock&& body)
-	: subordination{subordination}, reference_type{reference_type}, pattern{std::move(pattern)}, body{std::move(body)} {}
+	OperatorFunction(ReferenceType reference_type,	std::vector<std::unique_ptr<OperatorFunctionPatternPart>>&& pattern, CodeBlock&& body)
+	: reference_type{reference_type}, pattern{std::move(pattern)}, body{std::move(body)} {}
 
 	void accept(ASTVisitor& visitor) const override
 	{
