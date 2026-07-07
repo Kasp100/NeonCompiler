@@ -257,19 +257,21 @@ struct OperatorFunctionPatternPart {};
 
 struct TokenPattern : OperatorFunctionPatternPart, OperatorSyntaxPatternPart
 {
-	/** Token that needs to match */
-	neon_compiler::Token token;
+	/** Token type that needs to match */
+	neon_compiler::TokenType token_type;
+	/** The optional lexeme that needs to match */
+	std::optional<std::string> lexeme;
 	
-	TokenPattern(Token token)
-	: token{token} {}
+	TokenPattern(neon_compiler::TokenType token_type, std::optional<std::string> lexeme)
+	: token_type{token_type}, lexeme{std::move(lexeme)} {}
 };
 
-struct OperatorParameter : OperatorSyntaxPatternPart
+struct OperatorSyntaxParameter : OperatorSyntaxPatternPart
 {
-	/** Name of the token */
+	/** Name of the parameter */
 	std::string name;
 	
-	OperatorParameter(std::string name)
+	OperatorSyntaxParameter(std::string name)
 	: name{std::move(name)} {}
 };
 
