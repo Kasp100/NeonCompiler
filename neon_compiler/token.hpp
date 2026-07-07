@@ -66,6 +66,7 @@ enum class TokenType
 	BOOL_TRUE,
 	BOOL_FALSE,
 	RETURN_TYPE_VOID,
+	STMT_USE,
 	STMT_IF,
 	STMT_ELSE,
 	STMT_FOR,

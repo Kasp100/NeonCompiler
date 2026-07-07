@@ -88,6 +88,7 @@ std::optional<TokenType> Token::keyword_to_token_type(std::string_view word)
 	else if (word == "true")                  return TokenType::BOOL_TRUE;
 	else if (word == "false")                 return TokenType::BOOL_FALSE;
 	else if (word == "void")                  return TokenType::RETURN_TYPE_VOID;
+	else if (word == "use")                   return TokenType::STMT_USE;
 	else if (word == "if")                    return TokenType::STMT_IF;
 	else if (word == "else")                  return TokenType::STMT_ELSE;
 	else if (word == "for")                   return TokenType::STMT_FOR;
