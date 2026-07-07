@@ -55,7 +55,7 @@ std::optional<neon_compiler::ast::Identifier> Parser::parse_identifier(AnalysisE
 	std::vector<std::string> parts{};
 	std::vector<Token> tokens{};
 
-	bool continue_reading = true;
+	bool continue_reading{true};
 	do
 	{
 		if(reader.peek().get_type() != TokenType::IDENTIFIER)
@@ -596,58 +596,159 @@ std::unique_ptr<Statement> Parser::parse_return_statement()
 	return std::make_unique<Return>(std::move(value));
 }
 
-std::unique_ptr<Expression> Parser::parse_expression()
-{/*
-	std::vector<Token> expression_tokens{};
+std::unique_ptr<Expression> Parser::parse_expression(int max_subordination)
+{
+	// Implements Pratt parsing, but with subordination instead of precedence
 
-	bool postfix_brackets{false};
-	bool postfix_dot{false};
+	std::unique_ptr<Expression> left = parse_prefix_expression();
 
-	while(!reader.end_of_file_reached() &&
-		// Check token types that end expressions
-		reader.peek().get_type() != TokenType::END_STATEMENT &&
-		reader.peek().get_type() != TokenType::COMMA &&
-		reader.peek().get_type() != TokenType::BRACKET_ROUND_CLOSE)
+	while(true)
 	{
-		if(reader.peek().get_type() == TokenType::BRACKET_ROUND_OPEN) { postfix_brackets = true; break; }
-		if(reader.peek().get_type() == TokenType::DOT) { postfix_dot = true; break; }
-		expression_tokens.push_back(reader.consume());
+		int sl = subordination_level(reader.peek().get_type());
+
+		if(sl > max_subordination) { break; }
+
+		left = parse_infix_or_postfix_expression(std::move(left));
 	}
 
-	bool postfix = postfix_brackets || postfix_dot;
+	return left;
+}
 
-	if(postfix)
+int Parser::subordination_level(const TokenType token_type)
+{
+	// TODO
+	return 0;
+}
+
+std::unique_ptr<Expression> Parser::parse_prefix_expression()
+{
+	if(reader.peek().get_type() == TokenType::LITERAL_NUMBER)
+	{
+		return std::move
+		(
+			std::make_unique<LiteralNumberExpression>
+			(
+				std::string{reader.consume().get_lexeme().value()}
+			)
+		);
+	}
+
+	if(reader.peek().get_type() == TokenType::LITERAL_STRING)
+	{
+		return std::move
+		(
+			std::make_unique<LiteralStringExpression>
+			(
+				std::string{reader.consume().get_lexeme().value()}
+			)
+		);
+	}
+
+	if(reader.peek().get_type() == TokenType::BOOL_TRUE)
+	{
+		return std::move
+		(
+			std::make_unique<LiteralBooleanExpression>(true)
+		);
+	}
+
+	if(reader.peek().get_type() == TokenType::BOOL_FALSE)
+	{
+		return std::move
+		(
+			std::make_unique<LiteralBooleanExpression>(false)
+		);
+	}
+
+	if(reader.peek().get_type() == TokenType::IDENTIFIER)
+	{
+		return parse_named_expression();
+	}
+
+	if(reader.peek().get_type() == TokenType::BRACKET_ROUND_OPEN)
 	{
 		report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
-	}
 
-	if(expression_tokens.size() < 1)
-	{
-		return nullptr;
-	}
-
-	int parsing_idx = 0;
-
-	std::string identifier{};
-	while(parsing_idx < expression_tokens.size() && expression_tokens[parsing_idx].get_type() == TokenType::IDENTIFIER)
-	{
-		identifier += reader.peek().get_lexeme().value();
-		report_token(AnalysisEntryType::REFERENCE, AnalysisSeverity::INFO, expression_tokens[parsing_idx]);
-		parsing_idx++;
-
-		if(parsing_idx < expression_tokens.size() && expression_tokens[parsing_idx].get_type() == TokenType::STATIC_ACCESSOR)
+		std::unique_ptr<Expression> expr = parse_expression();
+		if(reader.peek().get_type() == TokenType::BRACKET_ROUND_CLOSE)
 		{
-			identifier += "::";
-			reader.peek();
-			report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, expression_tokens[parsing_idx]);
-			parsing_idx++;
+			report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
 		}
 		else
 		{
-			break;
+			report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(), std::string{error_messages::INVALID_CALL_EXPRESSION__EXPECTED_CLOSING_BRACKET});
 		}
-	}*/
 
+		return expr;
+	}
+
+	report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(), std::string{error_messages::INVALID_EXPRESSION});
+
+	return nullptr;
+}
+
+std::unique_ptr<Expression> Parser::parse_named_expression()
+{
+	// At this point, an identifier should be guaranteed
+	neon_compiler::ast::Identifier id{parse_identifier(AnalysisEntryType::REFERENCE, AnalysisSeverity::INFO).value()};
+
+	if(reader.peek().get_type() != TokenType::BRACKET_ROUND_OPEN)
+	{
+		return std::move
+		(
+			std::make_unique<SimpleRead>(id.to_string())
+		);
+	}
+
+	report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
+
+	std::vector<std::unique_ptr<Expression>> argument_expressions{};
+	
+	if(reader.peek().get_type() != TokenType::BRACKET_ROUND_CLOSE)
+	{
+		argument_expressions = parse_argument_expressions();
+	}
+
+	report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume()); // Consume the `)`
+
+	return std::move
+	(
+		std::make_unique<FunctionCall>(id.to_string(), std::move(argument_expressions))
+	);
+}
+
+std::vector<std::unique_ptr<Expression>> Parser::parse_argument_expressions()
+{
+	std::vector<std::unique_ptr<Expression>> argument_expressions{};
+
+	while(!reader.end_of_file_reached())
+	{
+		argument_expressions.push_back(std::move(parse_expression()));
+
+		if(reader.peek().get_type() == TokenType::BRACKET_ROUND_CLOSE)
+		{
+			return argument_expressions;
+		}
+
+		if(reader.peek().get_type() != TokenType::COMMA)
+		{
+			report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::ERROR, reader.consume(), std::string{error_messages::INVALID_ARGUMENT_LIST__EXPECTED_COMMA_OR_CLOSING_BRACKET});
+		}
+		else
+		{
+			report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
+		}
+	}
+
+	report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::ERROR, reader.consume(), std::string{error_messages::UNEXPECTED_END_OF_FILE_IN_ARGUMENT_LIST});
+
+	return argument_expressions;
+}
+
+std::unique_ptr<Expression> Parser::parse_infix_or_postfix_expression(std::unique_ptr<Expression> left)
+{
 	// TODO
 	return nullptr;
 }
+
+

@@ -37,6 +37,9 @@ public:
 	void visit(const nodes::TokenPattern& node) override;
 	void visit(const nodes::ParameterPattern& node) override;
 	void visit(const nodes::CompileFunction& node) override;
+	void visit(const nodes::LiteralNumberExpression& node) override;
+	void visit(const nodes::LiteralStringExpression& node) override;
+	void visit(const nodes::LiteralBooleanExpression& node) override;
 private:
 	static void print_access(const nodes::Access& a);
 	static void print_package_member_pattern(const nodes::PackageMemberPattern& pmp);

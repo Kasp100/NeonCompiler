@@ -148,6 +148,21 @@ void ASTPrinter::visit(const nodes::CompileFunction& node)
 
 }
 
+void ASTPrinter::visit(const nodes::LiteralNumberExpression& node)
+{
+
+}
+
+void ASTPrinter::visit(const nodes::LiteralStringExpression& node)
+{
+
+}
+
+void ASTPrinter::visit(const nodes::LiteralBooleanExpression& node)
+{
+
+}
+
 void ASTPrinter::print_access(const nodes::Access& a)
 {
 	switch (a.type)

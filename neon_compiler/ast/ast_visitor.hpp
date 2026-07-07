@@ -34,6 +34,9 @@ namespace neon_compiler::ast::nodes
 	struct TokenPattern;
 	struct ParameterPattern;
 	struct CompileFunction;
+	struct LiteralNumberExpression;
+	struct LiteralStringExpression;
+	struct LiteralBooleanExpression;
 }
 
 namespace neon_compiler::ast
@@ -70,6 +73,9 @@ public:
 	virtual void visit(const nodes::TokenPattern& node) = 0;
 	virtual void visit(const nodes::ParameterPattern& node) = 0;
 	virtual void visit(const nodes::CompileFunction& node) = 0;
+	virtual void visit(const nodes::LiteralNumberExpression& node) = 0;
+	virtual void visit(const nodes::LiteralStringExpression& node) = 0;
+	virtual void visit(const nodes::LiteralBooleanExpression& node) = 0;
 };
 
 }

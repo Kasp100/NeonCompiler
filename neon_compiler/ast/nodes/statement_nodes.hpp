@@ -199,6 +199,48 @@ struct OptEmpty : Expression
 	}
 };
 
+struct LiteralNumberExpression : Expression
+{
+	std::string value;
+
+	LiteralNumberExpression(std::string value)
+		: value{std::move(value)}
+	{}
+
+	void accept(ASTVisitor& visitor) const override
+	{
+		visitor.visit(*this);
+	}
+};
+
+struct LiteralStringExpression : Expression
+{
+	std::string value;
+
+	LiteralStringExpression(std::string value)
+		: value{std::move(value)}
+	{}
+
+	void accept(ASTVisitor& visitor) const override
+	{
+		visitor.visit(*this);
+	}
+};
+
+struct LiteralBooleanExpression : Expression
+{
+	bool value;
+
+	LiteralBooleanExpression(bool value)
+		: value{value}
+	{}
+
+	void accept(ASTVisitor& visitor) const override
+	{
+		visitor.visit(*this);
+	}
+};
+
 }
 
 #endif // STATEMENT_NODES_HPP

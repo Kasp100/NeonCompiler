@@ -55,6 +55,14 @@ namespace error_messages
 		"Expected the parameter declaration to end here with `)`.";
 	constexpr std::string_view INVALID_EXPRESSION_GRAMMAR_RULE_OR_MISSING_CLOSING_BRACKET =
 		"Invalid expression grammar rule or missing `}`. See documentation for custom expression grammar.";
+	constexpr std::string_view INVALID_CALL_EXPRESSION__EXPECTED_CLOSING_BRACKET =
+		"Invalid call expression; expected closing bracket `)`.";
+	constexpr std::string_view INVALID_ARGUMENT_LIST__EXPECTED_COMMA_OR_CLOSING_BRACKET =
+		"Invalid argument list; expected comma or closing bracket after argument.";
+	constexpr std::string_view INVALID_EXPRESSION =
+		"Invalid expression; see documentation about expressions.";
+	constexpr std::string_view UNEXPECTED_END_OF_FILE_IN_ARGUMENT_LIST =
+		"Unexpected end of file in argument list; a closing bracket `)` is missing.";
 }
 
 namespace error_recovery
@@ -106,7 +114,12 @@ private:
 	std::optional<neon_compiler::ast::nodes::ReferenceType> parse_reference_type(neon_compiler::ast::nodes::MutabilityMode default_mutability_mode);
 	neon_compiler::ast::nodes::CodeBlock parse_code_block_until_end();
 	std::unique_ptr<neon_compiler::ast::nodes::Statement> parse_return_statement();
-	std::unique_ptr<neon_compiler::ast::nodes::Expression> parse_expression();
+	std::unique_ptr<neon_compiler::ast::nodes::Expression> parse_expression(int max_subordination = INT_MAX);
+	static int subordination_level(const neon_compiler::TokenType token_type);
+	std::unique_ptr<neon_compiler::ast::nodes::Expression> parse_prefix_expression();
+	std::unique_ptr<neon_compiler::ast::nodes::Expression> parse_named_expression();
+	std::vector<std::unique_ptr<neon_compiler::ast::nodes::Expression>> parse_argument_expressions();
+	std::unique_ptr<neon_compiler::ast::nodes::Expression> parse_infix_or_postfix_expression(std::unique_ptr<neon_compiler::ast::nodes::Expression> left);
 };
 
 }
