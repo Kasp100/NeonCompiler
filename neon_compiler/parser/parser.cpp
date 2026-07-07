@@ -373,7 +373,7 @@ std::vector<std::unique_ptr<OperatorFunctionPatternPart>> Parser::parse_operator
 					std::string{error_recovery::PLACEHOLDER_NAME}}
 				);
 
-			std::unique_ptr<ParameterPattern> parameter_pattern = std::make_unique<ParameterPattern>(parameter);
+			std::unique_ptr<OperatorFunctionParameter> parameter_pattern = std::make_unique<OperatorFunctionParameter>(parameter);
 			pattern.emplace_back(std::move(parameter_pattern));
 
 			if(reader.peek().get_type() == TokenType::BRACKET_ROUND_CLOSE)

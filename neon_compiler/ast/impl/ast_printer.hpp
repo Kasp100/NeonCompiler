@@ -32,10 +32,9 @@ public:
 	void visit(const nodes::OptEmpty& node) override;
 	void visit(const nodes::PureFunctionSet& node) override;
 	void visit(const nodes::PureFunction& node) override;
+	void visit(const nodes::Operator& node) override;
 	void visit(const nodes::OperatorFunctionSet& node) override;
 	void visit(const nodes::OperatorFunction& node) override;
-	void visit(const nodes::TokenPattern& node) override;
-	void visit(const nodes::ParameterPattern& node) override;
 	void visit(const nodes::CompileFunction& node) override;
 	void visit(const nodes::LiteralNumberExpression& node) override;
 	void visit(const nodes::LiteralStringExpression& node) override;

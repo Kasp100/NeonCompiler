@@ -123,22 +123,17 @@ void ASTPrinter::visit(const nodes::PureFunction& node)
 
 }
 
+void ASTPrinter::visit(const nodes::Operator& node)
+{
+
+}
+
 void ASTPrinter::visit(const nodes::OperatorFunctionSet& node)
 {
 
 }
 
 void ASTPrinter::visit(const nodes::OperatorFunction& node)
-{
-
-}
-
-void ASTPrinter::visit(const nodes::TokenPattern& node)
-{
-
-}
-
-void ASTPrinter::visit(const nodes::ParameterPattern& node)
 {
 
 }

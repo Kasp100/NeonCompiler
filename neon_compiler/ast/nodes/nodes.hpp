@@ -244,6 +244,52 @@ struct PureFunction : ASTNode
 	}
 };
 
+enum class OperatorAssociativity
+{
+	UNDEFINED,
+	LEFT,
+	RIGHT
+};
+
+struct OperatorSyntaxPatternPart {};
+
+struct OperatorFunctionPatternPart {};
+
+struct TokenPattern : OperatorFunctionPatternPart, OperatorSyntaxPatternPart
+{
+	/** Token that needs to match */
+	neon_compiler::Token token;
+	
+	TokenPattern(Token token)
+	: token{token} {}
+};
+
+struct OperatorParameter : OperatorSyntaxPatternPart
+{
+	/** Name of the token */
+	std::string name;
+	
+	OperatorParameter(std::string name)
+	: name{std::move(name)} {}
+};
+
+struct Operator : PackageMember
+{
+	// No access here, operators are a special case
+
+	/** The sequence of tokens or parameters which makes this operator */
+	std::vector<std::unique_ptr<OperatorFunctionPatternPart>> pattern;
+	/** Subordination: e.g. `+` has a higher subordination (less precedence) than `*` */
+	uint subordination;
+	/** Associativity with this operator */
+	OperatorAssociativity associativity;
+
+	void accept(ASTVisitor& visitor) const override
+	{
+		visitor.visit(*this);
+	}
+};
+
 struct OperatorFunctionSet : PackageMember
 {
 	/** The access which determines who can use this expression grammar */
@@ -260,41 +306,20 @@ struct OperatorFunctionSet : PackageMember
 	}
 };
 
-struct OperatorFunctionPatternPart : ASTNode {};
-
-struct TokenPattern : OperatorFunctionPatternPart
-{
-	/** Token that needs to match */
-	neon_compiler::Token token;
-	
-	TokenPattern(Token token)
-	: token{token} {}
-
-	void accept(ASTVisitor& visitor) const override
-	{
-		visitor.visit(*this);
-	}
-};
-
-struct ParameterPattern : OperatorFunctionPatternPart
+struct OperatorFunctionParameter : OperatorFunctionPatternPart
 {
 	/** Parameter */
 	VariableDeclaration parameter;
 	
-	ParameterPattern(VariableDeclaration& parameter)
+	OperatorFunctionParameter(VariableDeclaration& parameter)
 	: parameter{std::move(parameter)} {}
-
-	void accept(ASTVisitor& visitor) const override
-	{
-		visitor.visit(*this);
-	}
 };
 
 struct OperatorFunction : ASTNode
 {
 	/** The reference type this pure function returns. */
 	ReferenceType reference_type;
-	/** Pattern to match */
+	/** Pattern to match, must use a valid operator */
 	std::vector<std::unique_ptr<OperatorFunctionPatternPart>> pattern;
 	/** Function body */
 	CodeBlock body;
