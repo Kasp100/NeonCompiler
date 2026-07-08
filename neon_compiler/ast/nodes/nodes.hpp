@@ -123,7 +123,7 @@ struct CodeBlock : ASTNode
 {
 	std::vector<std::unique_ptr<Statement>> statements;
 
-	CodeBlock(std::vector<std::unique_ptr<Statement>>&& statements)
+	CodeBlock(std::vector<std::unique_ptr<Statement>> statements)
 		: statements{std::move(statements)} {}
 
 	void accept(ASTVisitor& visitor) const override
@@ -314,7 +314,7 @@ struct OperatorFunctionSet : PackageMember
 	/** Expression grammar set rules */
 	std::vector<OperatorFunction> functions;
 
-	OperatorFunctionSet(Access access, std::vector<OperatorFunction>&& functions)
+	OperatorFunctionSet(Access access, std::vector<OperatorFunction> functions)
 		: access{access}, functions{std::move(functions)} {}
 
 	void accept(ASTVisitor& visitor) const override
@@ -341,7 +341,7 @@ struct OperatorFunction : ASTNode
 	/** Function body */
 	CodeBlock body;
 
-	OperatorFunction(ReferenceType reference_type,	std::vector<OperatorFunctionPatternElement> pattern, CodeBlock&& body)
+	OperatorFunction(ReferenceType reference_type,	std::vector<OperatorFunctionPatternElement> pattern, CodeBlock body)
 	: reference_type{reference_type}, pattern{std::move(pattern)}, body{std::move(body)} {}
 
 	void accept(ASTVisitor& visitor) const override
