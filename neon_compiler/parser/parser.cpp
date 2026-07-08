@@ -327,7 +327,7 @@ void Parser::parse_and_register_expected_operator_function_set(const Access& acc
 			report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(), std::string{error_messages::INVALID_REFERENCE_TYPE});
 		}
 
-		std::vector<std::unique_ptr<OperatorFunctionPatternPart>> pattern = parse_operator_function_pattern();
+		std::vector<OperatorFunctionPatternElement> pattern = parse_operator_function_pattern();
 		if(reader.end_of_file_reached()) { return; }
 
 		report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume()); // Consume the `{`
@@ -356,9 +356,9 @@ void Parser::parse_and_register_expected_operator_function_set(const Access& acc
 	append_ast(std::move(package_member), name);
 }
 
-std::vector<std::unique_ptr<OperatorFunctionPatternPart>> Parser::parse_operator_function_pattern()
+std::vector<OperatorFunctionPatternElement> Parser::parse_operator_function_pattern()
 {
-	std::vector<std::unique_ptr<OperatorFunctionPatternPart>> pattern{};
+	std::vector<OperatorFunctionPatternElement> pattern{};
 
 	while(!reader.end_of_file_reached() && reader.peek().get_type() != TokenType::BRACKET_CURLY_OPEN)
 	{

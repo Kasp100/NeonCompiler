@@ -108,7 +108,7 @@ private:
 	std::string parse_expected_declaration_name(neon_compiler::analysis::AnalysisEntryType analysis_entry_type);
 	void parse_and_register_expected_entrypoint(const neon_compiler::ast::nodes::Access& access);
 	void parse_and_register_expected_operator_function_set(const neon_compiler::ast::nodes::Access& access);
-	std::vector<std::unique_ptr<neon_compiler::ast::nodes::OperatorFunctionPatternPart>> parse_operator_function_pattern();
+	std::vector<neon_compiler::ast::nodes::OperatorFunctionPatternElement> parse_operator_function_pattern();
 	neon_compiler::ast::nodes::ParameterDeclarationList parse_parameter_declarations();
 	std::optional<neon_compiler::ast::nodes::VariableDeclaration> parse_variable_declaration(neon_compiler::ast::nodes::MutabilityMode default_mutability_mode);
 	std::optional<neon_compiler::ast::nodes::ReferenceType> parse_reference_type(neon_compiler::ast::nodes::MutabilityMode default_mutability_mode);
