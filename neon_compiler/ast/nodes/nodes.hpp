@@ -9,6 +9,7 @@
 #include "../ast_node.hpp"
 #include "../identifiers.hpp"
 #include "../../token.hpp"
+#include <variant>
 
 namespace neon_compiler::ast::nodes
 {
@@ -251,11 +252,7 @@ enum class OperatorAssociativity
 	RIGHT
 };
 
-struct OperatorSyntaxPatternPart {};
-
-struct OperatorFunctionPatternPart {};
-
-struct TokenPattern : OperatorFunctionPatternPart, OperatorSyntaxPatternPart
+struct TokenPattern
 {
 	/** Token type that needs to match */
 	neon_compiler::TokenType token_type;
@@ -266,7 +263,7 @@ struct TokenPattern : OperatorFunctionPatternPart, OperatorSyntaxPatternPart
 	: token_type{token_type}, lexeme{std::move(lexeme)} {}
 };
 
-struct OperatorSyntaxParameter : OperatorSyntaxPatternPart
+struct OperatorSyntaxParameter
 {
 	/** Name of the parameter */
 	std::string name;
@@ -275,16 +272,34 @@ struct OperatorSyntaxParameter : OperatorSyntaxPatternPart
 	: name{std::move(name)} {}
 };
 
+using OperatorSyntaxPatternElement = std::variant<TokenPattern, OperatorSyntaxParameter>;
+
+using OperatorFunctionPatternElement = std::variant<TokenPattern, OperatorFunctionParameter>;
+
+enum class OperatorFixity
+{
+	PREFIX,
+	INFIX,
+	POSTFIX
+};
+
 struct Operator : PackageMember
 {
 	// No access here, operators are a special case
 
+	/** The fixity of the operator: PREFIX, INFIX, POSTFIX */
+	OperatorFixity fixity;
 	/** The sequence of tokens or parameters which makes this operator */
-	std::vector<std::unique_ptr<OperatorFunctionPatternPart>> pattern;
+	std::vector<OperatorSyntaxPatternElement> pattern;
 	/** Subordination: e.g. `+` has a higher subordination (less precedence) than `*` */
 	uint subordination;
 	/** Associativity with this operator */
 	OperatorAssociativity associativity;
+
+	Operator(
+		OperatorFixity fixity, std::vector<OperatorSyntaxPatternElement> pattern,
+		uint subordination, OperatorAssociativity associativity
+	) : fixity{fixity}, pattern{std::move(pattern)}, subordination{subordination}, associativity{associativity} {}
 
 	void accept(ASTVisitor& visitor) const override
 	{
@@ -308,7 +323,7 @@ struct OperatorFunctionSet : PackageMember
 	}
 };
 
-struct OperatorFunctionParameter : OperatorFunctionPatternPart
+struct OperatorFunctionParameter
 {
 	/** Parameter */
 	VariableDeclaration parameter;
@@ -322,11 +337,11 @@ struct OperatorFunction : ASTNode
 	/** The reference type this pure function returns. */
 	ReferenceType reference_type;
 	/** Pattern to match, must use a valid operator */
-	std::vector<std::unique_ptr<OperatorFunctionPatternPart>> pattern;
+	std::vector<OperatorFunctionPatternElement> pattern;
 	/** Function body */
 	CodeBlock body;
 
-	OperatorFunction(ReferenceType reference_type,	std::vector<std::unique_ptr<OperatorFunctionPatternPart>>&& pattern, CodeBlock&& body)
+	OperatorFunction(ReferenceType reference_type,	std::vector<OperatorFunctionPatternElement> pattern, CodeBlock&& body)
 	: reference_type{reference_type}, pattern{std::move(pattern)}, body{std::move(body)} {}
 
 	void accept(ASTVisitor& visitor) const override
