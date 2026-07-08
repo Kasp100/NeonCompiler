@@ -285,19 +285,11 @@ using OperatorSyntaxPatternElement = std::variant<TokenPattern, OperatorSyntaxPa
 
 using OperatorFunctionPatternElement = std::variant<TokenPattern, OperatorFunctionParameter>;
 
-enum class OperatorFixity
-{
-	PREFIX,
-	INFIX,
-	POSTFIX
-};
 
 struct Operator : PackageMember
 {
 	// No access here, operators are a special case
 
-	/** The fixity of the operator: PREFIX, INFIX, POSTFIX */
-	OperatorFixity fixity;
 	/** The sequence of tokens or parameters which makes this operator */
 	std::vector<OperatorSyntaxPatternElement> pattern;
 	/** Subordination: e.g. `+` has a higher subordination (less precedence) than `*` */
@@ -305,10 +297,8 @@ struct Operator : PackageMember
 	/** Associativity with this operator */
 	OperatorAssociativity associativity;
 
-	Operator(
-		OperatorFixity fixity, std::vector<OperatorSyntaxPatternElement> pattern,
-		uint subordination, OperatorAssociativity associativity
-	) : fixity{fixity}, pattern{std::move(pattern)}, subordination{subordination}, associativity{associativity} {}
+	Operator(std::vector<OperatorSyntaxPatternElement> pattern, uint subordination, OperatorAssociativity associativity)
+		: pattern{std::move(pattern)}, subordination{subordination}, associativity{associativity} {}
 
 	void accept(ASTVisitor& visitor) const override
 	{
