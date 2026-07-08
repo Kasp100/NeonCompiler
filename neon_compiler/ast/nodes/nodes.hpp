@@ -247,7 +247,7 @@ struct PureFunction : ASTNode
 
 enum class OperatorAssociativity
 {
-	UNDEFINED,
+	NONE,
 	LEFT,
 	RIGHT
 };
