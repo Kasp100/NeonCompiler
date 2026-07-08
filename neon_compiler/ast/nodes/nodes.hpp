@@ -272,6 +272,15 @@ struct OperatorSyntaxParameter
 	: name{std::move(name)} {}
 };
 
+struct OperatorFunctionParameter
+{
+	/** Parameter */
+	VariableDeclaration parameter;
+	
+	OperatorFunctionParameter(VariableDeclaration& parameter)
+	: parameter{std::move(parameter)} {}
+};
+
 using OperatorSyntaxPatternElement = std::variant<TokenPattern, OperatorSyntaxParameter>;
 
 using OperatorFunctionPatternElement = std::variant<TokenPattern, OperatorFunctionParameter>;
@@ -321,15 +330,6 @@ struct OperatorFunctionSet : PackageMember
 	{
 		visitor.visit(*this);
 	}
-};
-
-struct OperatorFunctionParameter
-{
-	/** Parameter */
-	VariableDeclaration parameter;
-	
-	OperatorFunctionParameter(VariableDeclaration& parameter)
-	: parameter{std::move(parameter)} {}
 };
 
 struct OperatorFunction : ASTNode
