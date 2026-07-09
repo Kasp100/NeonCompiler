@@ -123,7 +123,7 @@ void ASTPrinter::visit(const nodes::PureFunction& node)
 
 }
 
-void ASTPrinter::visit(const nodes::Operator& node)
+void ASTPrinter::visit(const nodes::OperatorDeclaration& node)
 {
 
 }

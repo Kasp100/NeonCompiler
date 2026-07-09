@@ -252,6 +252,12 @@ enum class OperatorAssociativity
 	RIGHT
 };
 
+enum class BuiltinOperatorKind
+{
+	NOT_BUILT_IN,
+	MEMBER_ACCESS
+};
+
 struct TokenPattern
 {
 	/** Token type that needs to match */
@@ -259,7 +265,7 @@ struct TokenPattern
 	/** The optional lexeme that needs to match */
 	std::optional<std::string> lexeme;
 	
-	TokenPattern(neon_compiler::TokenType token_type, std::optional<std::string> lexeme)
+	TokenPattern(neon_compiler::TokenType token_type, std::optional<std::string> lexeme = std::nullopt)
 	: token_type{token_type}, lexeme{std::move(lexeme)} {}
 };
 
@@ -275,9 +281,9 @@ struct OperatorSyntaxParameter
 struct OperatorFunctionParameter
 {
 	/** Parameter */
-	VariableDeclaration parameter;
+	neon_compiler::ast::nodes::VariableDeclaration parameter;
 	
-	OperatorFunctionParameter(VariableDeclaration& parameter)
+	OperatorFunctionParameter(neon_compiler::ast::nodes::VariableDeclaration& parameter)
 	: parameter{std::move(parameter)} {}
 };
 
@@ -285,36 +291,31 @@ using OperatorSyntaxPatternElement = std::variant<TokenPattern, OperatorSyntaxPa
 
 using OperatorFunctionPatternElement = std::variant<TokenPattern, OperatorFunctionParameter>;
 
-
-struct Operator : PackageMember
+struct OperatorDeclaration : PackageMember
 {
 	// No access here, operators are a special case
 
 	/** The sequence of tokens or parameters which makes this operator */
-	std::vector<OperatorSyntaxPatternElement> pattern;
+	std::vector<const OperatorSyntaxPatternElement> pattern;
 	/** Subordination: e.g. `+` has a higher subordination (less precedence) than `*` */
 	uint subordination;
 	/** Associativity with this operator */
 	OperatorAssociativity associativity;
+	/** The kind of built-in operator. NOT_BUILT_IN means it's not built-in. */
+	BuiltinOperatorKind builtin_operator_kind;
 
-	Operator(std::vector<OperatorSyntaxPatternElement> pattern, uint subordination, OperatorAssociativity associativity)
-		: pattern{std::move(pattern)}, subordination{subordination}, associativity{associativity} {}
-
-	void accept(ASTVisitor& visitor) const override
-	{
-		visitor.visit(*this);
-	}
-};
-
-struct OperatorFunctionSet : PackageMember
-{
-	/** The access which determines who can use this expression grammar */
-	Access access;
-	/** Expression grammar set rules */
-	std::vector<OperatorFunction> functions;
-
-	OperatorFunctionSet(Access access, std::vector<OperatorFunction> functions)
-		: access{access}, functions{std::move(functions)} {}
+	OperatorDeclaration
+	(
+		std::vector<const OperatorSyntaxPatternElement> pattern,
+		uint subordination,
+		OperatorAssociativity associativity,
+		BuiltinOperatorKind builtin_operator_kind
+	) :
+		pattern{std::move(pattern)},
+		subordination{subordination},
+		associativity{associativity},
+		builtin_operator_kind{builtin_operator_kind}
+	{}
 
 	void accept(ASTVisitor& visitor) const override
 	{
@@ -333,6 +334,22 @@ struct OperatorFunction : ASTNode
 
 	OperatorFunction(ReferenceType reference_type,	std::vector<OperatorFunctionPatternElement> pattern, CodeBlock body)
 	: reference_type{reference_type}, pattern{std::move(pattern)}, body{std::move(body)} {}
+
+	void accept(ASTVisitor& visitor) const override
+	{
+		visitor.visit(*this);
+	}
+};
+
+struct OperatorFunctionSet : PackageMember
+{
+	/** The access which determines who can use this expression grammar */
+	Access access;
+	/** Expression grammar set rules */
+	std::vector<OperatorFunction> functions;
+
+	OperatorFunctionSet(Access access, std::vector<OperatorFunction> functions)
+		: access{access}, functions{std::move(functions)} {}
 
 	void accept(ASTVisitor& visitor) const override
 	{
