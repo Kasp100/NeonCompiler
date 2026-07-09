@@ -11,7 +11,7 @@ void Operator::validate()
 
 	if(pattern.size() < PATTERN_MIN_SIZE)
 	{
-		throw std::invalid_argument(std::string{operator_error_messages::TOO_FEW_PATTERN_ELEMENTS});
+		throw std::invalid_argument{std::string{operator_error_messages::TOO_FEW_PATTERN_ELEMENTS}};
 	}
 
 	bool ends_with_param = std::holds_alternative<OperatorSyntaxParameter>(pattern[pattern.size() - 1]);
@@ -36,7 +36,7 @@ void Operator::validate()
 		}
 		else
 		{
-			throw std::invalid_argument(std::string{operator_error_messages::OUTSIDE_PARAMETER_MISSING});
+			throw std::invalid_argument{std::string{operator_error_messages::OUTSIDE_PARAMETER_MISSING}};
 		}
 	}
 }
