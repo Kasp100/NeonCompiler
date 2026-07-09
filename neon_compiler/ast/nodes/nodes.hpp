@@ -296,7 +296,7 @@ struct OperatorDeclaration : PackageMember
 	// No access here, operators are a special case
 
 	/** The sequence of tokens or parameters which makes this operator */
-	std::vector<const OperatorSyntaxPatternElement> pattern;
+	std::vector<OperatorSyntaxPatternElement> pattern;
 	/** Subordination: e.g. `+` has a higher subordination (less precedence) than `*` */
 	uint subordination;
 	/** Associativity with this operator */
@@ -306,7 +306,7 @@ struct OperatorDeclaration : PackageMember
 
 	OperatorDeclaration
 	(
-		std::vector<const OperatorSyntaxPatternElement> pattern,
+		std::vector<OperatorSyntaxPatternElement> pattern,
 		uint subordination,
 		OperatorAssociativity associativity,
 		BuiltinOperatorKind builtin_operator_kind

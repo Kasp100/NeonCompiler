@@ -1,1 +1,2 @@
-parser_test
+operator_test
+../../../neon_compiler/parser/operator

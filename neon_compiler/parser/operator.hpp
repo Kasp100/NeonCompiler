@@ -36,6 +36,7 @@ public:
 
 	std::shared_ptr<const neon_compiler::ast::nodes::OperatorDeclaration> get_declaration() const;
 	Fixity get_fixity() const;
+	bool operator<(const Operator& other) const;
 private:
 	/** Declaration of this operator */
 	std::shared_ptr<const neon_compiler::ast::nodes::OperatorDeclaration> declaration;
@@ -43,6 +44,12 @@ private:
 	Fixity fixity;
 
 	void validate();
+	bool is_less_specific_from(const Operator& other, std::size_t check_index = 0) const;
+	static std::size_t count_consecutive_tokens
+	(
+		const std::vector<neon_compiler::ast::nodes::OperatorSyntaxPatternElement>& pattern,
+		std::size_t from
+	);
 };
 
 }
