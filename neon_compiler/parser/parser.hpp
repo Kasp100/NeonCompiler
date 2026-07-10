@@ -5,6 +5,7 @@
 #include <vector>
 #include <optional>
 #include <string>
+#include "operator_table.hpp"
 #include "../ast/nodes/nodes.hpp"
 #include "../ast/nodes/statement_nodes.hpp"
 #include "../token.hpp"
@@ -73,6 +74,8 @@ namespace error_recovery
 		"err_type";
 }
 
+using PeekCursor = uint*;
+
 class Parser
 {
 public:
@@ -92,14 +95,33 @@ private:
 	std::string_view file;
 	neon_compiler::ast::Identifier package{};
 	std::vector<neon_compiler::ast::Identifier> imports{};
+	neon_compiler::parser::OperatorTable operator_table{};
 
-	void report_token(
-			neon_compiler::analysis::AnalysisEntryType type, neon_compiler::analysis::AnalysisSeverity severity,
-			const neon_compiler::Token& token, std::optional<std::string> info = std::nullopt);
+	const neon_compiler::Token& peek_w_peek_cursor(PeekCursor peek_cursor, uint offset = 0);
+	const neon_compiler::Token& consume_w_peek_cursor(PeekCursor peek_cursor, uint offset = 0);
+	const neon_compiler::Token& consume_and_report_token
+	(
+		PeekCursor peek_cursor = nullptr,
+		neon_compiler::analysis::AnalysisEntryType type,
+		neon_compiler::analysis::AnalysisSeverity severity,
+		std::optional<std::string> info = std::nullopt
+	);
+	const neon_compiler::Token& report_token
+	(
+		neon_compiler::analysis::AnalysisEntryType type,
+		neon_compiler::analysis::AnalysisSeverity severity,
+		const neon_compiler::Token& token,
+		std::optional<std::string> info = std::nullopt
+	);
 
 	void append_ast(std::unique_ptr<neon_compiler::ast::nodes::PackageMember> node, const std::string& identifier);
 
-	std::optional<neon_compiler::ast::Identifier> parse_identifier(neon_compiler::analysis::AnalysisEntryType type, neon_compiler::analysis::AnalysisSeverity severity);
+	std::optional<neon_compiler::ast::Identifier> parse_identifier
+	(
+		neon_compiler::analysis::AnalysisEntryType type,
+		neon_compiler::analysis::AnalysisSeverity severity,
+		PeekCursor peek_cursor = nullptr
+	);
 	void parse_and_register_expected_package_declaration();
 	void parse_and_register_import_statement();
 	neon_compiler::ast::nodes::Access parse_access();
@@ -114,12 +136,20 @@ private:
 	std::optional<neon_compiler::ast::nodes::ReferenceType> parse_reference_type(neon_compiler::ast::nodes::MutabilityMode default_mutability_mode);
 	neon_compiler::ast::nodes::CodeBlock parse_code_block_until_end();
 	std::unique_ptr<neon_compiler::ast::nodes::Statement> parse_return_statement();
-	std::unique_ptr<neon_compiler::ast::nodes::Expression> parse_expression(int max_subordination = INT_MAX);
-	static int subordination_level(const neon_compiler::TokenType token_type);
-	std::unique_ptr<neon_compiler::ast::nodes::Expression> parse_prefix_expression();
-	std::unique_ptr<neon_compiler::ast::nodes::Expression> parse_named_expression();
-	std::vector<std::unique_ptr<neon_compiler::ast::nodes::Expression>> parse_argument_expressions();
-	std::unique_ptr<neon_compiler::ast::nodes::Expression> parse_infix_or_postfix_expression(std::unique_ptr<neon_compiler::ast::nodes::Expression> left);
+
+	// Expression parsing.
+	std::unique_ptr<neon_compiler::ast::nodes::Expression> parse_expression(PeekCursor peek_cursor = nullptr, uint max_subordination = INT_MAX);
+	std::unique_ptr<neon_compiler::ast::nodes::Expression> parse_prefix_expression(PeekCursor peek_cursor, FuncParseExpressionWCursor func_parse_expression_w_cursor);
+	std::unique_ptr<neon_compiler::ast::nodes::Expression> parse_terminating_expression(PeekCursor peek_cursor);
+	std::unique_ptr<neon_compiler::ast::nodes::Expression> parse_parenthesised_expression(PeekCursor peek_cursor);
+	std::unique_ptr<neon_compiler::ast::nodes::Expression> parse_named_expression(PeekCursor peek_cursor);
+	std::vector<std::unique_ptr<neon_compiler::ast::nodes::Expression>> parse_argument_expressions(PeekCursor peek_cursor);
+	std::unique_ptr<neon_compiler::ast::nodes::Expression> parse_infix_or_postfix_expression
+	(
+		PeekCursor peek_cursor,
+		std::unique_ptr<neon_compiler::ast::nodes::Expression> left,
+		std::shared_ptr<const neon_compiler::parser::Operator> op
+	);
 };
 
 }

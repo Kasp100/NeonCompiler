@@ -1,7 +1,9 @@
 #include "operator.hpp"
 
 #include <stdexcept>
+#include "../token_reader.hpp"
 
+using namespace neon_compiler;
 using namespace neon_compiler::parser;
 using namespace neon_compiler::ast::nodes;
 
@@ -90,4 +92,29 @@ std::size_t Operator::count_consecutive_tokens(const std::vector<OperatorSyntaxP
 	}
 
 	return count;
+}
+
+bool Operator::matches(const TokenReader& reader, const FuncParseExpressionWCursor& func_parse_expression_w_cursor) const
+{
+	uint peek_offset{0};
+
+	for(OperatorSyntaxPatternElement elem : get_declaration()->pattern)
+	{
+		if(std::holds_alternative<OperatorSyntaxParameter>(elem))
+		{
+			peek_offset = func_parse_expression_w_cursor(peek_offset);
+			continue;
+		}
+
+		if(reader.peek(peek_offset).get_type() == std::get<TokenPattern>(elem).token_type &&
+			reader.peek(peek_offset).get_lexeme() == std::get<TokenPattern>(elem).lexeme)
+		{
+			++peek_offset;
+			continue;
+		}
+
+		return false;
+	}
+
+	return true;
 }
