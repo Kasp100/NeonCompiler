@@ -144,11 +144,11 @@ private:
 	std::unique_ptr<neon_compiler::ast::nodes::Expression> parse_parenthesised_expression(PeekCursor peek_cursor);
 	std::unique_ptr<neon_compiler::ast::nodes::Expression> parse_named_expression(PeekCursor peek_cursor);
 	std::vector<std::unique_ptr<neon_compiler::ast::nodes::Expression>> parse_argument_expressions(PeekCursor peek_cursor);
-	std::unique_ptr<neon_compiler::ast::nodes::Expression> parse_infix_or_postfix_expression
+	std::unique_ptr<neon_compiler::ast::nodes::Expression> parse_operator_call_expression
 	(
 		PeekCursor peek_cursor,
-		std::unique_ptr<neon_compiler::ast::nodes::Expression> left,
-		std::shared_ptr<const neon_compiler::parser::Operator> op
+		std::shared_ptr<const neon_compiler::parser::Operator> op,
+		std::unique_ptr<neon_compiler::ast::nodes::Expression> first_argument = nullptr
 	);
 };
 

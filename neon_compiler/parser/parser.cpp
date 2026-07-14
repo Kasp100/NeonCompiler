@@ -644,7 +644,7 @@ std::unique_ptr<Expression> Parser::parse_expression(PeekCursor peek_cursor, uin
 
 		if(op->get_declaration()->subordination > max_subordination) { break; }
 
-		left = parse_infix_or_postfix_expression(peek_cursor, std::move(left), op);
+		left = parse_operator_call_expression(peek_cursor, op, std::move(left));
 	}
 
 	return left;
@@ -653,17 +653,18 @@ std::unique_ptr<Expression> Parser::parse_expression(PeekCursor peek_cursor, uin
 std::unique_ptr<Expression> Parser::parse_prefix_expression(PeekCursor peek_cursor, FuncParseExpressionWCursor func_parse_expression_w_cursor)
 {
 	{
-		std::unique_ptr<Expression> expr = parse_terminating_expression(peek_cursor);
-		if(expr) { return expr; }
-	}
-
-	{
-		std::unique_ptr<Expression> expr = parse_terminating_expression(peek_cursor);
-		if(expr) { return expr; }
-	}
-
-	{
 		std::unique_ptr<Expression> expr = parse_parenthesised_expression(peek_cursor);
+		if(expr) { return expr; }
+	}
+
+	{
+		// Handle prefix operators
+		std::shared_ptr<const Operator> op = operator_table.match_prefix(reader, func_parse_expression_w_cursor);
+		if(op) { return parse_operator_call_expression(peek_cursor, op); }
+	}
+
+	{
+		std::unique_ptr<Expression> expr = parse_terminating_expression(peek_cursor);
 		if(expr) { return expr; }
 	}
 
@@ -803,10 +804,29 @@ std::vector<std::unique_ptr<Expression>> Parser::parse_argument_expressions(Peek
 	return argument_expressions;
 }
 
-std::unique_ptr<Expression> Parser::parse_infix_or_postfix_expression(PeekCursor peek_cursor, std::unique_ptr<Expression> left, std::shared_ptr<const Operator> op)
+std::unique_ptr<Expression> Parser::parse_operator_call_expression
+(
+	PeekCursor peek_cursor,
+	std::shared_ptr<const Operator> op,
+	std::unique_ptr<Expression> first_argument
+)
 {
-	// TODO
-	return nullptr;
+	std::vector<std::unique_ptr<Expression>> arguments;
+
+	const std::vector<OperatorSyntaxPatternElement>& pattern = op->get_declaration()->pattern;
+
+	for(std::size_t i = 1; i < pattern.size(); ++i)
+	{
+		const OperatorSyntaxPatternElement& elem = pattern[i];
+
+		if(std::holds_alternative<TokenPattern>(elem))
+		{
+			consume_and_report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, peek_cursor);
+			continue;
+		}
+
+		arguments.push_back(parse_expression(peek_cursor));
+	}
+
+	return std::make_unique<OperatorCallExpression>(arguments, op);
 }
-
-

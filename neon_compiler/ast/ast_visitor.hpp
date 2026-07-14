@@ -36,6 +36,7 @@ namespace neon_compiler::ast::nodes
 	struct LiteralNumberExpression;
 	struct LiteralStringExpression;
 	struct LiteralBooleanExpression;
+	struct OperatorCallExpression;
 }
 
 namespace neon_compiler::ast
@@ -74,6 +75,7 @@ public:
 	virtual void visit(const nodes::LiteralNumberExpression& node) = 0;
 	virtual void visit(const nodes::LiteralStringExpression& node) = 0;
 	virtual void visit(const nodes::LiteralBooleanExpression& node) = 0;
+	virtual void visit(const nodes::OperatorCallExpression& node) = 0;
 };
 
 }

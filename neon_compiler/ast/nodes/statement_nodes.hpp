@@ -241,6 +241,25 @@ struct LiteralBooleanExpression : Expression
 	}
 };
 
+struct OperatorCallExpression : Expression
+{
+	std::vector<std::unique_ptr<Expression>> arguments;
+	std::shared_ptr<neon_compiler::parser::Operator> op;
+
+	OperatorCallExpression
+	(
+		std::vector<std::unique_ptr<Expression>> arguments,
+		std::shared_ptr<neon_compiler::parser::Operator> op
+	)
+		: arguments{std::move(arguments)}, op{op}
+	{}
+
+	void accept(ASTVisitor& visitor) const override
+	{
+		visitor.visit(*this);
+	}
+};
+
 }
 
 #endif // STATEMENT_NODES_HPP
