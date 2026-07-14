@@ -99,7 +99,7 @@ private:
 
 	const neon_compiler::Token& peek_w_peek_cursor(PeekCursor peek_cursor, uint offset = 0);
 	const neon_compiler::Token& consume_w_peek_cursor(PeekCursor peek_cursor, uint offset = 0);
-	const neon_compiler::Token& consume_and_report_token
+	const neon_compiler::Token& consume_w_peek_cursor_and_report
 	(
 		neon_compiler::analysis::AnalysisEntryType type,
 		neon_compiler::analysis::AnalysisSeverity severity,

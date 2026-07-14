@@ -55,9 +55,16 @@ const Token& Parser::consume_w_peek_cursor(PeekCursor peek_cursor, uint offset)
 	}
 }
 
-const neon_compiler::Token& Parser::consume_and_report_token(AnalysisEntryType type, AnalysisSeverity severity, PeekCursor peek_cursor, std::optional<std::string> info)
+const neon_compiler::Token& Parser::consume_w_peek_cursor_and_report(AnalysisEntryType type, AnalysisSeverity severity, PeekCursor peek_cursor, std::optional<std::string> info)
 {
-	return report_token(type, severity, consume_w_peek_cursor(peek_cursor), info);
+	if(peek_cursor)
+	{
+		return consume_w_peek_cursor(peek_cursor);
+	}
+	else
+	{
+		return report_token(type, severity, consume_w_peek_cursor(peek_cursor), info);
+	}
 }
 
 const neon_compiler::Token& Parser::report_token(AnalysisEntryType type, AnalysisSeverity severity, const neon_compiler::Token& token, std::optional<std::string> info)
@@ -668,7 +675,7 @@ std::unique_ptr<Expression> Parser::parse_prefix_expression(PeekCursor peek_curs
 		if(expr) { return expr; }
 	}
 
-	consume_and_report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, peek_cursor, std::string{error_messages::INVALID_EXPRESSION});
+	consume_w_peek_cursor_and_report(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, peek_cursor, std::string{error_messages::INVALID_EXPRESSION});
 
 	return nullptr;
 }
@@ -719,16 +726,16 @@ std::unique_ptr<Expression> Parser::parse_parenthesised_expression(PeekCursor pe
 		return nullptr;
 	}
 	
-	consume_and_report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, peek_cursor);
+	consume_w_peek_cursor_and_report(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, peek_cursor);
 
 	std::unique_ptr<Expression> expr = parse_expression();
 	if(peek_w_peek_cursor(peek_cursor).get_type() == TokenType::BRACKET_ROUND_CLOSE)
 	{
-		consume_and_report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, peek_cursor);
+		consume_w_peek_cursor_and_report(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, peek_cursor);
 	}
 	else
 	{
-		consume_and_report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, peek_cursor, std::string{error_messages::INVALID_CALL_EXPRESSION__EXPECTED_CLOSING_BRACKET});
+		consume_w_peek_cursor_and_report(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, peek_cursor, std::string{error_messages::INVALID_CALL_EXPRESSION__EXPECTED_CLOSING_BRACKET});
 	}
 
 	return expr;
@@ -744,7 +751,7 @@ std::unique_ptr<Expression> Parser::parse_named_expression(PeekCursor peek_curso
 		return std::make_unique<SimpleRead>(id.to_string());
 	}
 
-	consume_and_report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, peek_cursor);
+	consume_w_peek_cursor_and_report(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, peek_cursor);
 
 	std::vector<std::unique_ptr<Expression>> argument_expressions{};
 	
@@ -753,7 +760,7 @@ std::unique_ptr<Expression> Parser::parse_named_expression(PeekCursor peek_curso
 		argument_expressions = parse_argument_expressions(peek_cursor);
 	}
 
-	consume_and_report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, peek_cursor); // Consume the `)`
+	consume_w_peek_cursor_and_report(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, peek_cursor); // Consume the `)`
 
 	return std::make_unique<FunctionCall>(id.to_string(), std::move(argument_expressions));
 }
@@ -773,15 +780,15 @@ std::vector<std::unique_ptr<Expression>> Parser::parse_argument_expressions(Peek
 
 		if(reader.peek().get_type() != TokenType::COMMA)
 		{
-			consume_and_report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::ERROR, peek_cursor, std::string{error_messages::INVALID_ARGUMENT_LIST__EXPECTED_COMMA_OR_CLOSING_BRACKET});
+			consume_w_peek_cursor_and_report(AnalysisEntryType::SEPARATOR, AnalysisSeverity::ERROR, peek_cursor, std::string{error_messages::INVALID_ARGUMENT_LIST__EXPECTED_COMMA_OR_CLOSING_BRACKET});
 		}
 		else
 		{
-			consume_and_report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, peek_cursor);
+			consume_w_peek_cursor_and_report(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, peek_cursor);
 		}
 	}
 
-	consume_and_report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::ERROR, peek_cursor, std::string{error_messages::UNEXPECTED_END_OF_FILE_IN_ARGUMENT_LIST});
+	consume_w_peek_cursor_and_report(AnalysisEntryType::SEPARATOR, AnalysisSeverity::ERROR, peek_cursor, std::string{error_messages::UNEXPECTED_END_OF_FILE_IN_ARGUMENT_LIST});
 
 	return argument_expressions;
 }
@@ -803,7 +810,7 @@ std::unique_ptr<Expression> Parser::parse_operator_call_expression
 
 		if(std::holds_alternative<TokenPattern>(elem))
 		{
-			consume_and_report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, peek_cursor);
+			consume_w_peek_cursor_and_report(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, peek_cursor);
 			continue;
 		}
 
