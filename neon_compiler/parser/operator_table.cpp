@@ -34,7 +34,7 @@ std::shared_ptr<const Operator> OperatorTable::match_prefix
 	const FuncParseExpressionWCursor& func_parse_expression_w_cursor
 )
 {
-	match(prefix_operators, reader, func_parse_expression_w_cursor);
+	return match(prefix_operators, reader, func_parse_expression_w_cursor);
 }
 
 std::shared_ptr<const Operator> OperatorTable::match_infix
@@ -43,7 +43,7 @@ std::shared_ptr<const Operator> OperatorTable::match_infix
 	const FuncParseExpressionWCursor& func_parse_expression_w_cursor
 )
 {
-	match(infix_operators, reader, func_parse_expression_w_cursor);
+	return match(infix_operators, reader, func_parse_expression_w_cursor);
 }
 
 std::shared_ptr<const Operator> OperatorTable::match_postfix
@@ -52,7 +52,7 @@ std::shared_ptr<const Operator> OperatorTable::match_postfix
 	const FuncParseExpressionWCursor& func_parse_expression_w_cursor
 )
 {
-	match(postfix_operators, reader, func_parse_expression_w_cursor);
+	return match(postfix_operators, reader, func_parse_expression_w_cursor);
 }
 
 void OperatorTable::finalise()

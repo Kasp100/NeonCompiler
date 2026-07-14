@@ -1,7 +1,9 @@
 #ifndef OPERATOR_HPP
 #define OPERATOR_HPP
 
+#include <functional>
 #include "../token.hpp"
+#include "../token_reader.hpp"
 #include "../ast/nodes/nodes.hpp"
 
 namespace neon_compiler::parser

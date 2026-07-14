@@ -37,12 +37,12 @@ std::shared_ptr<neon_compiler::ast::nodes::Root> Parser::get_root_node() const
 	return root_node;
 }
 
-const Token& Parser::peek_w_peek_cursor(PeekCursor peek_cursor, uint offset = 0)
+const Token& Parser::peek_w_peek_cursor(PeekCursor peek_cursor, uint offset)
 {
 	return reader.peek((peek_cursor ? *peek_cursor : 0) + offset);
 }
 
-const Token& Parser::consume_w_peek_cursor(PeekCursor peek_cursor, uint offset = 0)
+const Token& Parser::consume_w_peek_cursor(PeekCursor peek_cursor, uint offset)
 {
 	if(peek_cursor)
 	{
@@ -55,7 +55,7 @@ const Token& Parser::consume_w_peek_cursor(PeekCursor peek_cursor, uint offset =
 	}
 }
 
-const neon_compiler::Token& Parser::consume_and_report_token(PeekCursor peek_cursor, AnalysisEntryType type, AnalysisSeverity severity, std::optional<std::string> info)
+const neon_compiler::Token& Parser::consume_and_report_token(AnalysisEntryType type, AnalysisSeverity severity, PeekCursor peek_cursor, std::optional<std::string> info)
 {
 	return report_token(type, severity, consume_w_peek_cursor(peek_cursor), info);
 }
@@ -400,8 +400,7 @@ std::vector<OperatorFunctionPatternElement> Parser::parse_operator_function_patt
 					std::string{error_recovery::PLACEHOLDER_NAME}}
 				);
 
-			std::unique_ptr<OperatorFunctionParameter> parameter_pattern = std::make_unique<OperatorFunctionParameter>(parameter);
-			pattern.emplace_back(std::move(parameter_pattern));
+			pattern.push_back(OperatorFunctionParameter{parameter});
 
 			if(reader.peek().get_type() == TokenType::BRACKET_ROUND_CLOSE)
 			{
@@ -414,9 +413,17 @@ std::vector<OperatorFunctionPatternElement> Parser::parse_operator_function_patt
 		}
 		else
 		{
+			const Token& token = reader.peek();
+			std::optional<std::string> lexeme{std::nullopt};
+
+			if(token.get_lexeme().has_value())
+			{
+				lexeme = std::string{token.get_lexeme().value()};
+			}
+	
 			report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.peek());
-			std::unique_ptr<TokenPattern> token_pattern = std::make_unique<TokenPattern>(reader.consume());
-			pattern.emplace_back(std::move(token_pattern));
+	
+			pattern.push_back(TokenPattern{token.get_type(), lexeme});
 		}
 	}
 
@@ -647,12 +654,12 @@ std::unique_ptr<Expression> Parser::parse_prefix_expression(PeekCursor peek_curs
 {
 	{
 		std::unique_ptr<Expression> expr = parse_terminating_expression(peek_cursor);
-		if(expr) { return std::move(expr); }
+		if(expr) { return expr; }
 	}
 
 	{
 		std::unique_ptr<Expression> expr = parse_terminating_expression(peek_cursor);
-		if(expr) { return std::move(expr); }
+		if(expr) { return expr; }
 	}
 
 	// Handle prefix operators
@@ -723,16 +730,16 @@ std::unique_ptr<Expression> Parser::parse_parenthesised_expression(PeekCursor pe
 		return nullptr;
 	}
 	
-	consume_and_report_token(peek_cursor, AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO);
+	consume_and_report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, peek_cursor);
 
 	std::unique_ptr<Expression> expr = parse_expression();
 	if(peek_w_peek_cursor(peek_cursor).get_type() == TokenType::BRACKET_ROUND_CLOSE)
 	{
-		consume_and_report_token(peek_cursor, AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO);
+		consume_and_report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, peek_cursor);
 	}
 	else
 	{
-		consume_and_report_token(peek_cursor, AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, std::string{error_messages::INVALID_CALL_EXPRESSION__EXPECTED_CLOSING_BRACKET});
+		consume_and_report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, peek_cursor, std::string{error_messages::INVALID_CALL_EXPRESSION__EXPECTED_CLOSING_BRACKET});
 	}
 
 	return expr;
@@ -751,7 +758,7 @@ std::unique_ptr<Expression> Parser::parse_named_expression(PeekCursor peek_curso
 		);
 	}
 
-	consume_and_report_token(peek_cursor, AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO);
+	consume_and_report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, peek_cursor);
 
 	std::vector<std::unique_ptr<Expression>> argument_expressions{};
 	
@@ -760,7 +767,7 @@ std::unique_ptr<Expression> Parser::parse_named_expression(PeekCursor peek_curso
 		argument_expressions = parse_argument_expressions(peek_cursor);
 	}
 
-	consume_and_report_token(peek_cursor, AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO); // Consume the `)`
+	consume_and_report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, peek_cursor); // Consume the `)`
 
 	return std::move
 	(
@@ -783,15 +790,15 @@ std::vector<std::unique_ptr<Expression>> Parser::parse_argument_expressions(Peek
 
 		if(reader.peek().get_type() != TokenType::COMMA)
 		{
-			consume_and_report_token(peek_cursor, AnalysisEntryType::SEPARATOR, AnalysisSeverity::ERROR, std::string{error_messages::INVALID_ARGUMENT_LIST__EXPECTED_COMMA_OR_CLOSING_BRACKET});
+			consume_and_report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::ERROR, peek_cursor, std::string{error_messages::INVALID_ARGUMENT_LIST__EXPECTED_COMMA_OR_CLOSING_BRACKET});
 		}
 		else
 		{
-			consume_and_report_token(peek_cursor, AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO);
+			consume_and_report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, peek_cursor);
 		}
 	}
 
-	consume_and_report_token(peek_cursor, AnalysisEntryType::SEPARATOR, AnalysisSeverity::ERROR, std::string{error_messages::UNEXPECTED_END_OF_FILE_IN_ARGUMENT_LIST});
+	consume_and_report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::ERROR, peek_cursor, std::string{error_messages::UNEXPECTED_END_OF_FILE_IN_ARGUMENT_LIST});
 
 	return argument_expressions;
 }

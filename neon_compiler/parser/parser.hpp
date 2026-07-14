@@ -101,9 +101,9 @@ private:
 	const neon_compiler::Token& consume_w_peek_cursor(PeekCursor peek_cursor, uint offset = 0);
 	const neon_compiler::Token& consume_and_report_token
 	(
-		PeekCursor peek_cursor = nullptr,
 		neon_compiler::analysis::AnalysisEntryType type,
 		neon_compiler::analysis::AnalysisSeverity severity,
+		PeekCursor peek_cursor = nullptr,
 		std::optional<std::string> info = std::nullopt
 	);
 	const neon_compiler::Token& report_token
