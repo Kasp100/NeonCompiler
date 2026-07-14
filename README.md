@@ -48,7 +48,7 @@ Neoncode supports compile-time metaprogramming and code generation through "**co
 Compile function calls are explicit and use the `auto:` prefix.
 
 ### Custom Grammar
-Neoncode supports custom **expression grammars** through grammar sets, enabling domain-specific syntax extensions.
+Neoncode supports custom **expression grammar** through custom operators and operator functions, enabling domain-specific syntax extensions.
 
 ---
 
