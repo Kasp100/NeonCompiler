@@ -678,42 +678,30 @@ std::unique_ptr<Expression> Parser::parse_terminating_expression(PeekCursor peek
 {
 	if(peek_w_peek_cursor(peek_cursor).get_type() == TokenType::LITERAL_NUMBER)
 	{
-		return std::move
-		(
-			std::make_unique<LiteralNumberExpression>
+		return std::make_unique<LiteralNumberExpression>
 			(
 				std::string{consume_w_peek_cursor(peek_cursor).get_lexeme().value()}
-			)
 		);
 	}
 
 	if(peek_w_peek_cursor(peek_cursor).get_type() == TokenType::LITERAL_STRING)
 	{
-		return std::move
-		(
-			std::make_unique<LiteralStringExpression>
+		return std::make_unique<LiteralStringExpression>
 			(
 				std::string{consume_w_peek_cursor(peek_cursor).get_lexeme().value()}
-			)
 		);
 	}
 
 	if(peek_w_peek_cursor(peek_cursor).get_type() == TokenType::BOOL_TRUE)
 	{
 		consume_w_peek_cursor(peek_cursor);
-		return std::move
-		(
-			std::make_unique<LiteralBooleanExpression>(true)
-		);
+		return std::make_unique<LiteralBooleanExpression>(true);
 	}
 
 	if(peek_w_peek_cursor(peek_cursor).get_type() == TokenType::BOOL_FALSE)
 	{
 		consume_w_peek_cursor(peek_cursor);
-		return std::move
-		(
-			std::make_unique<LiteralBooleanExpression>(false)
-		);
+		return std::make_unique<LiteralBooleanExpression>(false);
 	}
 
 	if(peek_w_peek_cursor(peek_cursor).get_type() == TokenType::IDENTIFIER)
@@ -753,10 +741,7 @@ std::unique_ptr<Expression> Parser::parse_named_expression(PeekCursor peek_curso
 
 	if(peek_w_peek_cursor(peek_cursor).get_type() != TokenType::BRACKET_ROUND_OPEN)
 	{
-		return std::move
-		(
-			std::make_unique<SimpleRead>(id.to_string())
-		);
+		return std::make_unique<SimpleRead>(id.to_string());
 	}
 
 	consume_and_report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, peek_cursor);
@@ -770,10 +755,7 @@ std::unique_ptr<Expression> Parser::parse_named_expression(PeekCursor peek_curso
 
 	consume_and_report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, peek_cursor); // Consume the `)`
 
-	return std::move
-	(
-		std::make_unique<FunctionCall>(id.to_string(), std::move(argument_expressions))
-	);
+	return std::make_unique<FunctionCall>(id.to_string(), std::move(argument_expressions));
 }
 
 std::vector<std::unique_ptr<Expression>> Parser::parse_argument_expressions(PeekCursor peek_cursor)
