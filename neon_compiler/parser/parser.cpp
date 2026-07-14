@@ -421,7 +421,7 @@ std::vector<OperatorFunctionPatternElement> Parser::parse_operator_function_patt
 				lexeme = std::string{token.get_lexeme().value()};
 			}
 	
-			report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.peek());
+			report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
 	
 			pattern.push_back(TokenPattern{token.get_type(), lexeme});
 		}
