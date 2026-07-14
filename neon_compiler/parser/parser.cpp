@@ -662,12 +662,12 @@ std::unique_ptr<Expression> Parser::parse_prefix_expression(PeekCursor peek_curs
 		if(expr) { return expr; }
 	}
 
-	// Handle prefix operators
-	std::shared_ptr<const Operator> op = operator_table.match_prefix(reader, func_parse_expression_w_cursor);
+	{
+		std::unique_ptr<Expression> expr = parse_parenthesised_expression(peek_cursor);
+		if(expr) { return expr; }
+	}
 
-	// TODO
-
-	report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(), std::string{error_messages::INVALID_EXPRESSION});
+	consume_and_report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, peek_cursor, std::string{error_messages::INVALID_EXPRESSION});
 
 	return nullptr;
 }
