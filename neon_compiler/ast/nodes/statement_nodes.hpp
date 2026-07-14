@@ -244,12 +244,12 @@ struct LiteralBooleanExpression : Expression
 struct OperatorCallExpression : Expression
 {
 	std::vector<std::unique_ptr<Expression>> arguments;
-	std::shared_ptr<neon_compiler::parser::Operator> op;
+	std::shared_ptr<const neon_compiler::parser::Operator> op;
 
 	OperatorCallExpression
 	(
 		std::vector<std::unique_ptr<Expression>> arguments,
-		std::shared_ptr<neon_compiler::parser::Operator> op
+		std::shared_ptr<const neon_compiler::parser::Operator> op
 	)
 		: arguments{std::move(arguments)}, op{op}
 	{}
