@@ -679,16 +679,16 @@ std::unique_ptr<Expression> Parser::parse_terminating_expression(PeekCursor peek
 	if(peek_w_peek_cursor(peek_cursor).get_type() == TokenType::LITERAL_NUMBER)
 	{
 		return std::make_unique<LiteralNumberExpression>
-			(
-				std::string{consume_w_peek_cursor(peek_cursor).get_lexeme().value()}
+		(
+			std::string{consume_w_peek_cursor(peek_cursor).get_lexeme().value()}
 		);
 	}
 
 	if(peek_w_peek_cursor(peek_cursor).get_type() == TokenType::LITERAL_STRING)
 	{
 		return std::make_unique<LiteralStringExpression>
-			(
-				std::string{consume_w_peek_cursor(peek_cursor).get_lexeme().value()}
+		(
+			std::string{consume_w_peek_cursor(peek_cursor).get_lexeme().value()}
 		);
 	}
 
@@ -810,5 +810,5 @@ std::unique_ptr<Expression> Parser::parse_operator_call_expression
 		arguments.push_back(parse_expression(peek_cursor));
 	}
 
-	return std::make_unique<OperatorCallExpression>(arguments, op);
+	return std::make_unique<OperatorCallExpression>(std::move(arguments), op);
 }
