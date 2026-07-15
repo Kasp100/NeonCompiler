@@ -38,8 +38,8 @@ struct AutoCall : Statement
 {
 	/** The name matching the one of a compile function name */
 	std::string function_name;
-	/** Tokens to pass. `,` separates parameters. */
-	std::vector<std::vector<neon_compiler::Token>> parameters;
+	/** Tokens to pass. `,` separates arguments. */
+	std::vector<std::vector<neon_compiler::Token>> arguments;
 
 	void accept(ASTVisitor& visitor) const override
 	{
@@ -89,18 +89,18 @@ struct ObjectFunctionCall : Expression
 	std::unique_ptr<Expression> object;
 	/** Function name */
 	std::string function_name;
-	/** Parameter values */
-	std::vector<std::unique_ptr<Expression>> parameters;
+	/** Arguments */
+	std::vector<std::unique_ptr<Expression>> arguments;
 
 	ObjectFunctionCall
 	(
 		std::unique_ptr<Expression> object,
 		std::string function_name,
-		std::vector<std::unique_ptr<Expression>> parameters
+		std::vector<std::unique_ptr<Expression>> arguments
 	) :
 		object(std::move(object)),
 		function_name(std::move(function_name)),
-		parameters(std::move(parameters))
+		arguments(std::move(arguments))
 	{}
 
 	void accept(ASTVisitor& visitor) const override
@@ -140,16 +140,16 @@ struct FunctionCall : Expression
 {
 	/** Function name */
 	std::string function_name;
-	/** Parameter values */
-	std::vector<std::unique_ptr<Expression>> parameters;
+	/** Arguments */
+	std::vector<std::unique_ptr<Expression>> arguments;
 
 	FunctionCall
 	(
 		std::string function_name,
-		std::vector<std::unique_ptr<Expression>> parameters
+		std::vector<std::unique_ptr<Expression>> arguments
 	) :
 		function_name(std::move(function_name)),
-		parameters(std::move(parameters))
+		arguments(std::move(arguments))
 	{}
 
 	void accept(ASTVisitor& visitor) const override
@@ -181,8 +181,8 @@ struct OptFunctionCall : Expression
 {
 	/** The name of the optional function. */
 	std::string function_name;
-	/** Parameter values */
-	std::vector<std::unique_ptr<Expression>> parameters;
+	/** Arguments */
+	std::vector<std::unique_ptr<Expression>> arguments;
 
 	void accept(ASTVisitor& visitor) const override
 	{
