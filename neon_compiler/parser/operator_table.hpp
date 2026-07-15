@@ -63,9 +63,9 @@ public:
 		const FuncParseExpressionWCursor& func_parse_expression_w_cursor
 	);
 private:
-	std::vector<std::shared_ptr<const neon_compiler::parser::Operator>> prefix_operators{};
-	std::vector<std::shared_ptr<const neon_compiler::parser::Operator>> infix_operators{};
-	std::vector<std::shared_ptr<const neon_compiler::parser::Operator>> postfix_operators{};
+	std::vector<std::shared_ptr<const neon_compiler::parser::Operator>> prefix_operators;
+	std::vector<std::shared_ptr<const neon_compiler::parser::Operator>> infix_operators;
+	std::vector<std::shared_ptr<const neon_compiler::parser::Operator>> postfix_operators;
 	bool finalised{false};
 
 	void finalise();

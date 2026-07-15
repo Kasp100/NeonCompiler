@@ -83,8 +83,8 @@ void Parser::append_ast(std::unique_ptr<PackageMember> node, const std::string& 
 
 std::optional<neon_compiler::ast::Identifier> Parser::parse_identifier(AnalysisEntryType type, AnalysisSeverity severity, PeekCursor peek_cursor)
 {
-	std::vector<std::string> parts{};
-	std::vector<Token> tokens{};
+	std::vector<std::string> parts;
+	std::vector<Token> tokens;
 
 	bool continue_reading{true};
 	do
@@ -194,7 +194,7 @@ Access Parser::parse_access()
 			report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(), std::string{error_messages::MISSING_PACKAGE_MEMBER_PATTERNS});
 		}
 
-		std::vector<PackageMemberPattern> patterns{};
+		std::vector<PackageMemberPattern> patterns;
 
 		patterns.push_back(parse_package_member_pattern());
 		while(reader.peek().get_type() == TokenType::COMMA)
@@ -351,7 +351,7 @@ void Parser::parse_and_register_expected_operator_function_set(const Access& acc
 		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(), std::string{error_messages::MISSING_CODE_BLOCK});
 	}
 
-	std::vector<OperatorFunction> functions{};
+	std::vector<OperatorFunction> functions;
 
 	while(reader.peek().get_type() == TokenType::IDENTIFIER)
 	{
@@ -392,7 +392,7 @@ void Parser::parse_and_register_expected_operator_function_set(const Access& acc
 
 std::vector<OperatorFunctionPatternElement> Parser::parse_operator_function_pattern()
 {
-	std::vector<OperatorFunctionPatternElement> pattern{};
+	std::vector<OperatorFunctionPatternElement> pattern;
 
 	while(!reader.end_of_file_reached() && reader.peek().get_type() != TokenType::BRACKET_CURLY_OPEN)
 	{
@@ -583,7 +583,7 @@ std::optional<ReferenceType> Parser::parse_reference_type(MutabilityMode default
 CodeBlock Parser::parse_code_block_until_end()
 {
 	// At this point, a `{` should already be consumed
-	std::vector<std::unique_ptr<Statement>> statements{};
+	std::vector<std::unique_ptr<Statement>> statements;
 
 	while(!reader.end_of_file_reached())
 	{
@@ -753,7 +753,7 @@ std::unique_ptr<Expression> Parser::parse_named_expression(PeekCursor peek_curso
 
 	consume_w_peek_cursor_and_report(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, peek_cursor);
 
-	std::vector<std::unique_ptr<Expression>> argument_expressions{};
+	std::vector<std::unique_ptr<Expression>> argument_expressions;
 	
 	if(reader.peek().get_type() != TokenType::BRACKET_ROUND_CLOSE)
 	{
@@ -767,7 +767,7 @@ std::unique_ptr<Expression> Parser::parse_named_expression(PeekCursor peek_curso
 
 std::vector<std::unique_ptr<Expression>> Parser::parse_argument_expressions(PeekCursor peek_cursor)
 {
-	std::vector<std::unique_ptr<Expression>> argument_expressions{};
+	std::vector<std::unique_ptr<Expression>> argument_expressions;
 
 	while(!reader.end_of_file_reached())
 	{

@@ -23,9 +23,9 @@ struct Expression : ASTNode {};
 struct Root : ASTNode
 {
 	/** Mapping from package member identifier to package member */
-	std::unordered_map<std::string, std::unique_ptr<PackageMember>> package_members{};
+	std::unordered_map<std::string, std::unique_ptr<PackageMember>> package_members;
 	/** Mapping from file path to package member identifiers */
-	std::unordered_map<std::string, std::vector<std::string>> file_package_members{};
+	std::unordered_map<std::string, std::vector<std::string>> file_package_members;
 
 	Root() = default;
 

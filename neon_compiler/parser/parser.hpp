@@ -93,9 +93,9 @@ private:
 	std::shared_ptr<neon_compiler::analysis::AnalysisReporter> analysis_reporter;
 	std::shared_ptr<neon_compiler::ast::nodes::Root> root_node;
 	std::string_view file;
-	neon_compiler::ast::Identifier package{};
-	std::vector<neon_compiler::ast::Identifier> imports{};
-	neon_compiler::parser::OperatorTable operator_table{};
+	neon_compiler::ast::Identifier package;
+	std::vector<neon_compiler::ast::Identifier> imports;
+	neon_compiler::parser::OperatorTable operator_table;
 
 	const neon_compiler::Token& peek_w_peek_cursor(PeekCursor peek_cursor, uint offset = 0);
 	const neon_compiler::Token& consume_w_peek_cursor(PeekCursor peek_cursor, uint offset = 0);

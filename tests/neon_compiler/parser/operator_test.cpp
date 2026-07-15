@@ -64,7 +64,7 @@ TEST_CASE("Operators compare specificity correctly")
 	CHECK(*op_0 < *op_2);
 	CHECK(*op_1 < *op_2);
 
-	std::vector<std::shared_ptr<const Operator>> list{};
+	std::vector<std::shared_ptr<const Operator>> list;
 
 	list.push_back(op_0);
 	list.push_back(op_1);
