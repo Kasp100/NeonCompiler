@@ -12,17 +12,22 @@ void ASTPrinter::visit(const nodes::Root& node)
 {
 	for(const std::pair<const std::string, std::unique_ptr<nodes::PackageMember>>& pm : node.package_members)
 	{
-		std::cout << "[AST] PM " << pm.first << " = ";
-		pm.second->accept(*this);
+		std::cout << "[AST] PM ";
+		std::cout << pm.first;
 		std::cout << "\n";
+		pm.second->accept(*this);
+		std::cout << "[--- end PM ---]\n";
 	}
 }
 
 void ASTPrinter::visit(const nodes::Entrypoint& node)
 {
+	std::cout << "[AST] ";
 	print_access(node.access);
-	std::cout << " entrypoint ";
+	std::cout << " entrypoint";
+	std::cout << "\n";
 	node.body.accept(*this);
+	std::cout << "[--- end entrypoint ---]\n";
 }
 
 void ASTPrinter::visit(const nodes::Type& node)
@@ -57,10 +62,12 @@ void ASTPrinter::visit(const nodes::ReferenceType& node)
 
 void ASTPrinter::visit(const nodes::CodeBlock& node)
 {
+	std::cout << "[AST] code block\n";
 	for(const std::unique_ptr<Statement>& stmt : node.statements)
 	{
 		stmt->accept(*this);
 	}
+	std::cout << "[--- end code block ---]\n";
 }
 
 void ASTPrinter::visit(const nodes::DiscardExpression& node)
@@ -80,7 +87,9 @@ void ASTPrinter::visit(const nodes::AutoCall& node)
 
 void ASTPrinter::visit(const nodes::Return& node)
 {
-
+	std::cout << "[AST] return\n";
+	node.value->accept(*this);
+	std::cout << "[--- end return ---]\n";
 }
 
 void ASTPrinter::visit(const nodes::Assignment& node)
@@ -100,12 +109,21 @@ void ASTPrinter::visit(const nodes::ObjectRead& node)
 
 void ASTPrinter::visit(const nodes::FunctionCall& node)
 {
-
+	std::cout << "[AST] function call - function name: ";
+	std::cout << node.function_name;
+	std::cout << "\n";
+	for(const std::unique_ptr<Expression>& arg : node.arguments)
+	{
+		arg->accept(*this);
+	}
+	std::cout << "[--- end function call expression ---]\n";
 }
 
 void ASTPrinter::visit(const nodes::SimpleRead& node)
 {
-
+	std::cout << "[AST] simple read - reference name: ";
+	std::cout << node.reference_name;
+	std::cout << " [end]\n";
 }
 
 void ASTPrinter::visit(const nodes::OptFunctionCall& node)
@@ -150,22 +168,35 @@ void ASTPrinter::visit(const nodes::CompileFunction& node)
 
 void ASTPrinter::visit(const nodes::LiteralNumberExpression& node)
 {
-
+	std::cout << "[AST] literal number expression - amount of digits: ";
+	std::cout << std::to_string(node.value.size());
+	std::cout << " [end]\n";
 }
 
 void ASTPrinter::visit(const nodes::LiteralStringExpression& node)
 {
-
+	std::cout << "[AST] literal string expression - length: ";
+	std::cout << std::to_string(node.value.size());
+	std::cout << " [end]\n";
 }
 
 void ASTPrinter::visit(const nodes::LiteralBooleanExpression& node)
 {
-
+	std::cout << "[AST] literal boolean expression ";
+	std::cout << (node.value ? "true" : "false");
+	std::cout << " [end]\n";
 }
 
 void ASTPrinter::visit(const nodes::OperatorCallExpression& node)
 {
-
+	std::cout << "[AST] operator call expression - ";
+	std::cout << std::to_string(node.arguments.size());
+	std::cout << " argument(s)\n";
+	for(const std::unique_ptr<Expression>& arg : node.arguments)
+	{
+		arg->accept(*this);
+	}
+	std::cout << "[--- end operator call expression ---]\n";
 }
 
 void ASTPrinter::print_access(const nodes::Access& a)
