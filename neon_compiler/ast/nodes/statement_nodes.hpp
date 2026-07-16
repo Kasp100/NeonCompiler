@@ -166,7 +166,7 @@ struct SimpleRead : Expression
 
 	SimpleRead
 	(
-		std::string reference_namereference_name
+		std::string reference_name
 	) :
 		reference_name(std::move(reference_name))
 	{}
