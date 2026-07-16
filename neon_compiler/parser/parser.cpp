@@ -58,7 +58,13 @@ const Token& Parser::consume_w_peek_cursor(PeekCursor peek_cursor, uint offset)
 	}
 }
 
-const neon_compiler::Token& Parser::consume_w_peek_cursor_and_report(AnalysisEntryType type, AnalysisSeverity severity, PeekCursor peek_cursor, std::optional<std::string> info)
+const neon_compiler::Token& Parser::consume_w_peek_cursor_and_report
+(
+	AnalysisEntryType type,
+	AnalysisSeverity severity,
+	PeekCursor peek_cursor,
+	std::optional<std::string> info
+)
 {
 	if(peek_cursor)
 	{
@@ -70,7 +76,13 @@ const neon_compiler::Token& Parser::consume_w_peek_cursor_and_report(AnalysisEnt
 	}
 }
 
-const neon_compiler::Token& Parser::report_token(AnalysisEntryType type, AnalysisSeverity severity, const neon_compiler::Token& token, std::optional<std::string> info)
+const neon_compiler::Token& Parser::report_token
+(
+	AnalysisEntryType type,
+	AnalysisSeverity severity,
+	const neon_compiler::Token& token,
+	std::optional<std::string> info
+)
 {
 	analysis_reporter->report(AnalysisEntry{file, type, severity, token.get_source_position(), token.get_length(), info});
 	return token;
@@ -131,13 +143,15 @@ void Parser::parse_and_register_expected_package_declaration()
 	}
 	else
 	{
-		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.peek(), std::string{error_messages::MISSING_PACKAGE_DECLARATION});
+		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.peek(),
+			std::string{error_messages::MISSING_PACKAGE_DECLARATION});
 	}
 
 	std::optional<neon_compiler::ast::Identifier> package_id = parse_identifier(AnalysisEntryType::PACKAGE, AnalysisSeverity::INFO);
 	if(!package_id.has_value())
 	{
-		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.peek(), std::string{error_messages::MISSING_PACKAGE_DECLARATION});
+		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.peek(),
+			std::string{error_messages::MISSING_PACKAGE_DECLARATION});
 	}
 
 	if(reader.peek().get_type() == TokenType::END_STATEMENT)
@@ -146,7 +160,8 @@ void Parser::parse_and_register_expected_package_declaration()
 	}
 	else
 	{
-		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.peek(), std::string{error_messages::MISSING_SEMICOLON});
+		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.peek(),
+			std::string{error_messages::MISSING_SEMICOLON});
 	}
 
 	package = package_id.value_or(neon_compiler::ast::Identifier{});
@@ -161,7 +176,8 @@ void Parser::parse_and_register_import_statement()
 
 	if(!package_member_id.has_value())
 	{
-		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.peek(), std::string{error_messages::INVALID_IMPORT_STATEMENT});
+		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.peek(),
+			std::string{error_messages::INVALID_IMPORT_STATEMENT});
 		return;
 	}
 
@@ -177,7 +193,8 @@ Access Parser::parse_access()
 	}
 	else if(reader.peek().get_type() == TokenType::ACCESS_PROTECTED)
 	{
-		report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::ERROR, reader.consume(), std::string{error_messages::PROTECTED_PACKAGE_MEMBER});
+		report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::ERROR, reader.consume(),
+			std::string{error_messages::PROTECTED_PACKAGE_MEMBER});
 	}
 	else if(reader.peek().get_type() == TokenType::ACCESS_PUBLIC)
 	{
@@ -194,7 +211,8 @@ Access Parser::parse_access()
 		}
 		else
 		{
-			report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(), std::string{error_messages::MISSING_PACKAGE_MEMBER_PATTERNS});
+			report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
+				std::string{error_messages::MISSING_PACKAGE_MEMBER_PATTERNS});
 		}
 
 		std::vector<PackageMemberPattern> patterns;
@@ -214,7 +232,8 @@ Access Parser::parse_access()
 		}
 		else
 		{
-			report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(), std::string{error_messages::INVALID_PACKAGE_MEMBER_PATTERN__EXPECTED_CLOSING_BRACKET});
+			report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
+				std::string{error_messages::INVALID_PACKAGE_MEMBER_PATTERN__EXPECTED_CLOSING_BRACKET});
 		}
 	}
 	return access;
@@ -242,7 +261,8 @@ PackageMemberPattern Parser::parse_package_member_pattern()
 		}
 		else
 		{
-			report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(), std::string{error_messages::INVALID_PACKAGE_MEMBER_PATTERN__EXPECTED_PKG});
+			report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
+				std::string{error_messages::INVALID_PACKAGE_MEMBER_PATTERN__EXPECTED_PKG});
 		}
 	}
 
@@ -254,11 +274,14 @@ PackageMemberPattern Parser::parse_package_member_pattern()
 	std::optional<ast::Identifier> supertype = parse_identifier(AnalysisEntryType::REFERENCE, AnalysisSeverity::INFO);
 	if(supertype.has_value())
 	{
-		return PackageMemberPattern{package_member_identifier.has_value() ? PackageMemberPatternType::INHERITANCE_ONLY : type, package_member_identifier, supertype};
+		return PackageMemberPattern{package_member_identifier.has_value() ? PackageMemberPatternType::INHERITANCE_ONLY : type,
+			package_member_identifier, supertype};
 	}
 	else
 	{
-		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(), std::string{error_messages::MISSING_SECOND_PACKAGE_MEMBER_PATTERN});
+		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
+			std::string{error_messages::MISSING_SECOND_PACKAGE_MEMBER_PATTERN});
+
 		return PackageMemberPattern{type, package_member_identifier};
 	}
 }
@@ -298,7 +321,8 @@ void Parser::parse_expected_package_member(const Access& access)
 	}
 	else
 	{
-		report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::ERROR, reader.consume(), std::string{error_messages::INVALID_FILE_LEVEL_TOKEN});
+		report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::ERROR, reader.consume(),
+			std::string{error_messages::INVALID_FILE_LEVEL_TOKEN});
 	}
 }
 
@@ -312,7 +336,9 @@ std::string Parser::parse_expected_declaration_name(AnalysisEntryType analysis_e
 	}
 	else
 	{
-		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(), std::string{error_messages::INVALID_DECLARATION_NAME});
+		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
+			std::string{error_messages::INVALID_DECLARATION_NAME});
+
 		return std::string{error_recovery::PLACEHOLDER_NAME};
 	}
 }
@@ -332,7 +358,8 @@ void Parser::parse_and_register_expected_entrypoint(const Access& access)
 	}
 	else
 	{
-		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(), std::string{error_messages::MISSING_CODE_BLOCK});
+		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
+			std::string{error_messages::MISSING_CODE_BLOCK});
 	}
 
 	std::unique_ptr<PackageMember> package_member = std::make_unique<Entrypoint>(access, std::move(parameters), std::move(body));
@@ -351,7 +378,8 @@ void Parser::parse_and_register_expected_operator_function_set(const Access& acc
 	}
 	else
 	{
-		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(), std::string{error_messages::MISSING_CODE_BLOCK});
+		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
+			std::string{error_messages::MISSING_CODE_BLOCK});
 	}
 
 	std::vector<OperatorFunction> functions;
@@ -361,7 +389,8 @@ void Parser::parse_and_register_expected_operator_function_set(const Access& acc
 		std::optional<ReferenceType> return_value = parse_reference_type(MutabilityMode::BORROW);
 		if(!return_value.has_value())
 		{
-			report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(), std::string{error_messages::INVALID_REFERENCE_TYPE});
+			report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
+				std::string{error_messages::INVALID_REFERENCE_TYPE});
 		}
 
 		std::vector<OperatorFunctionPatternElement> pattern = parse_operator_function_pattern();
@@ -384,7 +413,8 @@ void Parser::parse_and_register_expected_operator_function_set(const Access& acc
 	}
 	else
 	{
-		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(), std::string{error_messages::INVALID_OPERATOR_FUNCTION_SET_RULE_OR_MISSING_CLOSING_BRACKET});
+		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
+			std::string{error_messages::INVALID_OPERATOR_FUNCTION_SET_RULE_OR_MISSING_CLOSING_BRACKET});
 		// TODO: go to synchronisation token (create a helper method for this)
 	}
 
@@ -406,8 +436,12 @@ std::vector<OperatorFunctionPatternElement> Parser::parse_operator_function_patt
 			VariableDeclaration parameter = parse_variable_declaration(MutabilityMode::BORROW)
 				.value_or
 				(
-					VariableDeclaration{false, ReferenceType{false, MutabilityMode::BORROW, false, std::string{error_recovery::PLACEHOLDER_TYPE}},
-					std::string{error_recovery::PLACEHOLDER_NAME}}
+					VariableDeclaration
+					{
+						false,
+						ReferenceType{false, MutabilityMode::BORROW, false, std::string{error_recovery::PLACEHOLDER_TYPE}},
+						std::string{error_recovery::PLACEHOLDER_NAME}
+					}
 				);
 
 			pattern.push_back(OperatorFunctionParameter{parameter});
@@ -418,7 +452,8 @@ std::vector<OperatorFunctionPatternElement> Parser::parse_operator_function_patt
 			}
 			else
 			{
-				report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(), std::string{error_messages::INVALID_PACKAGE_MEMBER_PATTERN_PART__EXPECTED_CLOSING_BRACKET});
+				report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
+					std::string{error_messages::INVALID_PACKAGE_MEMBER_PATTERN_PART__EXPECTED_CLOSING_BRACKET});
 			}
 		}
 		else
@@ -470,7 +505,8 @@ ParameterDeclarationList Parser::parse_parameter_declarations()
 			}
 			else
 			{
-				report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(), std::string{error_messages::INVALID_PARAMETER_DECLARATION});
+				report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
+					std::string{error_messages::INVALID_PARAMETER_DECLARATION});
 				continue;
 			}
 		}
@@ -481,7 +517,8 @@ ParameterDeclarationList Parser::parse_parameter_declarations()
 
 		if(!var_decl.has_value())
 		{
-			report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(), std::string{error_messages::INVALID_PARAMETER_DECLARATION});
+			report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
+				std::string{error_messages::INVALID_PARAMETER_DECLARATION});
 			continue;
 		}
 
@@ -510,7 +547,8 @@ std::optional<VariableDeclaration> Parser::parse_variable_declaration(Mutability
 	}
 	else
 	{
-		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(), std::string{error_messages::MISSING_IDENTIFIER});
+		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
+			std::string{error_messages::MISSING_IDENTIFIER});
 	}
 
 	if(ref_type.has_value())
@@ -519,7 +557,8 @@ std::optional<VariableDeclaration> Parser::parse_variable_declaration(Mutability
 	}
 	else if(var)
 	{
-		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(), std::string{error_messages::INVALID_VARIABLE_DECLARATION});
+		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
+			std::string{error_messages::INVALID_VARIABLE_DECLARATION});
 
 		ReferenceType valid_ref_type{false, default_mutability_mode, false, std::string{error_recovery::PLACEHOLDER_NAME}};
 
@@ -574,7 +613,9 @@ std::optional<ReferenceType> Parser::parse_reference_type(MutabilityMode default
 	}
 	else if(opt || mut || !implicit_mutability_mode)
 	{
-		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(), std::string{error_messages::INVALID_REFERENCE_TYPE});
+		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
+			std::string{error_messages::INVALID_REFERENCE_TYPE});
+
 		return ReferenceType{opt, mm, mut, std::string{error_recovery::PLACEHOLDER_NAME}};
 	}
 	else
@@ -626,7 +667,8 @@ std::unique_ptr<Statement> Parser::parse_return_statement()
 	}
 	else
 	{
-		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(), std::string{error_messages::MISSING_SEMICOLON});
+		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
+			std::string{error_messages::MISSING_SEMICOLON});
 	}
 
 	return std::make_unique<Return>(std::move(value));
@@ -684,7 +726,8 @@ std::unique_ptr<Expression> Parser::parse_prefix_expression(PeekCursor peek_curs
 		if(expr) { return expr; }
 	}
 
-	consume_w_peek_cursor_and_report(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, peek_cursor, std::string{error_messages::INVALID_EXPRESSION});
+	consume_w_peek_cursor_and_report(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, peek_cursor,
+		std::string{error_messages::INVALID_EXPRESSION});
 
 	return nullptr;
 }
@@ -746,7 +789,8 @@ std::unique_ptr<Expression> Parser::parse_parenthesised_expression(PeekCursor pe
 	}
 	else
 	{
-		consume_w_peek_cursor_and_report(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, peek_cursor, std::string{error_messages::INVALID_CALL_EXPRESSION__EXPECTED_CLOSING_BRACKET});
+		consume_w_peek_cursor_and_report(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, peek_cursor,
+			std::string{error_messages::INVALID_CALL_EXPRESSION__EXPECTED_CLOSING_BRACKET});
 	}
 
 	return expr;
@@ -791,7 +835,8 @@ std::vector<std::unique_ptr<Expression>> Parser::parse_argument_expressions(Peek
 
 		if(peek_w_peek_cursor(peek_cursor).get_type() != TokenType::COMMA)
 		{
-			consume_w_peek_cursor_and_report(AnalysisEntryType::SEPARATOR, AnalysisSeverity::ERROR, peek_cursor, std::string{error_messages::INVALID_ARGUMENT_LIST__EXPECTED_COMMA_OR_CLOSING_BRACKET});
+			consume_w_peek_cursor_and_report(AnalysisEntryType::SEPARATOR, AnalysisSeverity::ERROR, peek_cursor,
+				std::string{error_messages::INVALID_ARGUMENT_LIST__EXPECTED_COMMA_OR_CLOSING_BRACKET});
 		}
 		else
 		{
@@ -799,7 +844,8 @@ std::vector<std::unique_ptr<Expression>> Parser::parse_argument_expressions(Peek
 		}
 	}
 
-	consume_w_peek_cursor_and_report(AnalysisEntryType::SEPARATOR, AnalysisSeverity::ERROR, peek_cursor, std::string{error_messages::UNEXPECTED_END_OF_FILE_IN_ARGUMENT_LIST});
+	consume_w_peek_cursor_and_report(AnalysisEntryType::SEPARATOR, AnalysisSeverity::ERROR, peek_cursor,
+		std::string{error_messages::UNEXPECTED_END_OF_FILE_IN_ARGUMENT_LIST});
 
 	return argument_expressions;
 }
