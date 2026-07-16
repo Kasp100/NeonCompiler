@@ -55,8 +55,8 @@ namespace error_messages
 		"Invalid package member pattern, expected `pkg` after `shallow` or `deep`.";
 	constexpr std::string_view INVALID_PACKAGE_MEMBER_PATTERN_PART__EXPECTED_CLOSING_BRACKET =
 		"Expected the parameter declaration to end here with `)`.";
-	constexpr std::string_view INVALID_OPERATOR_FUNCTION_SET_RULE_OR_MISSING_CLOSING_BRACKET =
-		"Invalid expression grammar rule or missing `}`. See documentation for custom expression grammar.";
+	constexpr std::string_view INVALID_OPERATOR_FUNCTION_OR_MISSING_CLOSING_BRACKET =
+		"Invalid operator function or missing `}`. See documentation for operator modules.";
 	constexpr std::string_view INVALID_CALL_EXPRESSION__EXPECTED_CLOSING_BRACKET =
 		"Invalid call expression; expected closing bracket `)`.";
 	constexpr std::string_view INVALID_ARGUMENT_LIST__EXPECTED_COMMA_OR_CLOSING_BRACKET =
@@ -130,7 +130,7 @@ private:
 	void parse_expected_package_member(const neon_compiler::ast::nodes::Access& access);
 	std::string parse_expected_declaration_name(neon_compiler::analysis::AnalysisEntryType analysis_entry_type);
 	void parse_and_register_expected_entrypoint(const neon_compiler::ast::nodes::Access& access);
-	void parse_and_register_expected_operator_function_set(const neon_compiler::ast::nodes::Access& access);
+	void parse_and_register_expected_operator_module(const neon_compiler::ast::nodes::Access& access);
 	std::vector<neon_compiler::ast::nodes::OperatorFunctionPatternElement> parse_operator_function_pattern();
 	neon_compiler::ast::nodes::ParameterDeclarationList parse_parameter_declarations();
 	std::optional<neon_compiler::ast::nodes::VariableDeclaration> parse_variable_declaration(neon_compiler::ast::nodes::MutabilityMode default_mutability_mode);

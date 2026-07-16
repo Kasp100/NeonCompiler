@@ -33,7 +33,7 @@ public:
 	void visit(const nodes::PureFunctionSet& node) override;
 	void visit(const nodes::PureFunction& node) override;
 	void visit(const nodes::OperatorDeclaration& node) override;
-	void visit(const nodes::OperatorFunctionSet& node) override;
+	void visit(const nodes::OperatorModule& node) override;
 	void visit(const nodes::OperatorFunction& node) override;
 	void visit(const nodes::CompileFunction& node) override;
 	void visit(const nodes::LiteralNumberExpression& node) override;

@@ -1,8 +1,10 @@
 #include "ast_printer.hpp"
 
 #include <iostream>
+#include "../nodes/statement_nodes.hpp"
 
 using namespace neon_compiler::ast::impl;
+using namespace neon_compiler::ast::nodes;
 
 ASTPrinter::ASTPrinter() {}
 
@@ -55,7 +57,10 @@ void ASTPrinter::visit(const nodes::ReferenceType& node)
 
 void ASTPrinter::visit(const nodes::CodeBlock& node)
 {
-
+	for(const std::unique_ptr<Statement>& stmt : node.statements)
+	{
+		stmt->accept(*this);
+	}
 }
 
 void ASTPrinter::visit(const nodes::DiscardExpression& node)
@@ -128,7 +133,7 @@ void ASTPrinter::visit(const nodes::OperatorDeclaration& node)
 
 }
 
-void ASTPrinter::visit(const nodes::OperatorFunctionSet& node)
+void ASTPrinter::visit(const nodes::OperatorModule& node)
 {
 
 }

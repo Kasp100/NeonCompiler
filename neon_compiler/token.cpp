@@ -70,7 +70,7 @@ std::optional<TokenType> Token::keyword_to_token_type(std::string_view word)
 	else if (word == "entrypoint")            return TokenType::PACKAGE_MEMBER_ENTRYPOINT;
 	else if (word == "pure_function_set")     return TokenType::PACKAGE_MEMBER_PURE_FUNCTION_SET;
 	else if (word == "operator")              return TokenType::PACKAGE_MEMBER_OPERATOR;
-	else if (word == "operator_function_set") return TokenType::PACKAGE_MEMBER_OPERATOR_FUNCTION_SET;
+	else if (word == "operator_module")       return TokenType::PACKAGE_MEMBER_OPERATOR_MODULE;
 	else if (word == "compile_function")      return TokenType::PACKAGE_MEMBER_COMPILE_FUNCTION;
 	else if (word == "class")                 return TokenType::PACKAGE_MEMBER_CLASS;
 	else if (word == "interface")             return TokenType::PACKAGE_MEMBER_INTERFACE;

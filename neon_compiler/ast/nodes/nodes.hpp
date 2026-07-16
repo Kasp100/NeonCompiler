@@ -341,14 +341,14 @@ struct OperatorFunction : ASTNode
 	}
 };
 
-struct OperatorFunctionSet : PackageMember
+struct OperatorModule : PackageMember
 {
 	/** The access which determines who can use this expression grammar */
 	Access access;
-	/** Expression grammar set rules */
+	/** Operator functions */
 	std::vector<OperatorFunction> functions;
 
-	OperatorFunctionSet(Access access, std::vector<OperatorFunction> functions)
+	OperatorModule(Access access, std::vector<OperatorFunction> functions)
 		: access{access}, functions{std::move(functions)} {}
 
 	void accept(ASTVisitor& visitor) const override

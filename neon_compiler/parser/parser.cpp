@@ -297,10 +297,10 @@ void Parser::parse_expected_package_member(const Access& access)
 	{
 		report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
 	}
-	else if(reader.peek().get_type() == TokenType::PACKAGE_MEMBER_OPERATOR_FUNCTION_SET)
+	else if(reader.peek().get_type() == TokenType::PACKAGE_MEMBER_OPERATOR_MODULE)
 	{
 		report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
-		parse_and_register_expected_operator_function_set(access);
+		parse_and_register_expected_operator_module(access);
 	}
 	else if(reader.peek().get_type() == TokenType::PACKAGE_MEMBER_COMPILE_FUNCTION)
 	{
@@ -368,7 +368,7 @@ void Parser::parse_and_register_expected_entrypoint(const Access& access)
 }
 
 // TODO: write tests for this
-void Parser::parse_and_register_expected_operator_function_set(const Access& access)
+void Parser::parse_and_register_expected_operator_module(const Access& access)
 {
 	const std::string name = parse_expected_declaration_name(AnalysisEntryType::DECLARATION);
 
@@ -414,11 +414,11 @@ void Parser::parse_and_register_expected_operator_function_set(const Access& acc
 	else
 	{
 		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
-			std::string{error_messages::INVALID_OPERATOR_FUNCTION_SET_RULE_OR_MISSING_CLOSING_BRACKET});
+			std::string{error_messages::INVALID_OPERATOR_FUNCTION_OR_MISSING_CLOSING_BRACKET});
 		// TODO: go to synchronisation token (create a helper method for this)
 	}
 
-	std::unique_ptr<PackageMember> package_member = std::make_unique<OperatorFunctionSet>(access, std::move(functions));
+	std::unique_ptr<PackageMember> package_member = std::make_unique<OperatorModule>(access, std::move(functions));
 
 	append_ast(std::move(package_member), name);
 }
