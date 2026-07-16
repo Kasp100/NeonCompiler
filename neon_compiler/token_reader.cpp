@@ -25,7 +25,7 @@ const Token& TokenReader::peek(uint offset) const
 	return tokens[peek_reading_index];
 }
 
-bool TokenReader::end_of_file_reached() const
+bool TokenReader::end_of_file_reached(uint offset) const
 {
-	return peek().get_type() == TokenType::END_OF_FILE;
+	return peek(offset).get_type() == TokenType::END_OF_FILE;
 }

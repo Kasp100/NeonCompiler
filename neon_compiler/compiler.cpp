@@ -67,7 +67,7 @@ void Compiler::generate_analysis() const
 	std::shared_ptr<analysis::AnalysisReporter> reporter =
 			std::make_shared<analysis::impl::ConsoleAnalysisReporter>(latest_file);
 
-	parser::Parser parser{tokens_view, reporter, root_node, latest_file};
+	parser::Parser parser{logger, tokens_view, reporter, root_node, latest_file};
 	parser.run();
 
 	ast::impl::ASTPrinter printer{};

@@ -13,6 +13,7 @@
 #include "../analysis/analysis_entry.hpp"
 #include "../analysis/analysis_reporter.hpp"
 #include "../ast/identifiers.hpp"
+#include "../../logging/logger.hpp"
 
 namespace neon_compiler::parser
 {
@@ -74,13 +75,12 @@ namespace error_recovery
 		"err_type";
 }
 
-using PeekCursor = uint*;
-
 class Parser
 {
 public:
 	explicit Parser
     (
+		std::shared_ptr<logging::Logger> logger,
         std::span<const neon_compiler::Token> tokens,
         std::shared_ptr<neon_compiler::analysis::AnalysisReporter> analysis_reporter,
 		std::shared_ptr<neon_compiler::ast::nodes::Root> root_node,
@@ -89,6 +89,7 @@ public:
 	void run();
 	std::shared_ptr<neon_compiler::ast::nodes::Root> get_root_node() const;
 private:
+	std::shared_ptr<logging::Logger> logger;
 	neon_compiler::TokenReader reader;
 	std::shared_ptr<neon_compiler::analysis::AnalysisReporter> analysis_reporter;
 	std::shared_ptr<neon_compiler::ast::nodes::Root> root_node;

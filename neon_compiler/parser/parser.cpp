@@ -7,12 +7,13 @@ using namespace neon_compiler::ast::nodes;
 
 Parser::Parser
 (
+	std::shared_ptr<logging::Logger> logger,
 	std::span<const Token> tokens,
 	std::shared_ptr<neon_compiler::analysis::AnalysisReporter> analysis_reporter,
 	std::shared_ptr<neon_compiler::ast::nodes::Root> root_node,
 	std::string_view file
 ) :
-	reader{tokens}, analysis_reporter{analysis_reporter}, root_node{root_node}, file{file} {}
+	logger{logger}, reader{tokens}, analysis_reporter{analysis_reporter}, root_node{root_node}, file{file} {}
 
 void Parser::run()
 {
@@ -46,12 +47,14 @@ const Token& Parser::consume_w_peek_cursor(PeekCursor peek_cursor, uint offset)
 {
 	if(peek_cursor)
 	{
-		*peek_cursor += offset;
-		return reader.peek(offset);
+		const Token& token = peek_w_peek_cursor(peek_cursor, offset);
+		*peek_cursor += offset + 1;
+		return token;
 	}
 	else
 	{
-		return reader.consume(offset);
+		const Token& token = reader.consume(offset);
+		return token;
 	}
 }
 
@@ -641,11 +644,17 @@ std::unique_ptr<Expression> Parser::parse_expression(PeekCursor peek_cursor, uin
 
 	std::unique_ptr<Expression> left = parse_prefix_expression(peek_cursor, func_parse_expression_w_cursor);
 
+	if(!left)
+	{
+		logger->info("Parsing encountered an invalid expression.");
+		return nullptr;
+	}
+
 	while(true)
 	{
-		std::shared_ptr<const Operator> op = operator_table.match_infix(reader, func_parse_expression_w_cursor);
+		std::shared_ptr<const Operator> op = operator_table.match_infix(reader, peek_cursor, func_parse_expression_w_cursor);
 
-		if(!op) { op = operator_table.match_postfix(reader, func_parse_expression_w_cursor); }
+		if(!op) { op = operator_table.match_postfix(reader, peek_cursor, func_parse_expression_w_cursor); }
 
 		if(!op) { break; }
 
@@ -666,7 +675,7 @@ std::unique_ptr<Expression> Parser::parse_prefix_expression(PeekCursor peek_curs
 
 	{
 		// Handle prefix operators
-		std::shared_ptr<const Operator> op = operator_table.match_prefix(reader, func_parse_expression_w_cursor);
+		std::shared_ptr<const Operator> op = operator_table.match_prefix(reader, peek_cursor, func_parse_expression_w_cursor);
 		if(op) { return parse_operator_call_expression(peek_cursor, op); }
 	}
 
@@ -728,7 +737,7 @@ std::unique_ptr<Expression> Parser::parse_parenthesised_expression(PeekCursor pe
 	
 	consume_w_peek_cursor_and_report(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, peek_cursor);
 
-	std::unique_ptr<Expression> expr = parse_expression();
+	std::unique_ptr<Expression> expr = parse_expression(peek_cursor);
 	if(peek_w_peek_cursor(peek_cursor).get_type() == TokenType::BRACKET_ROUND_CLOSE)
 	{
 		consume_w_peek_cursor_and_report(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, peek_cursor);
@@ -755,7 +764,7 @@ std::unique_ptr<Expression> Parser::parse_named_expression(PeekCursor peek_curso
 
 	std::vector<std::unique_ptr<Expression>> argument_expressions;
 	
-	if(reader.peek().get_type() != TokenType::BRACKET_ROUND_CLOSE)
+	if(peek_w_peek_cursor(peek_cursor).get_type() != TokenType::BRACKET_ROUND_CLOSE)
 	{
 		argument_expressions = parse_argument_expressions(peek_cursor);
 	}
@@ -769,16 +778,16 @@ std::vector<std::unique_ptr<Expression>> Parser::parse_argument_expressions(Peek
 {
 	std::vector<std::unique_ptr<Expression>> argument_expressions;
 
-	while(!reader.end_of_file_reached())
+	while(!reader.end_of_file_reached(peek_cursor ? *peek_cursor : 0))
 	{
-		argument_expressions.push_back(std::move(parse_expression()));
+		argument_expressions.push_back(std::move(parse_expression(peek_cursor)));
 
-		if(reader.peek().get_type() == TokenType::BRACKET_ROUND_CLOSE)
+		if(peek_w_peek_cursor(peek_cursor).get_type() == TokenType::BRACKET_ROUND_CLOSE)
 		{
 			return argument_expressions;
 		}
 
-		if(reader.peek().get_type() != TokenType::COMMA)
+		if(peek_w_peek_cursor(peek_cursor).get_type() != TokenType::COMMA)
 		{
 			consume_w_peek_cursor_and_report(AnalysisEntryType::SEPARATOR, AnalysisSeverity::ERROR, peek_cursor, std::string{error_messages::INVALID_ARGUMENT_LIST__EXPECTED_COMMA_OR_CLOSING_BRACKET});
 		}

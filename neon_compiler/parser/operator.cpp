@@ -94,12 +94,22 @@ std::size_t Operator::count_consecutive_tokens(const std::vector<OperatorSyntaxP
 	return count;
 }
 
-bool Operator::matches(const TokenReader& reader, const FuncParseExpressionWCursor& func_parse_expression_w_cursor) const
+bool Operator::matches
+(
+	const TokenReader& reader,
+	PeekCursor peek_cursor,
+	const FuncParseExpressionWCursor& func_parse_expression_w_cursor,
+	bool skip_first
+) const
 {
-	uint peek_offset{0};
+	uint peek_offset{peek_cursor ? *peek_cursor : 0}; 
 
-	for(OperatorSyntaxPatternElement elem : get_declaration()->pattern)
+	const std::vector<OperatorSyntaxPatternElement>& pattern = get_declaration()->pattern;
+
+	for(std::size_t i = (skip_first ? 1 : 0); i < pattern.size(); ++i)
 	{
+		const OperatorSyntaxPatternElement& elem = pattern[i];
+
 		if(std::holds_alternative<OperatorSyntaxParameter>(elem))
 		{
 			peek_offset = func_parse_expression_w_cursor(peek_offset);

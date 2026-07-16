@@ -50,16 +50,19 @@ public:
 	std::shared_ptr<const neon_compiler::parser::Operator> match_prefix
 	(
 		const neon_compiler::TokenReader& reader,
+		neon_compiler::parser::PeekCursor peek_cursor,
 		const FuncParseExpressionWCursor& func_parse_expression_w_cursor
 	);
 	std::shared_ptr<const neon_compiler::parser::Operator> match_infix
 	(
 		const neon_compiler::TokenReader& reader,
+		neon_compiler::parser::PeekCursor peek_cursor,
 		const FuncParseExpressionWCursor& func_parse_expression_w_cursor
 	);
 	std::shared_ptr<const neon_compiler::parser::Operator> match_postfix
 	(
 		const neon_compiler::TokenReader& reader,
+		neon_compiler::parser::PeekCursor peek_cursor,
 		const FuncParseExpressionWCursor& func_parse_expression_w_cursor
 	);
 private:
@@ -75,7 +78,9 @@ private:
 	(
 		std::vector<std::shared_ptr<const neon_compiler::parser::Operator>>& operators,
 		const neon_compiler::TokenReader& reader,
-		const FuncParseExpressionWCursor& func_parse_expression_w_cursor
+		PeekCursor peek_cursor,
+		const FuncParseExpressionWCursor& func_parse_expression_w_cursor,
+		bool skip_fist
 	);
 };
 

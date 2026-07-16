@@ -14,7 +14,7 @@ namespace neon_compiler
 
 		const neon_compiler::Token& consume(uint offset = 0);
 		const neon_compiler::Token& peek(uint offset = 0) const;
-		bool end_of_file_reached() const;
+		bool end_of_file_reached(uint offset = 0) const;
 
 	private:
 		std::span<const neon_compiler::Token> tokens;

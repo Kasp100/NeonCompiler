@@ -29,6 +29,8 @@ enum class Fixity
 
 using FuncParseExpressionWCursor = std::function<uint(uint peek_offset)>;
 
+using PeekCursor = uint*;
+
 class Operator
 {
 public:
@@ -41,7 +43,13 @@ public:
 	std::shared_ptr<const neon_compiler::ast::nodes::OperatorDeclaration> get_declaration() const;
 	Fixity get_fixity() const;
 	bool operator<(const Operator& other) const;
-	bool matches(const neon_compiler::TokenReader& reader, const FuncParseExpressionWCursor& func_parse_expression_w_cursor) const;
+	bool matches
+	(
+		const neon_compiler::TokenReader& reader,
+		PeekCursor peek_cursor,
+		const FuncParseExpressionWCursor& func_parse_expression_w_cursor,
+		bool skip_first
+	) const;
 private:
 	/** Declaration of this operator */
 	std::shared_ptr<const neon_compiler::ast::nodes::OperatorDeclaration> declaration;

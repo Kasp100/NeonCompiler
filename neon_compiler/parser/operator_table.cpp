@@ -31,28 +31,31 @@ void OperatorTable::add(std::shared_ptr<const neon_compiler::parser::Operator> o
 std::shared_ptr<const Operator> OperatorTable::match_prefix
 (
 	const TokenReader& reader,
+	PeekCursor peek_cursor,
 	const FuncParseExpressionWCursor& func_parse_expression_w_cursor
 )
 {
-	return match(prefix_operators, reader, func_parse_expression_w_cursor);
+	return match(prefix_operators, reader, peek_cursor, func_parse_expression_w_cursor, false);
 }
 
 std::shared_ptr<const Operator> OperatorTable::match_infix
 (
 	const TokenReader& reader,
+	PeekCursor peek_cursor,
 	const FuncParseExpressionWCursor& func_parse_expression_w_cursor
 )
 {
-	return match(infix_operators, reader, func_parse_expression_w_cursor);
+	return match(infix_operators, reader, peek_cursor, func_parse_expression_w_cursor, true);
 }
 
 std::shared_ptr<const Operator> OperatorTable::match_postfix
 (
 	const TokenReader& reader,
+	PeekCursor peek_cursor,
 	const FuncParseExpressionWCursor& func_parse_expression_w_cursor
 )
 {
-	return match(postfix_operators, reader, func_parse_expression_w_cursor);
+	return match(postfix_operators, reader, peek_cursor, func_parse_expression_w_cursor, true);
 }
 
 void OperatorTable::finalise()
@@ -81,7 +84,9 @@ std::shared_ptr<const Operator> OperatorTable::match
 (
 	std::vector<std::shared_ptr<const Operator>>& operators,
 	const TokenReader& reader,
-	const FuncParseExpressionWCursor& func_parse_expression_w_cursor
+	PeekCursor peek_cursor,
+	const FuncParseExpressionWCursor& func_parse_expression_w_cursor,
+	bool skip_first
 )
 {
 	if(!finalised)
@@ -91,7 +96,7 @@ std::shared_ptr<const Operator> OperatorTable::match
 
 	for(std::size_t i = 0; i < operators.size(); ++i)
 	{
-		if(operators[i]->matches(reader, func_parse_expression_w_cursor))
+		if(operators[i]->matches(reader, peek_cursor, func_parse_expression_w_cursor, skip_first))
 		{
 			return operators[i];
 		}
