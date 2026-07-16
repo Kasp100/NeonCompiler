@@ -27,7 +27,7 @@ enum class Fixity
 	INVALID
 };
 
-using FuncParseExpressionWCursor = std::function<uint(uint peek_offset)>;
+using FuncParseExpressionWCursor = std::function<uint(uint peek_offset, uint max_subordination)>;
 
 using PeekCursor = uint*;
 

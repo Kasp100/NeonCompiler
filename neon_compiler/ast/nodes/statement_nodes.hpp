@@ -7,6 +7,7 @@
 #include "nodes.hpp"
 #include "../ast_node.hpp"
 #include "../../token.hpp"
+#include "../../parser/operator.hpp"
 
 namespace neon_compiler::ast::nodes
 {

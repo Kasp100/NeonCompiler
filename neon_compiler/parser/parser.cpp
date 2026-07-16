@@ -678,9 +678,9 @@ std::unique_ptr<Expression> Parser::parse_expression(PeekCursor peek_cursor, uin
 {
 	// Implements Pratt parsing, but with subordination instead of precedence
 
-	FuncParseExpressionWCursor func_parse_expression_w_cursor = [this] (uint peek_offset)
+	FuncParseExpressionWCursor func_parse_expression_w_cursor = [this] (uint peek_offset, uint max_subordination)
 	{
-		parse_expression(&peek_offset);
+		parse_expression(&peek_offset, max_subordination);
 		return peek_offset;
 	};
 

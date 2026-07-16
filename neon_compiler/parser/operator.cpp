@@ -112,7 +112,9 @@ bool Operator::matches
 
 		if(std::holds_alternative<OperatorSyntaxParameter>(elem))
 		{
-			peek_offset = func_parse_expression_w_cursor(peek_offset);
+			uint max_subordination = declaration->subordination - 1;
+			if(i == pattern.size() - 1 && declaration->associativity == OperatorAssociativity::RIGHT) { ++max_subordination; }
+			peek_offset = func_parse_expression_w_cursor(peek_offset, max_subordination);
 			continue;
 		}
 
