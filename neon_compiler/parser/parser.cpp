@@ -861,7 +861,7 @@ std::unique_ptr<Expression> Parser::parse_operator_call_expression
 
 	const std::vector<OperatorSyntaxPatternElement>& pattern = op->get_declaration()->pattern;
 
-	for(std::size_t i = 1; i < pattern.size(); ++i)
+	for(std::size_t i = (first_argument ? 1 : 0); i < pattern.size(); ++i)
 	{
 		const OperatorSyntaxPatternElement& elem = pattern[i];
 
