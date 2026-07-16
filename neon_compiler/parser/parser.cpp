@@ -696,7 +696,8 @@ std::unique_ptr<Expression> Parser::parse_terminating_expression(PeekCursor peek
 	{
 		return std::make_unique<LiteralNumberExpression>
 		(
-			std::string{consume_w_peek_cursor(peek_cursor).get_lexeme().value()}
+			std::string{consume_w_peek_cursor_and_report(AnalysisEntryType::LITERAL_NUMBER, AnalysisSeverity::INFO, peek_cursor)
+				.get_lexeme().value()}
 		);
 	}
 
@@ -704,19 +705,20 @@ std::unique_ptr<Expression> Parser::parse_terminating_expression(PeekCursor peek
 	{
 		return std::make_unique<LiteralStringExpression>
 		(
-			std::string{consume_w_peek_cursor(peek_cursor).get_lexeme().value()}
+			std::string{consume_w_peek_cursor_and_report(AnalysisEntryType::LITERAL_STRING, AnalysisSeverity::INFO, peek_cursor)
+				.get_lexeme().value()}
 		);
 	}
 
 	if(peek_w_peek_cursor(peek_cursor).get_type() == TokenType::BOOL_TRUE)
 	{
-		consume_w_peek_cursor(peek_cursor);
+		consume_w_peek_cursor_and_report(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, peek_cursor);
 		return std::make_unique<LiteralBooleanExpression>(true);
 	}
 
 	if(peek_w_peek_cursor(peek_cursor).get_type() == TokenType::BOOL_FALSE)
 	{
-		consume_w_peek_cursor(peek_cursor);
+		consume_w_peek_cursor_and_report(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, peek_cursor);
 		return std::make_unique<LiteralBooleanExpression>(false);
 	}
 
