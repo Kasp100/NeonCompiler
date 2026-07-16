@@ -47,8 +47,8 @@ They may contain:
 Neoncode supports compile-time metaprogramming and code generation through "**compile functions**" — functions written in Neoncode that operate on the **AST (Abstract Syntax Tree)**.  
 Compile function calls are explicit and use the `auto:` prefix.
 
-### Custom Grammar
-Neoncode supports custom **expression grammar** through custom operators and operator functions, enabling domain-specific syntax extensions.
+### Custom Expression Grammar
+Neoncode supports custom **expression grammar** through custom operator modules containing operator and operator function definitions, enabling domain-specific syntax extensions.
 
 ---
 
