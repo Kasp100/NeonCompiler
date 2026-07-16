@@ -859,9 +859,14 @@ std::unique_ptr<Expression> Parser::parse_operator_call_expression
 {
 	std::vector<std::unique_ptr<Expression>> arguments;
 
-	const std::vector<OperatorSyntaxPatternElement>& pattern = op->get_declaration()->pattern;
+	bool first_argument_passed{first_argument};
 
-	for(std::size_t i = (first_argument ? 1 : 0); i < pattern.size(); ++i)
+	if(first_argument_passed) { arguments.push_back(std::move(first_argument)); }
+
+	std::shared_ptr<const neon_compiler::ast::nodes::OperatorDeclaration> declaration = op->get_declaration();
+	const std::vector<OperatorSyntaxPatternElement>& pattern = declaration->pattern;
+
+	for(std::size_t i = (first_argument_passed ? 1 : 0); i < pattern.size(); ++i)
 	{
 		const OperatorSyntaxPatternElement& elem = pattern[i];
 
@@ -871,7 +876,9 @@ std::unique_ptr<Expression> Parser::parse_operator_call_expression
 			continue;
 		}
 
-		arguments.push_back(parse_expression(peek_cursor));
+		uint max_subordination = declaration->subordination - 1;
+		if(i == pattern.size() - 1 && declaration->associativity == OperatorAssociativity::RIGHT) { ++max_subordination; }
+		arguments.push_back(parse_expression(peek_cursor, max_subordination));
 	}
 
 	return std::make_unique<OperatorCallExpression>(std::move(arguments), op);
