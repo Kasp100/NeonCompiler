@@ -57,8 +57,8 @@ namespace error_messages
 		"Expected the parameter declaration to end here with `)`.";
 	constexpr std::string_view INVALID_OPERATOR_FUNCTION_OR_MISSING_CLOSING_BRACKET =
 		"Invalid operator function or missing `}`. See documentation for operator modules.";
-	constexpr std::string_view INVALID_CALL_EXPRESSION__EXPECTED_CLOSING_BRACKET =
-		"Invalid call expression; expected closing bracket `)`.";
+	constexpr std::string_view INVALID_PARENTHESISED_EXPRESSION__EXPECTED_CLOSING_BRACKET =
+		"Invalid parenthesised expression; expected closing bracket `)`.";
 	constexpr std::string_view INVALID_ARGUMENT_LIST__EXPECTED_COMMA_OR_CLOSING_BRACKET =
 		"Invalid argument list; expected comma or closing bracket after argument.";
 	constexpr std::string_view INVALID_EXPRESSION =

@@ -790,7 +790,7 @@ std::unique_ptr<Expression> Parser::parse_parenthesised_expression(PeekCursor pe
 	else
 	{
 		consume_w_peek_cursor_and_report(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, peek_cursor,
-			std::string{error_messages::INVALID_CALL_EXPRESSION__EXPECTED_CLOSING_BRACKET});
+			std::string{error_messages::INVALID_PARENTHESISED_EXPRESSION__EXPECTED_CLOSING_BRACKET});
 	}
 
 	return expr;
