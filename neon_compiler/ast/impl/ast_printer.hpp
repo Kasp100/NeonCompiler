@@ -41,8 +41,14 @@ public:
 	void visit(const nodes::LiteralBooleanExpression& node) override;
 	void visit(const nodes::OperatorCallExpression& node) override;
 private:
-	static void print_access(const nodes::Access& a);
-	static void print_package_member_pattern(const nodes::PackageMemberPattern& pmp);
+	uint depth{0};
+	void incr_depth();
+	void decr_depth();
+	void print(const std::string& str) const;
+	void print_prefix() const;
+	void print_line() const;
+	void print_access(const nodes::Access& a) const;
+	void print_package_member_pattern(const nodes::PackageMemberPattern& pmp) const;
 };
 
 }

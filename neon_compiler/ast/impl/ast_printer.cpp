@@ -12,22 +12,27 @@ void ASTPrinter::visit(const nodes::Root& node)
 {
 	for(const std::pair<const std::string, std::unique_ptr<nodes::PackageMember>>& pm : node.package_members)
 	{
-		std::cout << "[AST] PM ";
-		std::cout << pm.first;
-		std::cout << "\n";
+		print_prefix();
+		print("package member ");
+		print(pm.first);
+		print_line();
+
+		incr_depth();
 		pm.second->accept(*this);
-		std::cout << "[--- end PM ---]\n";
+		decr_depth();
 	}
 }
 
 void ASTPrinter::visit(const nodes::Entrypoint& node)
 {
-	std::cout << "[AST] ";
+	print_prefix();
 	print_access(node.access);
-	std::cout << " entrypoint";
-	std::cout << "\n";
+	print(" entrypoint");
+	print_line();
+
+	incr_depth();
 	node.body.accept(*this);
-	std::cout << "[--- end entrypoint ---]\n";
+	decr_depth();
 }
 
 void ASTPrinter::visit(const nodes::Type& node)
@@ -62,12 +67,16 @@ void ASTPrinter::visit(const nodes::ReferenceType& node)
 
 void ASTPrinter::visit(const nodes::CodeBlock& node)
 {
-	std::cout << "[AST] code block\n";
+	print_prefix();
+	print("code block");
+	print_line();
+
+	incr_depth();
 	for(const std::unique_ptr<Statement>& stmt : node.statements)
 	{
 		stmt->accept(*this);
 	}
-	std::cout << "[--- end code block ---]\n";
+	decr_depth();
 }
 
 void ASTPrinter::visit(const nodes::DiscardExpression& node)
@@ -87,9 +96,13 @@ void ASTPrinter::visit(const nodes::AutoCall& node)
 
 void ASTPrinter::visit(const nodes::Return& node)
 {
-	std::cout << "[AST] return\n";
+	print_prefix();
+	print("return");
+	print_line();
+
+	incr_depth();
 	node.value->accept(*this);
-	std::cout << "[--- end return ---]\n";
+	decr_depth();
 }
 
 void ASTPrinter::visit(const nodes::Assignment& node)
@@ -109,21 +122,25 @@ void ASTPrinter::visit(const nodes::ObjectRead& node)
 
 void ASTPrinter::visit(const nodes::FunctionCall& node)
 {
-	std::cout << "[AST] function call - function name: ";
-	std::cout << node.function_name;
-	std::cout << "\n";
+	print_prefix();
+	print("function call - function name: ");
+	print(node.function_name);
+	print_line();
+
+	incr_depth();
 	for(const std::unique_ptr<Expression>& arg : node.arguments)
 	{
 		arg->accept(*this);
 	}
-	std::cout << "[--- end function call expression ---]\n";
+	decr_depth();
 }
 
 void ASTPrinter::visit(const nodes::SimpleRead& node)
 {
-	std::cout << "[AST] simple read - reference name: ";
-	std::cout << node.reference_name;
-	std::cout << " [end]\n";
+	print_prefix();
+	print("simple read - reference name: ");
+	print(node.reference_name);
+	print_line();
 }
 
 void ASTPrinter::visit(const nodes::OptFunctionCall& node)
@@ -168,76 +185,146 @@ void ASTPrinter::visit(const nodes::CompileFunction& node)
 
 void ASTPrinter::visit(const nodes::LiteralNumberExpression& node)
 {
-	std::cout << "[AST] literal number expression - amount of digits: ";
-	std::cout << std::to_string(node.value.size());
-	std::cout << " [end]\n";
+	print_prefix();
+	print("literal number expression - amount of digits: ");
+	print(std::to_string(node.value.size()));
+	print_line();
 }
 
 void ASTPrinter::visit(const nodes::LiteralStringExpression& node)
 {
-	std::cout << "[AST] literal string expression - length: ";
-	std::cout << std::to_string(node.value.size());
-	std::cout << " [end]\n";
+	print_prefix();
+	print("literal string expression - length: ");
+	print(std::to_string(node.value.size()));
+	print_line();
 }
 
 void ASTPrinter::visit(const nodes::LiteralBooleanExpression& node)
 {
-	std::cout << "[AST] literal boolean expression ";
-	std::cout << (node.value ? "true" : "false");
-	std::cout << " [end]\n";
+	print_prefix();
+	print("literal boolean expression ");
+	print(node.value ? "true" : "false");
+	print_line();
 }
 
 void ASTPrinter::visit(const nodes::OperatorCallExpression& node)
 {
-	std::cout << "[AST] operator call expression - ";
-	std::cout << std::to_string(node.arguments.size());
-	std::cout << " argument(s)\n";
-	for(const std::unique_ptr<Expression>& arg : node.arguments)
+	print_prefix();
+	print("operator call expression - ");
+	print(std::to_string(node.arguments.size()));
+	print(" argument(s)");
+	print_line();
+
+	const std::vector<std::unique_ptr<Expression>>& args = node.arguments;
+	const std::vector<OperatorSyntaxPatternElement>& pattern = node.op->get_declaration()->pattern;
+
+	uint arg_i{0};
+
+	incr_depth();
+	for(const OperatorSyntaxPatternElement& elem : pattern)
 	{
-		arg->accept(*this);
+		if(std::holds_alternative<TokenPattern>(elem))
+		{
+			const TokenPattern& tp = std::get<TokenPattern>(elem);
+			print_prefix();
+			print("token - type: ");
+			print(std::to_string(static_cast<int>(tp.token_type)));
+
+			if(tp.lexeme.has_value())
+			{
+				const std::string& v = tp.lexeme.value();
+				print(", lexeme: ");
+				print(v);
+			}
+			
+			print_line();
+		}
+		else
+		{
+			const OperatorSyntaxParameter& param = std::get<OperatorSyntaxParameter>(elem);
+			print_prefix();
+			print("param ");
+			print(param.name);
+			print_line();
+
+			incr_depth();
+			args.at(arg_i)->accept(*this);
+			decr_depth();
+			++arg_i;
+		}
 	}
-	std::cout << "[--- end operator call expression ---]\n";
+	decr_depth();
 }
 
-void ASTPrinter::print_access(const nodes::Access& a)
+void ASTPrinter::incr_depth()
+{
+	++depth;
+}
+
+void ASTPrinter::decr_depth()
+{
+	--depth;
+}
+
+void ASTPrinter::print(const std::string& str) const
+{
+	std::cout << str;
+}
+
+void ASTPrinter::print_prefix() const
+{
+	print("[AST] ");
+	for(uint i = 0; i < depth; ++i)
+	{
+		print("|  ");
+	}
+	print("|--");
+}
+
+void ASTPrinter::print_line() const
+{
+	print("\n");
+}
+
+void ASTPrinter::print_access(const nodes::Access& a) const
 {
 	switch (a.type)
 	{
 	case nodes::AccessType::PUBLIC:
-		std::cout << "public";
+		print("public");
 		break;
 	case nodes::AccessType::PRIVATE:
-		std::cout << "private";
+		print("private");
 		break;
 	case nodes::AccessType::PROTECTED:
-		std::cout << "protected";
+		print("protected");
 		break;
 	case nodes::AccessType::EXCLUSIVE:
-		std::cout << "exclusive { ";
+		print("exclusive { ");
 
 		bool first{true};
 		for(const nodes::PackageMemberPattern& pmp : a.patterns)
 		{
 			if(first) { first = false; }
-			else { std::cout << ", "; }
+			else { print(", "); }
 
 			print_package_member_pattern(pmp);
 		}
 		
-		std::cout << " }";
+		print(" }");
 		break;
 	}
 }
 
-void ASTPrinter::print_package_member_pattern(const nodes::PackageMemberPattern& pmp)
+void ASTPrinter::print_package_member_pattern(const nodes::PackageMemberPattern& pmp) const
 {
 	switch (pmp.type)
 	{
 	case nodes::PackageMemberPatternType::PACKAGE_WITHOUT_SUBPACKAGES:
-		std::cout << "shallow pkg ";
+		print("shallow pkg ");
 		break;
 	case nodes::PackageMemberPatternType::PACKAGE_WITH_SUBPACKAGES:
-		std::cout << "deep pkg ";
+		print("deep pkg ");
 		break;
 	default:
 		break;
@@ -245,12 +332,13 @@ void ASTPrinter::print_package_member_pattern(const nodes::PackageMemberPattern&
 	
 	if(pmp.package_member_identifier.has_value())
 	{
-		std::cout << pmp.package_member_identifier.value().to_string();
+		print(pmp.package_member_identifier.value().to_string());
 	}
 
 	if(pmp.supertype.has_value())
 	{
-		if(pmp.package_member_identifier.has_value()) { std::cout << " "; }
-		std::cout << "extends " << pmp.supertype.value().to_string();
+		if(pmp.package_member_identifier.has_value()) { print(" "); }
+		print("extends ");
+		print(pmp.supertype.value().to_string());
 	}
 }
