@@ -112,12 +112,30 @@ void ASTPrinter::visit(const nodes::Assignment& node)
 
 void ASTPrinter::visit(const nodes::ObjectFunctionCall& node)
 {
+	print_prefix();
+	print("object function call - function name: ");
+	print(node.function_name);
+	print_line();
 
+	incr_depth();
+	node.object->accept(*this);
+	for(const std::unique_ptr<Expression>& arg : node.arguments)
+	{
+		arg->accept(*this);
+	}
+	decr_depth();
 }
 
 void ASTPrinter::visit(const nodes::ObjectRead& node)
 {
-
+	print_prefix();
+	print("object read - reference name: ");
+	print(node.reference_name);
+	print_line();
+	
+	incr_depth();
+	node.object->accept(*this);
+	decr_depth();
 }
 
 void ASTPrinter::visit(const nodes::FunctionCall& node)

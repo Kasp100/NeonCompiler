@@ -857,6 +857,11 @@ std::unique_ptr<Expression> Parser::parse_operator_call_expression
 	std::unique_ptr<Expression> first_argument
 )
 {
+	if(op->get_declaration()->builtin_operator_kind == BuiltinOperatorKind::MEMBER_ACCESS)
+	{
+		return parse_dot_expression(peek_cursor, std::move(first_argument));
+	}
+
 	std::vector<std::unique_ptr<Expression>> arguments;
 
 	bool first_argument_passed{first_argument};
@@ -882,4 +887,43 @@ std::unique_ptr<Expression> Parser::parse_operator_call_expression
 	}
 
 	return std::make_unique<OperatorCallExpression>(std::move(arguments), op);
+}
+
+std::unique_ptr<Expression> Parser::parse_dot_expression
+(
+	PeekCursor peek_cursor,
+	std::unique_ptr<Expression> first_argument
+)
+{
+	// Consume the dot
+	consume_w_peek_cursor_and_report(AnalysisEntryType::OPERATOR, AnalysisSeverity::INFO, peek_cursor);
+
+	// The dot operator must be declared so first_argument always has a value here.
+
+	if(peek_w_peek_cursor(peek_cursor).get_type() != TokenType::IDENTIFIER)
+	{
+		consume_w_peek_cursor_and_report(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, peek_cursor);
+		return nullptr;
+	}
+
+	std::unique_ptr<Expression> second_argument = parse_named_expression(peek_cursor);
+
+	if(dynamic_cast<SimpleRead*>(second_argument.get()))
+	{
+		std::unique_ptr<SimpleRead> read =
+			std::unique_ptr<SimpleRead>
+			(
+				static_cast<SimpleRead*>(second_argument.release())
+			);
+		return std::make_unique<ObjectRead>(std::move(first_argument), read->reference_name);
+	}
+	else
+	{
+		std::unique_ptr<FunctionCall> call =
+			std::unique_ptr<FunctionCall>
+			(
+				static_cast<FunctionCall*>(second_argument.release())
+			);
+		return std::make_unique<ObjectFunctionCall>(std::move(first_argument), call->function_name, std::move(call->arguments));
+	}
 }

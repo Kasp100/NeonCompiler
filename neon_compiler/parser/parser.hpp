@@ -65,6 +65,8 @@ namespace error_messages
 		"Invalid expression; see documentation about expressions.";
 	constexpr std::string_view UNEXPECTED_END_OF_FILE_IN_ARGUMENT_LIST =
 		"Unexpected end of file in argument list; a closing bracket `)` is missing.";
+	constexpr std::string_view INVALID_NAMED_EXPRESSION =
+		"Invalid named expression. The dot operator expects a named expression after the dot, e.g. `method_name()` or `field_name`.";
 }
 
 namespace error_recovery
@@ -150,6 +152,11 @@ private:
 		PeekCursor peek_cursor,
 		std::shared_ptr<const neon_compiler::parser::Operator> op,
 		std::unique_ptr<neon_compiler::ast::nodes::Expression> first_argument = nullptr
+	);
+	std::unique_ptr<neon_compiler::ast::nodes::Expression> parse_dot_expression
+	(
+		PeekCursor peek_cursor,
+		std::unique_ptr<neon_compiler::ast::nodes::Expression> first_argument
 	);
 };
 
