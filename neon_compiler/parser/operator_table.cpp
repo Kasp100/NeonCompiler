@@ -10,6 +10,9 @@ using namespace neon_compiler::ast::nodes;
 OperatorTable::OperatorTable()
 {
 	add(builtin_operators::DOT);
+	add(builtin_operators::MULTIPLY);
+	add(builtin_operators::ADD);
+	add(builtin_operators::POWER);
 }
 
 void OperatorTable::add(std::shared_ptr<const neon_compiler::parser::Operator> op)
