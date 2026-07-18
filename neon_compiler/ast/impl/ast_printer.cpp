@@ -100,9 +100,12 @@ void ASTPrinter::visit(const nodes::Return& node)
 	print("return");
 	print_line();
 
-	incr_depth();
-	node.value->accept(*this);
-	decr_depth();
+	if(node.value)
+	{
+		incr_depth();
+		node.value->accept(*this);
+		decr_depth();
+	}
 }
 
 void ASTPrinter::visit(const nodes::Assignment& node)
