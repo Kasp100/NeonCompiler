@@ -883,7 +883,15 @@ std::unique_ptr<Expression> Parser::parse_operator_call_expression
 
 		uint max_subordination = declaration->subordination - 1;
 		if(i == pattern.size() - 1 && declaration->associativity == OperatorAssociativity::RIGHT) { ++max_subordination; }
-		arguments.push_back(parse_expression(peek_cursor, max_subordination));
+		std::unique_ptr<Expression> argument = parse_expression(peek_cursor, max_subordination);
+
+		if(!argument)
+		{
+			logger->info("Operator call expression failed to parse argument. (pattern element index: " + std::to_string(i) + ")");
+			return nullptr;
+		}
+
+		arguments.push_back(std::move(argument));
 	}
 
 	return std::make_unique<OperatorCallExpression>(std::move(arguments), op);
