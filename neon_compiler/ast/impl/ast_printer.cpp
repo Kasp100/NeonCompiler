@@ -204,8 +204,8 @@ void ASTPrinter::visit(const nodes::CompileFunction& node)
 void ASTPrinter::visit(const nodes::LiteralNumberExpression& node)
 {
 	print_prefix();
-	print("literal number expression - amount of digits: ");
-	print(std::to_string(node.value.size()));
+	print("literal number expression - value: ");
+	print(node.value);
 	print_line();
 }
 
