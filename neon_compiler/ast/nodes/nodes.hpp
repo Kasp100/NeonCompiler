@@ -291,10 +291,8 @@ using OperatorSyntaxPatternElement = std::variant<TokenPattern, OperatorSyntaxPa
 
 using OperatorFunctionPatternElement = std::variant<TokenPattern, OperatorFunctionParameter>;
 
-struct OperatorDeclaration : PackageMember
+struct OperatorDeclaration : ASTNode
 {
-	// No access here, operators are a special case
-
 	/** The sequence of tokens or parameters which makes this operator */
 	std::vector<OperatorSyntaxPatternElement> pattern;
 	/** Subordination: e.g. `+` has a higher subordination (less precedence) than `*` */
@@ -345,11 +343,13 @@ struct OperatorModule : PackageMember
 {
 	/** The access which determines who can use this expression grammar */
 	Access access;
+	/** Operator declarations */
+	std::vector<OperatorDeclaration> operators;
 	/** Operator functions */
 	std::vector<OperatorFunction> functions;
 
-	OperatorModule(Access access, std::vector<OperatorFunction> functions)
-		: access{access}, functions{std::move(functions)} {}
+	OperatorModule(Access access, std::vector<OperatorDeclaration> operators, std::vector<OperatorFunction> functions)
+		: access{access}, operators{operators}, functions{functions} {}
 
 	void accept(ASTVisitor& visitor) const override
 	{

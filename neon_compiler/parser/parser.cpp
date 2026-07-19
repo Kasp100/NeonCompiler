@@ -367,7 +367,6 @@ void Parser::parse_and_register_expected_entrypoint(const Access& access)
 	append_ast(std::move(package_member), name);
 }
 
-// TODO: write tests for this
 void Parser::parse_and_register_expected_operator_module(const Access& access)
 {
 	const std::string name = parse_expected_declaration_name(AnalysisEntryType::DECLARATION);
@@ -382,45 +381,103 @@ void Parser::parse_and_register_expected_operator_module(const Access& access)
 			std::string{error_messages::MISSING_CODE_BLOCK});
 	}
 
+	std::vector<OperatorDeclaration> operators;
 	std::vector<OperatorFunction> functions;
 
-	while(reader.peek().get_type() == TokenType::IDENTIFIER)
+	TokenType token_type = reader.peek().get_type();
+	while(!reader.end_of_file_reached() && token_type != TokenType::BRACKET_CURLY_CLOSE)
 	{
-		std::optional<ReferenceType> return_value = parse_reference_type(MutabilityMode::BORROW);
-		if(!return_value.has_value())
+		if(token_type == TokenType::OPERATOR)
 		{
-			report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
-				std::string{error_messages::INVALID_REFERENCE_TYPE});
+			operators.push_back(parse_expected_operator_declaration());
 		}
-
-		std::vector<OperatorFunctionPatternElement> pattern = parse_operator_function_pattern();
-		if(reader.end_of_file_reached()) { return; }
-
-		report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume()); // Consume the `{`
-		CodeBlock body = parse_code_block_until_end();
-
-		functions.emplace_back
-		(
-			return_value.value_or(ReferenceType{false, MutabilityMode::BORROW, false, std::string{error_recovery::PLACEHOLDER_TYPE}}),
-			std::move(pattern),
-			std::move(body)
-		);
+		else
+		{
+			functions.push_back(parse_expected_operator_function());
+		}
+		token_type = reader.peek().get_type();
 	}
 
-	if(reader.peek().get_type() == TokenType::BRACKET_CURLY_CLOSE)
+	report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
+
+	append_ast
+	(
+		std::make_unique<OperatorModule>(access, std::move(operators), std::move(functions)),
+		name
+	);
+}
+
+OperatorDeclaration Parser::parse_expected_operator_declaration()
+{
+	// At this point, the `operator` keyword should be guaranteed
+	report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
+
+	std::vector<OperatorSyntaxPatternElement> pattern;
+	uint subordination{0};
+	OperatorAssociativity associativity{OperatorAssociativity::NONE};
+
+	TokenType token_type = reader.peek().get_type();
+	while(!reader.end_of_file_reached() && token_type != TokenType::BRACKET_CURLY_OPEN)
 	{
-		report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
+		if(token_type == TokenType::BRACKET_ROUND_OPEN)
+		{
+			report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
+
+			if(reader.peek(0).get_type() != TokenType::IDENTIFIER || reader.peek(1).get_type() != TokenType::BRACKET_ROUND_CLOSE)
+			{
+				report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(), std::string{error_messages::INVALID_OPERATOR_PARAMETER});
+			}
+			else
+			{
+				report_token(AnalysisEntryType::DECLARATION, AnalysisSeverity::INFO, reader.peek());
+				pattern.push_back(OperatorSyntaxParameter{std::string{reader.consume().get_lexeme().value()}});
+
+				report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
+			}
+		}
+		else
+		{
+			const Token& token = reader.consume();
+			const std::optional<std::string_view>& lexeme = token.get_lexeme();
+
+			if(lexeme.has_value())
+			{
+				pattern.push_back(TokenPattern{token.get_type(), std::string{lexeme.value()}});
+			}
+			else
+			{
+				pattern.push_back(TokenPattern{token.get_type()});
+			}
+		}
+		token_type = reader.peek().get_type();
 	}
-	else
+
+	return OperatorDeclaration{std::move(pattern), subordination, associativity, BuiltinOperatorKind::NOT_BUILT_IN};
+}
+
+OperatorFunction Parser::parse_expected_operator_function()
+{
+	std::optional<ReferenceType> return_value = parse_reference_type(MutabilityMode::BORROW);
+
+	if(!return_value.has_value())
 	{
 		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
-			std::string{error_messages::INVALID_OPERATOR_FUNCTION_OR_MISSING_CLOSING_BRACKET});
-		// TODO: go to synchronisation token (create a helper method for this)
+			std::string{error_messages::INVALID_REFERENCE_TYPE});
 	}
+	
+	std::vector<OperatorFunctionPatternElement> pattern = parse_operator_function_pattern();
+	report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume()); // Consume the `{`
+	CodeBlock body = parse_code_block_until_end();
 
-	std::unique_ptr<PackageMember> package_member = std::make_unique<OperatorModule>(access, std::move(functions));
-
-	append_ast(std::move(package_member), name);
+	return OperatorFunction
+	{
+		return_value.value_or
+		(
+			ReferenceType{false, MutabilityMode::BORROW, false, std::string{error_recovery::PLACEHOLDER_TYPE}}
+		),
+		std::move(pattern),
+		std::move(body)
+	};
 }
 
 std::vector<OperatorFunctionPatternElement> Parser::parse_operator_function_pattern()
