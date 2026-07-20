@@ -75,6 +75,10 @@ std::optional<TokenType> Token::keyword_to_token_type(std::string_view word)
 	else if (word == "interface")             return TokenType::PACKAGE_MEMBER_INTERFACE;
 	else if (word == "abstract")              return TokenType::MEMBER_ABSTRACT;
 	else if (word == "operator")              return TokenType::OPERATOR;
+	else if (word == "subordination")         return TokenType::SUBORDINATION;
+	else if (word == "associativity")         return TokenType::ASSOCIATIVITY;
+	else if (word == "left")                  return TokenType::LEFT;
+	else if (word == "right")                 return TokenType::RIGHT;
 	else if (word == "constructor")           return TokenType::CONSTRUCTOR;
 	else if (word == "super")                 return TokenType::REFERENCE_SUPER;
 	else if (word == "this")                  return TokenType::REFERENCE_THIS;

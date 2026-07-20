@@ -67,6 +67,12 @@ namespace error_messages
 		"Unexpected end of file in argument list; a closing bracket `)` is missing.";
 	constexpr std::string_view INVALID_NAMED_EXPRESSION =
 		"Invalid named expression. The dot operator expects a named expression after the dot, e.g. `method_name()` or `field_name`.";
+	constexpr std::string_view INVALID_SUBORDINATION =
+		"Invalid subordination; must be a natural number. 0 is the lowest subordination / highest precedence.";
+	constexpr std::string_view INVALID_ASSOCIATIVITY =
+		"Invalid associativity; must be `left` or `right`, or not defined.";
+	constexpr std::string_view INVALID_OPERATOR_PROPERTY =
+		"Invalid operator property. Only `subordination` (defines precedence) and `associativity` are supported.";
 }
 
 namespace error_recovery

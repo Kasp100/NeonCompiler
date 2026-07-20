@@ -452,6 +452,76 @@ OperatorDeclaration Parser::parse_expected_operator_declaration()
 		token_type = reader.peek().get_type();
 	}
 
+	report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume()); // Consume the `{`
+
+	token_type = reader.peek().get_type();
+
+	while(!reader.end_of_file_reached() && token_type != TokenType::BRACKET_CURLY_CLOSE)
+	{
+		if(token_type == TokenType::SUBORDINATION)
+		{
+			report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
+
+			bool invalid_subord{false};
+
+			if(reader.peek().get_type() == TokenType::LITERAL_NUMBER)
+			{
+				try
+				{
+					int subord = std::stoi(std::string{reader.peek().get_lexeme().value()}, nullptr, 0);
+					if(subord < 0) { invalid_subord = true; }
+					subordination = subord;
+				}
+				catch(...) { invalid_subord = true; }
+			}
+			else { invalid_subord = true; }
+
+			if(invalid_subord)
+			{
+				report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(), std::string{error_messages::INVALID_SUBORDINATION});
+			}
+			else
+			{
+				report_token(AnalysisEntryType::LITERAL_NUMBER, AnalysisSeverity::INFO, reader.consume());
+			}
+		}
+		else if(token_type == TokenType::ASSOCIATIVITY)
+		{
+			report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
+
+			token_type = reader.peek().get_type();
+
+			if(token_type == TokenType::LEFT)
+			{
+				report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
+				associativity = OperatorAssociativity::LEFT;
+			}
+			else if(token_type == TokenType::RIGHT)
+			{
+				report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
+				associativity = OperatorAssociativity::RIGHT;
+			}
+			else
+			{
+				report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(), std::string{error_messages::INVALID_ASSOCIATIVITY});
+			}
+		}
+		else
+		{
+			report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(), std::string{error_messages::INVALID_OPERATOR_PROPERTY});
+		}
+
+		if(reader.peek().get_type() != TokenType::END_STATEMENT)
+		{
+			report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(), std::string{error_messages::MISSING_SEMICOLON});
+		}
+		report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
+
+		token_type = reader.peek().get_type();
+	}
+
+	report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume()); // Consume the `}`
+
 	return OperatorDeclaration{std::move(pattern), subordination, associativity, BuiltinOperatorKind::NOT_BUILT_IN};
 }
 
