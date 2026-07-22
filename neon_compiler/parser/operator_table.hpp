@@ -4,7 +4,7 @@
 #include <memory>
 #include <vector>
 #include <functional>
-#include "../parser/operator.hpp"
+#include "operator.hpp"
 #include "../ast/nodes/nodes.hpp"
 #include "../token_reader.hpp"
 

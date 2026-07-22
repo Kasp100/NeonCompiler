@@ -57,14 +57,6 @@ namespace error_messages
 		"Expected the parameter declaration to end here with `)`.";
 	constexpr std::string_view INVALID_OPERATOR_PARAMETER =
 		"Invalid operator parameter - operator parameters have a name but no type in the operator declaration.";
-	constexpr std::string_view INVALID_PARENTHESISED_EXPRESSION__EXPECTED_CLOSING_BRACKET =
-		"Invalid parenthesised expression; expected closing bracket `)`.";
-	constexpr std::string_view INVALID_ARGUMENT_LIST__EXPECTED_COMMA_OR_CLOSING_BRACKET =
-		"Invalid argument list; expected comma or closing bracket after argument.";
-	constexpr std::string_view INVALID_EXPRESSION =
-		"Invalid expression; see documentation about expressions.";
-	constexpr std::string_view UNEXPECTED_END_OF_FILE_IN_ARGUMENT_LIST =
-		"Unexpected end of file in argument list; a closing bracket `)` is missing.";
 	constexpr std::string_view INVALID_NAMED_EXPRESSION =
 		"Invalid named expression. The dot operator expects a named expression after the dot, e.g. `method_name()` or `field_name`.";
 	constexpr std::string_view INVALID_SUBORDINATION =
@@ -92,8 +84,10 @@ public:
         std::span<const neon_compiler::Token> tokens,
         std::shared_ptr<neon_compiler::analysis::AnalysisReporter> analysis_reporter,
 		std::shared_ptr<neon_compiler::ast::nodes::Root> root_node,
-        std::string_view file
-    );
+        std::string_view file,
+		neon_compiler::parser::OperatorTable* operator_table
+    ) : logger{logger}, reader{tokens}, analysis_reporter{analysis_reporter}, root_node{root_node}, file{file}, operator_table{operator_table} {}
+
 	void run();
 	std::shared_ptr<neon_compiler::ast::nodes::Root> get_root_node() const;
 private:
@@ -104,18 +98,9 @@ private:
 	std::string_view file;
 	neon_compiler::ast::Identifier package;
 	std::vector<neon_compiler::ast::Identifier> imports;
-	neon_compiler::parser::OperatorTable operator_table;
+	neon_compiler::parser::OperatorTable* operator_table;
 
-	const neon_compiler::Token& peek_w_peek_cursor(PeekCursor peek_cursor, uint offset = 0);
-	const neon_compiler::Token& consume_w_peek_cursor(PeekCursor peek_cursor, uint offset = 0);
-	const neon_compiler::Token& consume_w_peek_cursor_and_report
-	(
-		neon_compiler::analysis::AnalysisEntryType type,
-		neon_compiler::analysis::AnalysisSeverity severity,
-		PeekCursor peek_cursor = nullptr,
-		std::optional<std::string> info = std::nullopt
-	);
-	const neon_compiler::Token& report_token
+	void report_token
 	(
 		neon_compiler::analysis::AnalysisEntryType type,
 		neon_compiler::analysis::AnalysisSeverity severity,
@@ -128,8 +113,7 @@ private:
 	std::optional<neon_compiler::ast::Identifier> parse_identifier
 	(
 		neon_compiler::analysis::AnalysisEntryType type,
-		neon_compiler::analysis::AnalysisSeverity severity,
-		PeekCursor peek_cursor = nullptr
+		neon_compiler::analysis::AnalysisSeverity severity
 	);
 	void parse_and_register_expected_package_declaration();
 	void parse_and_register_import_statement();
@@ -149,25 +133,6 @@ private:
 	std::optional<neon_compiler::ast::nodes::ReferenceType> parse_reference_type(neon_compiler::ast::nodes::MutabilityMode default_mutability_mode);
 	neon_compiler::ast::nodes::CodeBlock parse_code_block_until_end();
 	std::unique_ptr<neon_compiler::ast::nodes::Statement> parse_return_statement();
-
-	// Expression parsing.
-	std::unique_ptr<neon_compiler::ast::nodes::Expression> parse_expression(PeekCursor peek_cursor = nullptr, uint max_subordination = INT_MAX);
-	std::unique_ptr<neon_compiler::ast::nodes::Expression> parse_prefix_expression(PeekCursor peek_cursor, FuncParseExpressionWCursor func_parse_expression_w_cursor);
-	std::unique_ptr<neon_compiler::ast::nodes::Expression> parse_terminating_expression(PeekCursor peek_cursor);
-	std::unique_ptr<neon_compiler::ast::nodes::Expression> parse_parenthesised_expression(PeekCursor peek_cursor);
-	std::unique_ptr<neon_compiler::ast::nodes::Expression> parse_named_expression(PeekCursor peek_cursor);
-	std::vector<std::unique_ptr<neon_compiler::ast::nodes::Expression>> parse_argument_expressions(PeekCursor peek_cursor);
-	std::unique_ptr<neon_compiler::ast::nodes::Expression> parse_operator_call_expression
-	(
-		PeekCursor peek_cursor,
-		std::shared_ptr<const neon_compiler::parser::Operator> op,
-		std::unique_ptr<neon_compiler::ast::nodes::Expression> first_argument = nullptr
-	);
-	std::unique_ptr<neon_compiler::ast::nodes::Expression> parse_dot_expression
-	(
-		PeekCursor peek_cursor,
-		std::unique_ptr<neon_compiler::ast::nodes::Expression> first_argument
-	);
 };
 
 }
