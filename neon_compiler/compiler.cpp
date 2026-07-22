@@ -11,12 +11,20 @@
 #include "ast/ast_visitor.hpp"
 #include "ast/impl/ast_printer.hpp"
 
+using namespace logging;
+using namespace reading;
 using namespace neon_compiler;
+using namespace neon_compiler::analysis;
+using namespace neon_compiler::analysis::impl;
+using namespace neon_compiler::ast::impl;
+using namespace neon_compiler::ast::nodes;
+using namespace neon_compiler::lexer;
+using namespace neon_compiler::parser;
 
-Compiler::Compiler(std::shared_ptr<logging::Logger> logger)
+Compiler::Compiler(std::shared_ptr<Logger> logger)
 	: logger{logger}, tokens{}
 {
-	root_node = std::make_shared<neon_compiler::ast::nodes::Root>();
+	root_node = std::make_shared<Root>();
 }
 
 void Compiler::read_file(std::unique_ptr<std::istream> stream, std::string_view file_name)
@@ -26,22 +34,21 @@ void Compiler::read_file(std::unique_ptr<std::istream> stream, std::string_view 
 	std::vector<lexer::TokenisationError> lexer_errors;
 	try
 	{
-		std::unique_ptr<reading::CharReader> reader =
-				std::make_unique<reading::CharReader>(std::move(stream));
-		lexer::Lexer lexer(std::move(reader));
+		std::unique_ptr<CharReader> reader = std::make_unique<CharReader>(std::move(stream));
+		Lexer lexer(std::move(reader));
 
 		lexer.run();
 
 		tokens = lexer.take_tokens();
 		lexer_errors = lexer.take_errors();
 	}
-	catch (const reading::ReadException& e)
+	catch (const ReadException& e)
 	{
 		logger->error("Reading failed: " + std::string(e.what()));
 		return;
 	}
 
-	for(const lexer::TokenisationError& error : lexer_errors)
+	for(const TokenisationError& error : lexer_errors)
 	{
 		logger->error
 		(
@@ -64,15 +71,14 @@ void Compiler::generate_analysis() const
 	logger->debug("Generating analysis...");
 	const std::span<const Token> tokens_view{tokens};
 
-	std::shared_ptr<analysis::AnalysisReporter> reporter =
-			std::make_shared<analysis::impl::ConsoleAnalysisReporter>(latest_file);
+	std::shared_ptr<AnalysisReporter> reporter = std::make_shared<ConsoleAnalysisReporter>(latest_file);
 
-	parser::OperatorTable operator_table{};
+	OperatorTable operator_table{};
 
-	parser::Parser parser{logger, tokens_view, reporter, root_node, latest_file, &operator_table};
+	Parser parser{logger, tokens_view, reporter, root_node, latest_file, &operator_table};
 	parser.run();
 
-	ast::impl::ASTPrinter printer{};
+	ASTPrinter printer{};
 	printer.visit(*parser.get_root_node());
 
 	//std::unique_ptr<ast::ASTVisitor> ast_visitor = std::make_unique<ast::impl::ASTPrinter>();
