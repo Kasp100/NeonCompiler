@@ -80,8 +80,4 @@ void Compiler::generate_analysis() const
 
 	ASTPrinter printer{};
 	printer.visit(*parser.get_root_node());
-
-	//std::unique_ptr<ast::ASTVisitor> ast_visitor = std::make_unique<ast::impl::ASTPrinter>();
-
-
 }
