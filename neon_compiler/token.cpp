@@ -100,7 +100,7 @@ std::optional<TokenType> Token::keyword_to_token_type(std::string_view word)
 	else if (word == "while")                 return TokenType::STMT_WHILE;
 	else if (word == "serialising")           return TokenType::STMT_SERIALISING;
 	else if (word == "ret")                   return TokenType::STMT_RETURN;
-	else if (word == "pass")                  return TokenType::STMT_PASS;
+	else if (word == "give")                  return TokenType::STMT_GIVE;
 	else if (word == "copy")                  return TokenType::STMT_COPY;
 
 	return std::nullopt;
