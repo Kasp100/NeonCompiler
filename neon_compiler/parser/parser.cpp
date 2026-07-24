@@ -7,7 +7,7 @@ using namespace neon_compiler::parser;
 using namespace neon_compiler::analysis;
 using namespace neon_compiler::ast::nodes;
 
-void Parser::run()
+void Parser::run_a()
 {
 	parse_and_register_expected_package_declaration();
 
@@ -15,19 +15,86 @@ void Parser::run()
 	{
 		if(reader.peek().get_type() == TokenType::IMPORT)
 		{
-			parse_and_register_import_statement();
+			skip_until_statement_end();
+			continue;
+		}
+
+		const Access access = parse_access();
+		const TokenType token_type = reader.consume().get_type();
+
+		if(token_type == TokenType::PACKAGE_MEMBER_OPERATOR_MODULE)
+		{
+			parse_expected_operator_module_a_and_register(access);
 		}
 		else
 		{
-			const Access access = parse_access(); // `private` if no keyword is present.
-			parse_expected_package_member(access);
+			skip_until_block_start();
+			skip_until_block_end();
 		}
+	}
+
+	reader.reset();
+}
+
+void Parser::run_b()
+{
+	skip_until_statement_end();
+
+	while(!reader.end_of_file_reached())
+	{
+		if(reader.peek().get_type() == TokenType::IMPORT)
+		{
+			parse_and_register_import_statement();
+			continue;
+		}
+
+		const Access access = parse_access(); // `private` if no keyword is present.
+		parse_expected_package_member(access);
 	}
 }
 
 std::shared_ptr<neon_compiler::ast::nodes::Root> Parser::get_root_node() const
 {
 	return root_node;
+}
+
+void Parser::skip_until_statement_end()
+{
+	while(!reader.end_of_file_reached())
+	{
+		if(reader.consume().get_type() == TokenType::END_STATEMENT)
+		{
+			return;
+		}
+	}
+}
+
+void Parser::skip_until_block_start()
+{
+	while(!reader.end_of_file_reached())
+	{
+		if(reader.consume().get_type() == TokenType::BRACKET_CURLY_OPEN)
+		{
+			return;
+		}
+	}
+}
+
+void Parser::skip_until_block_end()
+{
+	while(!reader.end_of_file_reached())
+	{
+		const TokenType token_type = reader.consume().get_type();
+
+		if(token_type == TokenType::BRACKET_CURLY_OPEN)
+		{
+			skip_until_block_end();
+		}
+		else if(token_type == TokenType::BRACKET_CURLY_CLOSE)
+		{
+			return;
+		}
+	}
 }
 
 void Parser::report_token
@@ -47,6 +114,11 @@ void Parser::append_ast(std::unique_ptr<PackageMember> node, const std::string& 
 
 	root_node->file_package_members[std::string{file}].push_back(full_identifier);
 	root_node->package_members[full_identifier] = std::move(node);
+}
+
+void Parser::parse_use_statement()
+{
+
 }
 
 std::optional<neon_compiler::ast::Identifier> Parser::parse_identifier(AnalysisEntryType type, AnalysisSeverity severity)
@@ -225,7 +297,7 @@ void Parser::parse_expected_package_member(const Access& access)
 	else if(reader.peek().get_type() == TokenType::PACKAGE_MEMBER_OPERATOR_MODULE)
 	{
 		report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
-		parse_and_register_expected_operator_module(access);
+		parse_expected_operator_module_b();
 	}
 	else if(reader.peek().get_type() == TokenType::PACKAGE_MEMBER_COMPILE_FUNCTION)
 	{
@@ -292,7 +364,7 @@ void Parser::parse_and_register_expected_entrypoint(const Access& access)
 	append_ast(std::move(package_member), name);
 }
 
-void Parser::parse_and_register_expected_operator_module(const Access& access)
+void Parser::parse_expected_operator_module_a_and_register(const Access& access)
 {
 	const std::string name = parse_expected_declaration_name(AnalysisEntryType::DECLARATION);
 
@@ -307,6 +379,49 @@ void Parser::parse_and_register_expected_operator_module(const Access& access)
 	}
 
 	std::vector<OperatorDeclaration> operators;
+
+	while(!reader.end_of_file_reached())
+	{
+		TokenType token_type = reader.consume().get_type();
+
+		if(token_type == TokenType::OPERATOR)
+		{
+			operators.push_back(parse_expected_operator_declaration());
+		}
+		else if(token_type == TokenType::BRACKET_CURLY_CLOSE)
+		{
+			break;
+		}
+		else
+		{
+			skip_until_block_start();
+			skip_until_block_end();
+		}
+	}
+
+	append_ast
+	(
+		std::make_unique<OperatorModule>(access, std::move(operators), std::vector<OperatorFunction>{}),
+		name
+	);
+}
+
+void Parser::parse_expected_operator_module_b()
+{
+	if(reader.peek(0).get_type() != TokenType::IDENTIFIER || reader.peek(1).get_type() != TokenType::BRACKET_CURLY_OPEN)
+	{
+		logger->info("Skipped invalid operator module.");
+		skip_until_block_start();
+		skip_until_block_end();
+		return;
+	}
+
+	// read and consume the IDENTIFIER token
+	const std::string name{reader.consume().get_lexeme().value()};
+
+	 // consume `{`
+	reader.consume();
+
 	std::vector<OperatorFunction> functions;
 
 	TokenType token_type = reader.peek().get_type();
@@ -314,7 +429,8 @@ void Parser::parse_and_register_expected_operator_module(const Access& access)
 	{
 		if(token_type == TokenType::OPERATOR)
 		{
-			operators.push_back(parse_expected_operator_declaration());
+			skip_until_block_start();
+			skip_until_block_end();
 		}
 		else
 		{
@@ -323,13 +439,29 @@ void Parser::parse_and_register_expected_operator_module(const Access& access)
 		token_type = reader.peek().get_type();
 	}
 
+	// consume `}`
 	report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
 
-	append_ast
-	(
-		std::make_unique<OperatorModule>(access, std::move(operators), std::move(functions)),
-		name
-	);
+	const std::string full_identifier{package.to_string() + "::" + name};
+
+	std::unordered_map<std::string, std::unique_ptr<PackageMember>>::iterator it =
+		root_node->package_members.find(full_identifier);
+
+	if(it == root_node->package_members.end())
+	{
+		logger->error("Could not complete operator module; could not find by identifier.");
+		return;
+	}
+
+	OperatorModule* operator_module = dynamic_cast<OperatorModule*>(it->second.get());
+
+	if(!operator_module)
+	{
+		logger->error("Could not complete operator module; dynamic cast returned nullptr.");
+		return;
+	}
+
+	operator_module->functions = std::move(functions);
 }
 
 OperatorDeclaration Parser::parse_expected_operator_declaration()

@@ -29,3 +29,8 @@ bool TokenReader::end_of_file_reached(uint offset) const
 {
 	return peek(offset).get_type() == TokenType::END_OF_FILE;
 }
+
+void TokenReader::reset()
+{
+	reading_index = 0;
+}

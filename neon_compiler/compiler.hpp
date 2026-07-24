@@ -22,8 +22,7 @@ public:
 
 private:
 	std::shared_ptr<logging::Logger> logger;
-	std::vector<Token> tokens;
-	std::string latest_file;
+	std::unordered_map<std::string, std::vector<neon_compiler::Token>> file_tokens;
 	std::shared_ptr<neon_compiler::ast::nodes::Root> root_node;
 };
 

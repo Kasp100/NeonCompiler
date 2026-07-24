@@ -22,15 +22,13 @@ using namespace neon_compiler::lexer;
 using namespace neon_compiler::parser;
 
 Compiler::Compiler(std::shared_ptr<Logger> logger)
-	: logger{logger}, tokens{}
+	: logger{logger}
 {
 	root_node = std::make_shared<Root>();
 }
 
 void Compiler::read_file(std::unique_ptr<std::istream> stream, std::string_view file_name)
 {
-	latest_file = std::string{file_name};
-
 	std::vector<lexer::TokenisationError> lexer_errors;
 	try
 	{
@@ -39,7 +37,7 @@ void Compiler::read_file(std::unique_ptr<std::istream> stream, std::string_view 
 
 		lexer.run();
 
-		tokens = lexer.take_tokens();
+		file_tokens.emplace(std::string{file_name}, lexer.take_tokens());
 		lexer_errors = lexer.take_errors();
 	}
 	catch (const ReadException& e)
@@ -63,21 +61,35 @@ void Compiler::read_file(std::unique_ptr<std::istream> stream, std::string_view 
 void Compiler::build() const
 {
 	logger->debug("Building...");
-	const std::span<const Token> tokens_view{tokens};
 }
 
 void Compiler::generate_analysis() const
 {
 	logger->debug("Generating analysis...");
-	const std::span<const Token> tokens_view{tokens};
 
-	std::shared_ptr<AnalysisReporter> reporter = std::make_shared<ConsoleAnalysisReporter>(latest_file);
+	std::vector<Parser> parsers;
 
 	OperatorTable operator_table{};
 
-	Parser parser{logger, tokens_view, reporter, root_node, latest_file, &operator_table};
-	parser.run();
+	for(const std::pair<const std::string, std::vector<Token>>& pair : file_tokens)
+	{
+		const std::span<const Token> tokens_view{pair.second};
+
+		std::shared_ptr<AnalysisReporter> reporter = std::make_shared<ConsoleAnalysisReporter>(pair.first);
+
+		parsers.emplace_back(logger, tokens_view, reporter, root_node, pair.first, &operator_table);
+	}
+
+	for(Parser& parser : parsers)
+	{
+		parser.run_a();
+	}
+
+	for(Parser& parser : parsers)
+	{
+		parser.run_b();
+	}
 
 	ASTPrinter printer{};
-	printer.visit(*parser.get_root_node());
+	printer.visit(*root_node);
 }

@@ -88,7 +88,12 @@ public:
 		neon_compiler::parser::OperatorTable* operator_table
     ) : logger{logger}, reader{tokens}, analysis_reporter{analysis_reporter}, root_node{root_node}, file{file}, operator_table{operator_table} {}
 
-	void run();
+	/** Should be run first in the parsing phase to register package declaration and parse operator modules. */
+	void run_a();
+
+	/** Should be run second in the parsing phase to parse other package member types. */
+	void run_b();
+
 	std::shared_ptr<neon_compiler::ast::nodes::Root> get_root_node() const;
 private:
 	std::shared_ptr<logging::Logger> logger;
@@ -100,6 +105,10 @@ private:
 	std::vector<neon_compiler::ast::Identifier> imports;
 	neon_compiler::parser::OperatorTable* operator_table;
 
+	void skip_until_statement_end();
+	void skip_until_block_start();
+	void skip_until_block_end();
+
 	void report_token
 	(
 		neon_compiler::analysis::AnalysisEntryType type,
@@ -109,6 +118,8 @@ private:
 	);
 
 	void append_ast(std::unique_ptr<neon_compiler::ast::nodes::PackageMember> node, const std::string& identifier);
+
+	void parse_use_statement();
 
 	std::optional<neon_compiler::ast::Identifier> parse_identifier
 	(
@@ -123,8 +134,9 @@ private:
 	std::string parse_expected_declaration_name(neon_compiler::analysis::AnalysisEntryType analysis_entry_type);
 	void parse_and_register_expected_entrypoint(const neon_compiler::ast::nodes::Access& access);
 
-	void parse_and_register_expected_operator_module(const neon_compiler::ast::nodes::Access& access);
+	void parse_expected_operator_module_a_and_register(const neon_compiler::ast::nodes::Access& access);
 	neon_compiler::ast::nodes::OperatorDeclaration parse_expected_operator_declaration();
+	void parse_expected_operator_module_b();
 	neon_compiler::ast::nodes::OperatorFunction parse_expected_operator_function();
 	std::vector<neon_compiler::ast::nodes::OperatorFunctionPatternElement> parse_operator_function_pattern();
 

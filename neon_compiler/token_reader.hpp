@@ -15,10 +15,11 @@ namespace neon_compiler
 		const neon_compiler::Token& consume(uint offset = 0);
 		const neon_compiler::Token& peek(uint offset = 0) const;
 		bool end_of_file_reached(uint offset = 0) const;
+		void reset();
 
 	private:
 		std::span<const neon_compiler::Token> tokens;
-		uint reading_index = 0;
+		uint reading_index{0};
 	};
 
 }
