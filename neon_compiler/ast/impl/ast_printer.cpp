@@ -184,12 +184,12 @@ void ASTPrinter::visit(const nodes::PureFunction& node)
 
 }
 
-void ASTPrinter::visit(const nodes::OperatorDeclaration& node)
+void ASTPrinter::visit(const nodes::OperatorModule& node)
 {
 
 }
 
-void ASTPrinter::visit(const nodes::OperatorModule& node)
+void ASTPrinter::visit(const nodes::OperatorDeclaration& node)
 {
 
 }
