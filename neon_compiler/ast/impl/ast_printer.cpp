@@ -62,7 +62,38 @@ void ASTPrinter::visit(const nodes::Constant& node)
 
 void ASTPrinter::visit(const nodes::ReferenceType& node)
 {
+	print_prefix();
+	print("reference type: ");
 
+	if(node.opt)
+	{
+		print("opt ");
+	}
+
+	switch (node.mutability)
+	{
+	case MutabilityMode::OWN:
+		print("own ");
+		break;
+	case MutabilityMode::SHARED:
+		print("shared ");
+		break;
+	case MutabilityMode::BORROW:
+		print("borrow ");
+		break;
+	default:
+		print("err_mutability_mode ");
+		break;
+	}
+
+	if(node.mut)
+	{
+		print("mut:");
+	}
+
+	print(node.type);
+
+	print_line();
 }
 
 void ASTPrinter::visit(const nodes::CodeBlock& node)
@@ -186,17 +217,138 @@ void ASTPrinter::visit(const nodes::PureFunction& node)
 
 void ASTPrinter::visit(const nodes::OperatorModule& node)
 {
+	print_prefix();
+	print_access(node.access);
+	print(" operator module");
+	print_line();
 
+	incr_depth();
+	for(const OperatorDeclaration& od : node.operators)
+	{
+		od.accept(*this);
+	}
+	for(const OperatorFunction& of : node.functions)
+	{
+		of.accept(*this);
+	}
+	decr_depth();
 }
 
 void ASTPrinter::visit(const nodes::OperatorDeclaration& node)
 {
+	print_prefix();
 
+	print("operator declaration - subordination: ");
+	print(std::to_string(node.subordination));
+	print(", associativity: ");
+
+	switch (node.associativity)
+	{
+		case OperatorAssociativity::NONE:
+			print("none");
+			break;
+		case OperatorAssociativity::LEFT:
+			print("left");
+			break;
+		case OperatorAssociativity::RIGHT:
+			print("right");
+			break;
+		default:
+			print("err");
+			break;
+	}
+
+	print(", pattern: ");
+	print_line();
+
+	incr_depth();
+	for(const OperatorSyntaxPatternElement& elem : node.pattern)
+	{
+		print_prefix();
+		if(std::holds_alternative<OperatorSyntaxParameter>(elem))
+		{
+			const OperatorSyntaxParameter& param = std::get<OperatorSyntaxParameter>(elem);
+
+			print("parameter - name: ");
+			print(param.name);
+		}
+		else
+		{
+			const TokenPattern& tp = std::get<TokenPattern>(elem);
+
+			print("token - type: ");
+			print(std::to_string(static_cast<int>(tp.token_type)));
+
+			if(tp.lexeme.has_value())
+			{
+				print(", lexeme: ");
+				print(tp.lexeme.value());
+			}
+		}
+		print_line();
+	}
+	decr_depth();
 }
 
 void ASTPrinter::visit(const nodes::OperatorFunction& node)
 {
+	print_prefix();
+	print("operator functon:");
+	print_line();
 
+	incr_depth();
+
+	print_prefix();
+	print("pattern:");
+	print_line();
+
+		incr_depth();
+		for(const OperatorFunctionPatternElement& elem : node.pattern)
+		{
+			print_prefix();
+			if(std::holds_alternative<OperatorFunctionParameter>(elem))
+			{
+				const OperatorFunctionParameter& param = std::get<OperatorFunctionParameter>(elem);
+				
+				print("parameter:");
+				incr_depth();
+				param.parameter.accept(*this);
+				decr_depth();
+			}
+			else
+			{
+				const TokenPattern& tp = std::get<TokenPattern>(elem);
+
+				print("token - type: ");
+				print(std::to_string(static_cast<int>(tp.token_type)));
+
+				if(tp.lexeme.has_value())
+				{
+					print(", lexeme: ");
+					print(tp.lexeme.value());
+				}
+			}
+			print_line();
+		}
+		decr_depth();
+
+	print_prefix();
+	print("return type:");
+	print_line();
+
+		incr_depth();
+		node.return_type.accept(*this);
+		decr_depth();
+
+	print_prefix();
+	print("body:");
+	print_line();
+
+		incr_depth();
+		node.body.accept(*this);
+		decr_depth();
+
+	decr_depth();
 }
 
 void ASTPrinter::visit(const nodes::CompileFunction& node)
