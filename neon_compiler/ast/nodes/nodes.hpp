@@ -188,7 +188,7 @@ struct Method : ASTNode
 	/** The access which determines who can use this method */
 	Access access;
 	/** The reference type this method returns. Empty means it's a `void` method. */
-	std::optional<ReferenceType> reference_type;
+	std::optional<ReferenceType> return_type;
 	/** Whether this method may mutate the object. */
 	bool mutating;
 	/** Parameters */
@@ -324,14 +324,14 @@ struct OperatorDeclaration : ASTNode
 struct OperatorFunction : ASTNode
 {
 	/** The reference type this pure function returns. */
-	ReferenceType reference_type;
+	ReferenceType return_type;
 	/** Pattern to match, must use a valid operator */
 	std::vector<OperatorFunctionPatternElement> pattern;
 	/** Function body */
 	CodeBlock body;
 
-	OperatorFunction(ReferenceType reference_type,	std::vector<OperatorFunctionPatternElement> pattern, CodeBlock body)
-	: reference_type{reference_type}, pattern{std::move(pattern)}, body{std::move(body)} {}
+	OperatorFunction(ReferenceType return_type,	std::vector<OperatorFunctionPatternElement> pattern, CodeBlock body)
+	: return_type{return_type}, pattern{std::move(pattern)}, body{std::move(body)} {}
 
 	void accept(ASTVisitor& visitor) const override
 	{
