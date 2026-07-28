@@ -274,14 +274,14 @@ PackageMemberPattern Parser::parse_package_member_pattern()
 	if(supertype.has_value())
 	{
 		return PackageMemberPattern{package_member_identifier.has_value() ? PackageMemberPatternType::INHERITANCE_ONLY : type,
-			package_member_identifier, supertype};
+			std::move(package_member_identifier), std::move(supertype)};
 	}
 	else
 	{
 		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
 			std::string{error_messages::MISSING_SECOND_PACKAGE_MEMBER_PATTERN});
 
-		return PackageMemberPattern{type, package_member_identifier};
+		return PackageMemberPattern{type, std::move(package_member_identifier)};
 	}
 }
 
@@ -348,7 +348,7 @@ void Parser::parse_and_register_expected_entrypoint(const Access& access)
 
 	ParameterDeclarationList parameters = parse_parameter_declarations();
 
-	CodeBlock body = CodeBlock{std::vector<std::unique_ptr<Statement>>{}};
+	CodeBlock body{std::vector<std::unique_ptr<Statement>>{}};
 
 	if(reader.peek().get_type() == TokenType::BRACKET_CURLY_OPEN)
 	{
@@ -388,7 +388,7 @@ void Parser::parse_expected_operator_module_a_and_register(const Access& access)
 
 		if(token_type == TokenType::OPERATOR)
 		{
-			operators.push_back(std::move(parse_expected_operator_declaration()));
+			operators.push_back(parse_expected_operator_declaration());
 		}
 		else if(token_type == TokenType::BRACKET_CURLY_CLOSE)
 		{
@@ -412,7 +412,7 @@ void Parser::parse_expected_operator_module_a_and_register(const Access& access)
 
 	std::string full_id = append_ast
 	(
-		std::make_unique<OperatorModule>(access, operators, std::vector<OperatorFunction>{}),
+		std::make_unique<OperatorModule>(access, std::move(operators), std::vector<OperatorFunction>{}),
 		name
 	);
 
@@ -848,7 +848,7 @@ CodeBlock Parser::parse_code_block_until_end()
 		}
 		else if(reader.peek().get_type() == TokenType::STMT_RETURN)
 		{
-			statements.push_back(std::move(parse_return_statement()));
+			statements.push_back(parse_return_statement());
 		}
 		else
 		{
