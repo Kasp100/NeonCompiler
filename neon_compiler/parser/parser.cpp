@@ -171,16 +171,29 @@ void Parser::parse_and_register_import_statement()
 	// At this point, `import` should be guaranteed.
 	report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
 
-	std::optional<neon_compiler::ast::Identifier> package_member_id = parse_identifier(AnalysisEntryType::REFERENCE, AnalysisSeverity::INFO);
+	std::optional<neon_compiler::ast::Identifier> opt_id = parse_identifier(AnalysisEntryType::REFERENCE, AnalysisSeverity::INFO);
 
-	if(!package_member_id.has_value())
+	if(!opt_id.has_value())
 	{
-		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.peek(),
+		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
 			std::string{error_messages::INVALID_IMPORT_STATEMENT});
-		return;
 	}
 
-	imports.push_back(package_member_id.value());
+	if(reader.peek().get_type() == TokenType::END_STATEMENT)
+	{
+		report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
+	}
+	else
+	{
+		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
+			std::string{error_messages::MISSING_SEMICOLON});
+	}
+
+	if(!opt_id.has_value()) { return; }
+
+	const neon_compiler::ast::Identifier& id = opt_id.value();
+
+	imports[id.parts[id.parts.size() - 1]] = std::move(id);
 }
 
 Access Parser::parse_access()
