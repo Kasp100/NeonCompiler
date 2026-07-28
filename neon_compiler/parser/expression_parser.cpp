@@ -208,7 +208,7 @@ std::unique_ptr<Expression> ExpressionParser::parse_parenthesised_expression(Pee
 
 std::unique_ptr<Expression> ExpressionParser::parse_named_expression(PeekCursor peek_cursor)
 {
-	// At this point, an identifier should be guaranteed
+	// At this point, an identifier should be guaranteed.
 	neon_compiler::ast::Identifier id{parse_identifier(AnalysisEntryType::REFERENCE, AnalysisSeverity::INFO, peek_cursor).value()};
 
 	if(peek_w_peek_cursor(peek_cursor).get_type() != TokenType::BRACKET_ROUND_OPEN)
@@ -225,7 +225,8 @@ std::unique_ptr<Expression> ExpressionParser::parse_named_expression(PeekCursor 
 		argument_expressions = parse_argument_expressions(peek_cursor);
 	}
 
-	consume_w_peek_cursor_and_report(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, peek_cursor); // Consume the `)`
+	// Consume `)`
+	consume_w_peek_cursor_and_report(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, peek_cursor);
 
 	return std::make_unique<FunctionCall>(id.to_string(), std::move(argument_expressions));
 }
@@ -313,7 +314,7 @@ std::unique_ptr<Expression> ExpressionParser::parse_dot_expression
 	std::unique_ptr<Expression> first_argument
 )
 {
-	// Consume the dot
+	// Consume dot
 	consume_w_peek_cursor_and_report(AnalysisEntryType::OPERATOR, AnalysisSeverity::INFO, peek_cursor);
 
 	// The dot operator must be declared so first_argument always has a value here.

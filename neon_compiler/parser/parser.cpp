@@ -168,7 +168,7 @@ void Parser::parse_and_register_expected_package_declaration()
 
 void Parser::parse_and_register_import_statement()
 {
-	// At this point, IMPORT should be guaranteed
+	// At this point, `import` should be guaranteed.
 	report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
 
 	std::optional<neon_compiler::ast::Identifier> package_member_id = parse_identifier(AnalysisEntryType::REFERENCE, AnalysisSeverity::INFO);
@@ -441,11 +441,10 @@ void Parser::parse_expected_operator_module_b()
 		return;
 	}
 
-	// read and consume the IDENTIFIER token
+	// Read and consume the IDENTIFIER token
 	const std::string name{reader.consume().get_lexeme().value()};
 
-	// consume `{`
-	reader.consume();
+	reader.consume(); // Consume `{`
 
 	std::vector<OperatorFunction> functions;
 
@@ -464,7 +463,7 @@ void Parser::parse_expected_operator_module_b()
 		token_type = reader.peek().get_type();
 	}
 
-	// consume `}`
+	// Consume `}`
 	report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
 
 	const std::string full_identifier{package.to_string() + "::" + name};
@@ -491,7 +490,7 @@ void Parser::parse_expected_operator_module_b()
 
 OperatorDeclaration Parser::parse_expected_operator_declaration()
 {
-	// At this point, the `operator` keyword should be guaranteed
+	// At this point, `operator` should be guaranteed.
 	report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
 
 	std::vector<OperatorSyntaxPatternElement> pattern;
@@ -534,7 +533,7 @@ OperatorDeclaration Parser::parse_expected_operator_declaration()
 		token_type = reader.peek().get_type();
 	}
 
-	report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume()); // Consume the `{`
+	report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume()); // Consume `{`
 
 	token_type = reader.peek().get_type();
 
@@ -602,7 +601,7 @@ OperatorDeclaration Parser::parse_expected_operator_declaration()
 		token_type = reader.peek().get_type();
 	}
 
-	report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume()); // Consume the `}`
+	report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume()); // Consume `}`
 
 	return OperatorDeclaration{std::move(pattern), subordination, associativity, BuiltinOperatorKind::NOT_BUILT_IN};
 }
@@ -860,7 +859,7 @@ CodeBlock Parser::parse_code_block_until_end()
 
 std::unique_ptr<Statement> Parser::parse_return_statement()
 {
-	// At this point, STMT_RETURN should be guaranteed
+	// At this point, `ret` should be guaranteed.
 	report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
 
 	std::unique_ptr<Expression> value = nullptr;
