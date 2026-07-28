@@ -133,6 +133,11 @@ private:
 
 	std::string append_ast(std::unique_ptr<neon_compiler::ast::nodes::PackageMember> node, const std::string& identifier);
 
+	/* Names:
+	 * **with** "expected": a check is done to see if what the reader sees is the expected thing
+	 * **without** "expected": no check is done and assumes what the reader sees is the (optional/required) thing
+	 */
+
 	void parse_use_statement();
 
 	std::optional<neon_compiler::ast::Identifier> parse_identifier
