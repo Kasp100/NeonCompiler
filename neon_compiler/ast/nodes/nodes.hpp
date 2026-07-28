@@ -6,10 +6,18 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <variant>
 #include "../ast_node.hpp"
 #include "../identifiers.hpp"
 #include "../../token.hpp"
-#include <variant>
+#include <iostream>
+
+
+// forward declaration
+namespace neon_compiler::parser
+{
+	struct Operator;
+}
 
 namespace neon_compiler::ast::nodes
 {

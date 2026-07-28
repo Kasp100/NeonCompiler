@@ -41,53 +41,49 @@ namespace builtin_operators
 		neon_compiler::ast::nodes::OperatorSyntaxParameter{"exp"}
 	};
 
-	inline const std::shared_ptr<const neon_compiler::ast::nodes::OperatorDeclaration> DOT_DECLARATION =
-		std::make_shared<const neon_compiler::ast::nodes::OperatorDeclaration>
-		(
-			DOT_PATTERN,
-			0,
-			neon_compiler::ast::nodes::OperatorAssociativity::LEFT,
-			neon_compiler::ast::nodes::BuiltinOperatorKind::MEMBER_ACCESS
-		);
+	inline const neon_compiler::ast::nodes::OperatorDeclaration DOT_DECLARATION
+	{
+		DOT_PATTERN,
+		0,
+		neon_compiler::ast::nodes::OperatorAssociativity::LEFT,
+		neon_compiler::ast::nodes::BuiltinOperatorKind::MEMBER_ACCESS
+	};
 
-	inline const std::shared_ptr<const neon_compiler::ast::nodes::OperatorDeclaration> MULTIPLY_DECLARATION =
-		std::make_shared<const neon_compiler::ast::nodes::OperatorDeclaration>
-		(
-			MULTIPLY_PATTERN,
-			2,
-			neon_compiler::ast::nodes::OperatorAssociativity::LEFT,
-			neon_compiler::ast::nodes::BuiltinOperatorKind::NOT_BUILT_IN
-		);
+	inline const neon_compiler::ast::nodes::OperatorDeclaration MULTIPLY_DECLARATION
+	{
+		MULTIPLY_PATTERN,
+		2,
+		neon_compiler::ast::nodes::OperatorAssociativity::LEFT,
+		neon_compiler::ast::nodes::BuiltinOperatorKind::NOT_BUILT_IN
+	};
 
-	inline const std::shared_ptr<const neon_compiler::ast::nodes::OperatorDeclaration> ADD_DECLARATION =
-		std::make_shared<const neon_compiler::ast::nodes::OperatorDeclaration>
-		(
-			ADD_PATTERN,
-			3,
-			neon_compiler::ast::nodes::OperatorAssociativity::LEFT,
-			neon_compiler::ast::nodes::BuiltinOperatorKind::NOT_BUILT_IN
-		);
+	inline const neon_compiler::ast::nodes::OperatorDeclaration ADD_DECLARATION =
+	{
+		ADD_PATTERN,
+		3,
+		neon_compiler::ast::nodes::OperatorAssociativity::LEFT,
+		neon_compiler::ast::nodes::BuiltinOperatorKind::NOT_BUILT_IN
+	};
 
-	inline const std::shared_ptr<const neon_compiler::ast::nodes::OperatorDeclaration> POWER_DECLARATION =
-		std::make_shared<const neon_compiler::ast::nodes::OperatorDeclaration>
-		(
-			POWER_PATTERN,
-			1,
-			neon_compiler::ast::nodes::OperatorAssociativity::RIGHT,
-			neon_compiler::ast::nodes::BuiltinOperatorKind::NOT_BUILT_IN
-		);
+	inline const neon_compiler::ast::nodes::OperatorDeclaration POWER_DECLARATION
+	{		
+		POWER_PATTERN,
+		1,
+		neon_compiler::ast::nodes::OperatorAssociativity::RIGHT,
+		neon_compiler::ast::nodes::BuiltinOperatorKind::NOT_BUILT_IN
+	};
 
     inline const std::shared_ptr<const parser::Operator> DOT =
-		std::make_shared<const parser::Operator>(DOT_DECLARATION);
+		std::make_shared<const parser::Operator>(&DOT_DECLARATION);
 
     inline const std::shared_ptr<const parser::Operator> MULTIPLY =
-		std::make_shared<const parser::Operator>(MULTIPLY_DECLARATION);
+		std::make_shared<const parser::Operator>(&MULTIPLY_DECLARATION);
 
     inline const std::shared_ptr<const parser::Operator> ADD =
-		std::make_shared<const parser::Operator>(ADD_DECLARATION);
+		std::make_shared<const parser::Operator>(&ADD_DECLARATION);
 
     inline const std::shared_ptr<const parser::Operator> POWER =
-		std::make_shared<const parser::Operator>(POWER_DECLARATION);
+		std::make_shared<const parser::Operator>(&POWER_DECLARATION);
 }
 
 namespace operator_table_error_messages

@@ -4,8 +4,9 @@
 #include <memory>
 #include <vector>
 #include <string>
-#include "ast/nodes/nodes.hpp"
 #include "../logging/logger.hpp"
+#include "ast/nodes/nodes.hpp"
+#include "parser/parser.hpp"
 #include "token.hpp"
 
 namespace neon_compiler
@@ -24,6 +25,7 @@ private:
 	std::shared_ptr<logging::Logger> logger;
 	std::unordered_map<std::string, std::vector<neon_compiler::Token>> file_tokens;
 	std::shared_ptr<neon_compiler::ast::nodes::Root> root_node;
+	std::shared_ptr<neon_compiler::parser::OperatorMap> operator_map;
 };
 
 }

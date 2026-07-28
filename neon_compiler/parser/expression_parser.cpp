@@ -278,7 +278,7 @@ std::unique_ptr<Expression> ExpressionParser::parse_operator_call_expression
 
 	if(first_argument_passed) { arguments.push_back(std::move(first_argument)); }
 
-	std::shared_ptr<const neon_compiler::ast::nodes::OperatorDeclaration> declaration = op->get_declaration();
+	const neon_compiler::ast::nodes::OperatorDeclaration* declaration = op->get_declaration();
 	const std::vector<OperatorSyntaxPatternElement>& pattern = declaration->pattern;
 
 	for(std::size_t i = (first_argument_passed ? 1 : 0); i < pattern.size(); ++i)

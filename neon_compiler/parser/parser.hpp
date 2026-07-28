@@ -75,6 +75,8 @@ namespace error_recovery
 		"err_type";
 }
 
+using OperatorMap = std::unordered_map<std::string, std::vector<neon_compiler::parser::Operator>>;
+
 class Parser
 {
 public:
@@ -85,8 +87,16 @@ public:
         std::shared_ptr<neon_compiler::analysis::AnalysisReporter> analysis_reporter,
 		std::shared_ptr<neon_compiler::ast::nodes::Root> root_node,
         std::string_view file,
+		std::shared_ptr<OperatorMap> operator_map,
 		neon_compiler::parser::OperatorTable* operator_table
-    ) : logger{logger}, reader{tokens}, analysis_reporter{analysis_reporter}, root_node{root_node}, file{file}, operator_table{operator_table} {}
+    ) :
+		logger{logger},
+		reader{tokens},
+		analysis_reporter{analysis_reporter},
+		root_node{root_node},
+		file{file},
+		operator_map{operator_map},
+		operator_table{operator_table} {}
 
 	/** Should be run first in the parsing phase to register package declaration and parse operator modules. */
 	void run_a();
@@ -103,6 +113,10 @@ private:
 	std::string_view file;
 	neon_compiler::ast::Identifier package;
 	std::vector<neon_compiler::ast::Identifier> imports;
+
+	/** Mapping from package member identifier to operator lists */
+	std::shared_ptr<OperatorMap> operator_map;
+	/** Global operator table */
 	neon_compiler::parser::OperatorTable* operator_table;
 
 	void skip_until_statement_end();
@@ -117,7 +131,7 @@ private:
 		std::optional<std::string> info = std::nullopt
 	);
 
-	void append_ast(std::unique_ptr<neon_compiler::ast::nodes::PackageMember> node, const std::string& identifier);
+	std::string append_ast(std::unique_ptr<neon_compiler::ast::nodes::PackageMember> node, const std::string& identifier);
 
 	void parse_use_statement();
 

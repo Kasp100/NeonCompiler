@@ -5,7 +5,6 @@
 #include "../reading/char_reader.hpp"
 #include "lexer/lexer.hpp"
 #include "lexer/tokenisation_error.hpp"
-#include "parser/parser.hpp"
 #include "analysis/analysis_reporter.hpp"
 #include "analysis/impl/console_analysis_reporter.hpp"
 #include "ast/ast_visitor.hpp"
@@ -25,6 +24,7 @@ Compiler::Compiler(std::shared_ptr<Logger> logger)
 	: logger{logger}
 {
 	root_node = std::make_shared<Root>();
+	operator_map = std::make_shared<OperatorMap>();
 }
 
 void Compiler::read_file(std::unique_ptr<std::istream> stream, std::string_view file_name)
@@ -77,7 +77,7 @@ void Compiler::generate_analysis() const
 
 		std::shared_ptr<AnalysisReporter> reporter = std::make_shared<ConsoleAnalysisReporter>(pair.first);
 
-		parsers.emplace_back(logger, tokens_view, reporter, root_node, pair.first, &operator_table);
+		parsers.emplace_back(logger, tokens_view, reporter, root_node, pair.first, operator_map, &operator_table);
 	}
 
 	for(Parser& parser : parsers)

@@ -108,12 +108,14 @@ void Parser::report_token
 	analysis_reporter->report(AnalysisEntry{file, type, severity, token.get_source_position(), token.get_length(), info});
 }
 
-void Parser::append_ast(std::unique_ptr<PackageMember> node, const std::string& identifier)
+std::string Parser::append_ast(std::unique_ptr<PackageMember> node, const std::string& identifier)
 {
-	const std::string full_identifier{package.to_string() + "::" + identifier};
+	std::string full_identifier{package.to_string() + "::" + identifier};
 
 	root_node->file_package_members[std::string{file}].push_back(full_identifier);
 	root_node->package_members[full_identifier] = std::move(node);
+
+	return full_identifier;
 }
 
 void Parser::parse_use_statement()
@@ -382,28 +384,65 @@ void Parser::parse_expected_operator_module_a_and_register(const Access& access)
 
 	while(!reader.end_of_file_reached())
 	{
-		TokenType token_type = reader.consume().get_type();
+		TokenType token_type = reader.peek().get_type();
 
 		if(token_type == TokenType::OPERATOR)
 		{
-			operators.push_back(parse_expected_operator_declaration());
+			operators.push_back(std::move(parse_expected_operator_declaration()));
 		}
 		else if(token_type == TokenType::BRACKET_CURLY_CLOSE)
 		{
+			reader.consume();
 			break;
 		}
 		else
 		{
+			reader.consume();
 			skip_until_block_start();
 			skip_until_block_end();
 		}
 	}
 
-	append_ast
+	std::vector<OperatorDeclaration*> operator_declaration_ptrs;
+
+	for(OperatorDeclaration& op : operators)
+	{
+		operator_declaration_ptrs.push_back(&op);
+	}
+
+	logger->debug("built operator_declaration_ptrs");
+
+	std::string full_id = append_ast
 	(
 		std::make_unique<OperatorModule>(access, std::move(operators), std::vector<OperatorFunction>{}),
 		name
 	);
+
+	logger->debug("appended AST");
+
+	std::vector<Operator> operator_list;
+
+	if(operator_map->contains(full_id))
+	{
+		operator_list = (*operator_map)[full_id];
+
+		logger->debug("found existing operator list");
+	}
+
+	logger->debug("created operator list");
+
+	for(OperatorDeclaration* op_decl : operator_declaration_ptrs)
+	{
+		logger->debug("op_decl->associativity=" + std::to_string(static_cast<int>(op_decl->associativity)));
+		logger->debug("op_decl->pattern.size()=" + std::to_string(op_decl->pattern.size()));
+		operator_list.emplace_back(op_decl);
+	}
+
+	logger->debug("added to operator list");
+
+	(*operator_map)[full_id] = std::move(operator_list);
+
+	logger->debug("moved operator list");
 }
 
 void Parser::parse_expected_operator_module_b()
@@ -419,7 +458,7 @@ void Parser::parse_expected_operator_module_b()
 	// read and consume the IDENTIFIER token
 	const std::string name{reader.consume().get_lexeme().value()};
 
-	 // consume `{`
+	// consume `{`
 	reader.consume();
 
 	std::vector<OperatorFunction> functions;
@@ -486,7 +525,7 @@ OperatorDeclaration Parser::parse_expected_operator_declaration()
 			}
 			else
 			{
-				report_token(AnalysisEntryType::DECLARATION, AnalysisSeverity::INFO, reader.peek());
+				report_token(AnalysisEntryType::DECLARATION, AnalysisSeverity::INFO, reader.peek(), std::string{reader.peek().get_lexeme().value()});
 				pattern.push_back(OperatorSyntaxParameter{std::string{reader.consume().get_lexeme().value()}});
 
 				report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
@@ -579,6 +618,7 @@ OperatorDeclaration Parser::parse_expected_operator_declaration()
 
 	report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume()); // Consume the `}`
 
+	logger->debug("opdecl pattern size=" + std::to_string(pattern.size()));
 	return OperatorDeclaration{std::move(pattern), subordination, associativity, BuiltinOperatorKind::NOT_BUILT_IN};
 }
 

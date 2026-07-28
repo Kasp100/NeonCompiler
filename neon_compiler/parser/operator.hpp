@@ -34,13 +34,9 @@ using PeekCursor = uint*;
 class Operator
 {
 public:
-	Operator(std::shared_ptr<const neon_compiler::ast::nodes::OperatorDeclaration> declaration)
-	: declaration{declaration}, fixity{Fixity::INVALID}
-	{
-		validate();
-	}
+	explicit Operator(const neon_compiler::ast::nodes::OperatorDeclaration* declaration);
 
-	std::shared_ptr<const neon_compiler::ast::nodes::OperatorDeclaration> get_declaration() const;
+	const neon_compiler::ast::nodes::OperatorDeclaration* get_declaration() const;
 	Fixity get_fixity() const;
 	bool operator<(const Operator& other) const;
 	bool matches
@@ -51,8 +47,8 @@ public:
 		bool skip_first
 	) const;
 private:
-	/** Declaration of this operator */
-	std::shared_ptr<const neon_compiler::ast::nodes::OperatorDeclaration> declaration;
+	/** Declaration of this operator, non-owning */
+	const neon_compiler::ast::nodes::OperatorDeclaration* declaration;
 	/** Fixity of the operator: prefix, infix, or postfix */
 	Fixity fixity;
 

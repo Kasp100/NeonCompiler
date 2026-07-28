@@ -2,10 +2,17 @@
 
 #include <stdexcept>
 #include "../token_reader.hpp"
+#include <iostream>
 
 using namespace neon_compiler;
 using namespace neon_compiler::parser;
 using namespace neon_compiler::ast::nodes;
+
+Operator::Operator(const neon_compiler::ast::nodes::OperatorDeclaration* declaration)
+	: declaration{declaration}, fixity{Fixity::INVALID}
+{
+	validate();
+}
 
 void Operator::validate()
 {
@@ -43,7 +50,7 @@ void Operator::validate()
 	}
 }
 
-std::shared_ptr<const neon_compiler::ast::nodes::OperatorDeclaration> Operator::get_declaration() const
+const neon_compiler::ast::nodes::OperatorDeclaration* Operator::get_declaration() const
 {
 	return declaration;
 }
