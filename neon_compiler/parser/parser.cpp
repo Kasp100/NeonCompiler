@@ -604,7 +604,6 @@ OperatorDeclaration Parser::parse_expected_operator_declaration()
 
 	report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume()); // Consume the `}`
 
-	logger->debug("opdecl pattern size=" + std::to_string(pattern.size()));
 	return OperatorDeclaration{std::move(pattern), subordination, associativity, BuiltinOperatorKind::NOT_BUILT_IN};
 }
 
