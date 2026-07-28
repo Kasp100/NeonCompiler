@@ -357,7 +357,7 @@ struct OperatorModule : PackageMember
 	std::vector<OperatorFunction> functions;
 
 	OperatorModule(Access access, std::vector<OperatorDeclaration> operators, std::vector<OperatorFunction> functions)
-		: access{access}, operators{operators}, functions{std::move(functions)} {}
+		: access{access}, operators{std::move(operators)}, functions{std::move(functions)} {}
 
 	void accept(ASTVisitor& visitor) const override
 	{

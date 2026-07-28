@@ -410,39 +410,25 @@ void Parser::parse_expected_operator_module_a_and_register(const Access& access)
 		operator_declaration_ptrs.push_back(&op);
 	}
 
-	logger->debug("built operator_declaration_ptrs");
-
 	std::string full_id = append_ast
 	(
-		std::make_unique<OperatorModule>(access, std::move(operators), std::vector<OperatorFunction>{}),
+		std::make_unique<OperatorModule>(access, operators, std::vector<OperatorFunction>{}),
 		name
 	);
-
-	logger->debug("appended AST");
 
 	std::vector<Operator> operator_list;
 
 	if(operator_map->contains(full_id))
 	{
 		operator_list = (*operator_map)[full_id];
-
-		logger->debug("found existing operator list");
 	}
-
-	logger->debug("created operator list");
 
 	for(OperatorDeclaration* op_decl : operator_declaration_ptrs)
 	{
-		logger->debug("op_decl->associativity=" + std::to_string(static_cast<int>(op_decl->associativity)));
-		logger->debug("op_decl->pattern.size()=" + std::to_string(op_decl->pattern.size()));
 		operator_list.emplace_back(op_decl);
 	}
 
-	logger->debug("added to operator list");
-
 	(*operator_map)[full_id] = std::move(operator_list);
-
-	logger->debug("moved operator list");
 }
 
 void Parser::parse_expected_operator_module_b()
