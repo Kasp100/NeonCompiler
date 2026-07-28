@@ -112,8 +112,9 @@ private:
 	std::shared_ptr<neon_compiler::ast::nodes::Root> root_node;
 	std::string_view file;
 	neon_compiler::ast::Identifier package;
-	std::vector<neon_compiler::ast::Identifier> imports;
 
+	/** Mapping from reference name to declaration path */
+	std::unordered_map<std::string, std::string> imports;
 	/** Mapping from package member identifier to operator lists */
 	std::shared_ptr<OperatorMap> operator_map;
 	/** Global operator table */

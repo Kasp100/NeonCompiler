@@ -193,7 +193,7 @@ void Parser::parse_and_register_import_statement()
 
 	const neon_compiler::ast::Identifier& id = opt_id.value();
 
-	imports[id.parts[id.parts.size() - 1]] = std::move(id);
+	imports[id.parts[id.parts.size() - 1]] = id.to_string();
 }
 
 Access Parser::parse_access()
