@@ -43,6 +43,8 @@ namespace error_messages
 		"Expected a parameter declaration, e.g. `shared mut:array<int> arr`. Terminate with `)` and separate parameter declarations with `,`.";
 	constexpr std::string_view MISSING_SEMICOLON =
 		"Missing a semicolon.";
+	constexpr std::string_view MISSING_SEMICOLON_OR_FAILED_TO_PARSE_EXPRESSION =
+		"Missing a semicolon or failed to parse expression.";
 	constexpr std::string_view MISSING_CODE_BLOCK =
 		"Expected a code block, starting with `{` and ending with `}`.";
 	constexpr std::string_view MISSING_SECOND_PACKAGE_MEMBER_PATTERN =

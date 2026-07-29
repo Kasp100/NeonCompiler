@@ -965,15 +965,13 @@ std::unique_ptr<Statement> Parser::parse_return_statement(OperatorTable* operato
 		value = expression_parser.parse_expression();
 	}
 
-	if(reader.peek().get_type() == TokenType::END_STATEMENT)
-	{
-		report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
-	}
-	else
+	while(!reader.end_of_file_reached() && reader.peek().get_type() != TokenType::END_STATEMENT)
 	{
 		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
-			std::string{error_messages::MISSING_SEMICOLON});
+			std::string{error_messages::MISSING_SEMICOLON_OR_FAILED_TO_PARSE_EXPRESSION});
 	}
+
+	report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
 
 	return std::make_unique<Return>(std::move(value));
 }
