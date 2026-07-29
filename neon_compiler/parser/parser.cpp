@@ -61,20 +61,7 @@ void Parser::run_b(std::shared_ptr<OperatorTable> operator_table)
 
 		if(token_type == TokenType::STMT_USE)
 		{
-			std::shared_ptr<OperatorTable> new_operator_table = std::make_shared<OperatorTable>();
-
-			const std::vector<std::shared_ptr<const Operator>>* found_operators = parse_use_statement();
-
-			if(!found_operators) { continue; }
-
-			for(std::shared_ptr<const Operator> op : *found_operators)
-			{
-				new_operator_table->add(op);
-			}
-
-			new_operator_table->add_all(operator_table);
-
-			operator_table = new_operator_table;
+			operator_table = parse_use_statement_and_create_operator_table(operator_table);
 			continue;
 		}
 
@@ -148,6 +135,24 @@ std::string Parser::append_ast(std::unique_ptr<PackageMember> node, const std::s
 	logger->info("Appended to AST: " + full_identifier);
 
 	return full_identifier;
+}
+
+std::shared_ptr<OperatorTable> Parser::parse_use_statement_and_create_operator_table(std::shared_ptr<OperatorTable> previous)
+{
+	std::shared_ptr<OperatorTable> new_operator_table = std::make_shared<OperatorTable>();
+
+	const std::vector<std::shared_ptr<const Operator>>* found_operators = parse_use_statement();
+
+	if(!found_operators) { return new_operator_table; }
+
+	for(std::shared_ptr<const Operator> op : *found_operators)
+	{
+		new_operator_table->add(op);
+	}
+
+	new_operator_table->add_all(previous);
+
+	return new_operator_table;
 }
 
 const std::vector<std::shared_ptr<const Operator>>* Parser::parse_use_statement()
@@ -928,14 +933,20 @@ CodeBlock Parser::parse_code_block_until_end(std::shared_ptr<OperatorTable> oper
 
 	while(!reader.end_of_file_reached())
 	{
-		if(reader.peek().get_type() == TokenType::BRACKET_CURLY_CLOSE)
+		const TokenType token_type = reader.peek().get_type();
+
+		if(token_type == TokenType::BRACKET_CURLY_CLOSE)
 		{
 			report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
 			break;
 		}
-		else if(reader.peek().get_type() == TokenType::STMT_RETURN)
+		else if(token_type == TokenType::STMT_RETURN)
 		{
 			statements.push_back(parse_return_statement(operator_table.get()));
+		}
+		else if(token_type == TokenType::STMT_USE)
+		{
+			operator_table = parse_use_statement_and_create_operator_table(operator_table);
 		}
 		else
 		{

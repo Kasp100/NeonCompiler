@@ -140,6 +140,10 @@ private:
 	 * **without** "expected": no check is done and assumes what the reader sees is the (optional/required) thing
 	 */
 
+	std::shared_ptr<neon_compiler::parser::OperatorTable> parse_use_statement_and_create_operator_table
+	(
+		std::shared_ptr<neon_compiler::parser::OperatorTable> previous
+	);
 	const std::vector<std::shared_ptr<const neon_compiler::parser::Operator>>* parse_use_statement();
 
 	std::optional<neon_compiler::ast::Identifier> parse_identifier
