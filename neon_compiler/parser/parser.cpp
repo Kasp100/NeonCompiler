@@ -940,17 +940,12 @@ CodeBlock Parser::parse_code_block_until_end(std::shared_ptr<OperatorTable> oper
 			report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
 			break;
 		}
-		else if(token_type == TokenType::STMT_RETURN)
+
+		switch(token_type)
 		{
-			statements.push_back(parse_return_statement(operator_table.get()));
-		}
-		else if(token_type == TokenType::STMT_USE)
-		{
-			operator_table = parse_use_statement_and_create_operator_table(operator_table);
-		}
-		else
-		{
-			report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume());
+			case TokenType::STMT_RETURN:	statements.push_back(parse_return_statement(operator_table.get())); break;
+			case TokenType::STMT_USE:		operator_table = parse_use_statement_and_create_operator_table(operator_table); break;
+			default:						statements.push_back(parse_expected_discard_expression(operator_table.get()));
 		}
 	}
 
@@ -963,9 +958,9 @@ std::unique_ptr<Statement> Parser::parse_return_statement(OperatorTable* operato
 	report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
 
 	std::unique_ptr<Expression> value = nullptr;
-	
+
 	if(reader.peek().get_type() != TokenType::END_STATEMENT)
-	{		
+	{
 		FuncReportToken func_report_token = [this] (AnalysisEntryType type, AnalysisSeverity severity, const Token& token, std::optional<std::string> info)
 		{
 			report_token(type, severity, token, info);
@@ -987,3 +982,24 @@ std::unique_ptr<Statement> Parser::parse_return_statement(OperatorTable* operato
 	return std::make_unique<Return>(std::move(value));
 }
 
+std::unique_ptr<Statement> Parser::parse_expected_discard_expression(OperatorTable* operator_table)
+{
+	FuncReportToken func_report_token = [this] (AnalysisEntryType type, AnalysisSeverity severity, const Token& token, std::optional<std::string> info)
+	{
+		report_token(type, severity, token, info);
+	};
+
+	ExpressionParser expression_parser{logger, &reader, &func_report_token, operator_table};
+
+	std::unique_ptr<DiscardExpression> result = std::make_unique<DiscardExpression>(expression_parser.parse_expression());
+
+	while(!reader.end_of_file_reached() && reader.peek().get_type() != TokenType::END_STATEMENT)
+	{
+		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
+			std::string{error_messages::MISSING_SEMICOLON_OR_FAILED_TO_PARSE_EXPRESSION});
+	}
+
+	report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
+
+	return result;
+}

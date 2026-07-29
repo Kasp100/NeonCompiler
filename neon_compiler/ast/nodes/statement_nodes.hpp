@@ -17,6 +17,9 @@ struct DiscardExpression : Statement
 	/** The expression which will be evaluated, discarding the result. Typically done with `void` calls. */
 	std::unique_ptr<Expression> expression;
 
+	DiscardExpression(std::unique_ptr<Expression> expression)
+		: expression(std::move(expression)) {}
+
 	void accept(ASTVisitor& visitor) const override
 	{
 		visitor.visit(*this);
