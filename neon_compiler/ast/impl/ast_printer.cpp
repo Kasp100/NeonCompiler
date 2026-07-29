@@ -112,7 +112,13 @@ void ASTPrinter::visit(const nodes::CodeBlock& node)
 
 void ASTPrinter::visit(const nodes::DiscardExpression& node)
 {
+	print_prefix();
+	print("discard expression");
+	print_line();
 
+	incr_depth();
+	node.expression->accept(*this);
+	decr_depth();
 }
 
 void ASTPrinter::visit(const nodes::LocalDeclaration& node)
