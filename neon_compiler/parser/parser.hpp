@@ -65,6 +65,8 @@ namespace error_messages
 		"Invalid associativity; must be `left` or `right`, or not defined.";
 	constexpr std::string_view INVALID_OPERATOR_PROPERTY =
 		"Invalid operator property. Only `subordination` (defines precedence) and `associativity` are supported.";
+	constexpr std::string_view INVALID_USE_STATEMENT_ARGUMENT =
+		"Invalid `use` statement; requires a reference to an operator module.";
 }
 
 namespace error_recovery
@@ -75,7 +77,7 @@ namespace error_recovery
 		"err_type";
 }
 
-using OperatorMap = std::unordered_map<std::string, std::vector<neon_compiler::parser::Operator>>;
+using OperatorMap = std::unordered_map<std::string, std::vector<std::shared_ptr<const neon_compiler::parser::Operator>>>;
 
 class Parser
 {
@@ -87,22 +89,21 @@ public:
         std::shared_ptr<neon_compiler::analysis::AnalysisReporter> analysis_reporter,
 		std::shared_ptr<neon_compiler::ast::nodes::Root> root_node,
         std::string_view file,
-		std::shared_ptr<OperatorMap> operator_map,
-		neon_compiler::parser::OperatorTable* operator_table
+		std::shared_ptr<OperatorMap> operator_map
     ) :
 		logger{logger},
 		reader{tokens},
 		analysis_reporter{analysis_reporter},
 		root_node{root_node},
 		file{file},
-		operator_map{operator_map},
-		operator_table{operator_table} {}
+		operator_map{operator_map}
+	{}
 
 	/** Should be run first in the parsing phase to register package declaration and parse operator modules. */
 	void run_a();
 
 	/** Should be run second in the parsing phase to parse other package member types. */
-	void run_b();
+	void run_b(std::shared_ptr<neon_compiler::parser::OperatorTable> operator_table);
 
 	std::shared_ptr<neon_compiler::ast::nodes::Root> get_root_node() const;
 private:
@@ -117,8 +118,6 @@ private:
 	std::unordered_map<std::string, std::string> imports;
 	/** Mapping from package member identifier to operator lists */
 	std::shared_ptr<OperatorMap> operator_map;
-	/** Global operator table */
-	neon_compiler::parser::OperatorTable* operator_table;
 
 	void skip_until_statement_end();
 	void skip_until_block_start();
@@ -139,7 +138,7 @@ private:
 	 * **without** "expected": no check is done and assumes what the reader sees is the (optional/required) thing
 	 */
 
-	void parse_use_statement();
+	const std::vector<std::shared_ptr<const neon_compiler::parser::Operator>>* parse_use_statement();
 
 	std::optional<neon_compiler::ast::Identifier> parse_identifier
 	(
@@ -150,21 +149,33 @@ private:
 	void parse_and_register_import_statement();
 	neon_compiler::ast::nodes::Access parse_access();
 	neon_compiler::ast::nodes::PackageMemberPattern parse_package_member_pattern();
-	void parse_expected_package_member(const neon_compiler::ast::nodes::Access& access);
-	std::string parse_expected_declaration_name(neon_compiler::analysis::AnalysisEntryType analysis_entry_type);
-	void parse_and_register_expected_entrypoint(const neon_compiler::ast::nodes::Access& access);
+
+	void parse_expected_package_member
+	(
+		const neon_compiler::ast::nodes::Access& access,
+		std::shared_ptr<neon_compiler::parser::OperatorTable> operator_table
+	);
+	std::string parse_expected_declaration_name
+	(
+		neon_compiler::analysis::AnalysisEntryType analysis_entry_type
+	);
+	void parse_and_register_expected_entrypoint
+	(
+		const neon_compiler::ast::nodes::Access& access,
+		std::shared_ptr<neon_compiler::parser::OperatorTable> operator_table
+	);
 
 	void parse_expected_operator_module_a_and_register(const neon_compiler::ast::nodes::Access& access);
 	neon_compiler::ast::nodes::OperatorDeclaration parse_expected_operator_declaration();
-	void parse_expected_operator_module_b();
-	neon_compiler::ast::nodes::OperatorFunction parse_expected_operator_function();
+	void parse_expected_operator_module_b(std::shared_ptr<OperatorTable> operator_table);
+	neon_compiler::ast::nodes::OperatorFunction parse_expected_operator_function(std::shared_ptr<neon_compiler::parser::OperatorTable> operator_table);
 	std::vector<neon_compiler::ast::nodes::OperatorFunctionPatternElement> parse_operator_function_pattern();
 
 	neon_compiler::ast::nodes::ParameterDeclarationList parse_parameter_declarations();
 	std::optional<neon_compiler::ast::nodes::VariableDeclaration> parse_variable_declaration(neon_compiler::ast::nodes::MutabilityMode default_mutability_mode);
 	std::optional<neon_compiler::ast::nodes::ReferenceType> parse_reference_type(neon_compiler::ast::nodes::MutabilityMode default_mutability_mode);
-	neon_compiler::ast::nodes::CodeBlock parse_code_block_until_end();
-	std::unique_ptr<neon_compiler::ast::nodes::Statement> parse_return_statement();
+	neon_compiler::ast::nodes::CodeBlock parse_code_block_until_end(std::shared_ptr<OperatorTable> operator_table);
+	std::unique_ptr<neon_compiler::ast::nodes::Statement> parse_return_statement(neon_compiler::parser::OperatorTable* operator_table);
 };
 
 }

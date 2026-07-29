@@ -13,14 +13,23 @@ void Parser::run_a()
 
 	while(!reader.end_of_file_reached())
 	{
-		if(reader.peek().get_type() == TokenType::IMPORT)
+		TokenType token_type = reader.peek().get_type();
+
+		if(token_type == TokenType::IMPORT)
+		{
+			skip_until_statement_end();
+			continue;
+		}
+
+		if(token_type == TokenType::STMT_USE)
 		{
 			skip_until_statement_end();
 			continue;
 		}
 
 		const Access access = parse_access();
-		const TokenType token_type = reader.consume().get_type();
+
+		token_type = reader.consume().get_type();
 
 		if(token_type == TokenType::PACKAGE_MEMBER_OPERATOR_MODULE)
 		{
@@ -36,20 +45,41 @@ void Parser::run_a()
 	reader.reset();
 }
 
-void Parser::run_b()
+void Parser::run_b(std::shared_ptr<OperatorTable> operator_table)
 {
 	skip_until_statement_end();
 
 	while(!reader.end_of_file_reached())
 	{
-		if(reader.peek().get_type() == TokenType::IMPORT)
+		const TokenType token_type = reader.peek().get_type();
+
+		if(token_type == TokenType::IMPORT)
 		{
 			parse_and_register_import_statement();
 			continue;
 		}
 
+		if(token_type == TokenType::STMT_USE)
+		{
+			std::shared_ptr<OperatorTable> new_operator_table = std::make_shared<OperatorTable>();
+
+			const std::vector<std::shared_ptr<const Operator>>* found_operators = parse_use_statement();
+
+			if(!found_operators) { continue; }
+
+			for(std::shared_ptr<const Operator> op : *found_operators)
+			{
+				new_operator_table->add(op);
+			}
+
+			new_operator_table->add_all(operator_table);
+
+			operator_table = new_operator_table;
+			continue;
+		}
+
 		const Access access = parse_access(); // `private` if no keyword is present.
-		parse_expected_package_member(access);
+		parse_expected_package_member(access, operator_table);
 	}
 }
 
@@ -118,9 +148,53 @@ std::string Parser::append_ast(std::unique_ptr<PackageMember> node, const std::s
 	return full_identifier;
 }
 
-void Parser::parse_use_statement()
+const std::vector<std::shared_ptr<const Operator>>* Parser::parse_use_statement()
 {
+	reader.consume(); // Consume `use`
 
+	std::optional<neon_compiler::ast::Identifier> opt_id = parse_identifier(AnalysisEntryType::REFERENCE, AnalysisSeverity::INFO);
+
+	if(!opt_id.has_value())
+	{
+		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
+			std::string{error_messages::INVALID_USE_STATEMENT_ARGUMENT});
+	}
+
+	if(reader.peek().get_type() == TokenType::END_STATEMENT)
+	{
+		report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
+	}
+	else
+	{
+		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
+			std::string{error_messages::MISSING_SEMICOLON});
+	}
+
+	if(!opt_id.has_value()) { return nullptr; }
+
+	const neon_compiler::ast::Identifier& id = opt_id.value();
+
+	std::string id_str = id.to_string();
+
+	if(id.parts.size() == 1)
+	{
+		if(imports.contains(id_str))
+		{
+			id_str = imports[id_str];
+		}
+		else
+		{
+			id_str = package.to_string() + "::" + id_str;
+		}
+	}
+
+	if(!operator_map->contains(id_str))
+	{
+		logger->info("Could not find operators: " + id_str);
+		return nullptr;
+	}
+
+	return &(*operator_map)[id_str];
 }
 
 std::optional<neon_compiler::ast::Identifier> Parser::parse_identifier(AnalysisEntryType type, AnalysisSeverity severity)
@@ -130,7 +204,7 @@ std::optional<neon_compiler::ast::Identifier> Parser::parse_identifier(AnalysisE
 		report_token(type, severity, token, info);
 	};
 
-	ExpressionParser expression_parser{logger, &reader, &func_report_token, operator_table};
+	ExpressionParser expression_parser{logger, &reader, &func_report_token, nullptr};
 	return expression_parser.parse_identifier(type, severity);
 }
 
@@ -298,12 +372,12 @@ PackageMemberPattern Parser::parse_package_member_pattern()
 	}
 }
 
-void Parser::parse_expected_package_member(const Access& access)
+void Parser::parse_expected_package_member(const Access& access, std::shared_ptr<OperatorTable> operator_table)
 {
 	if(reader.peek().get_type() == TokenType::PACKAGE_MEMBER_ENTRYPOINT)
 	{
 		report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
-		parse_and_register_expected_entrypoint(access);
+		parse_and_register_expected_entrypoint(access, operator_table);
 	}
 	else if(reader.peek().get_type() == TokenType::PACKAGE_MEMBER_PURE_FUNCTION_SET)
 	{
@@ -312,7 +386,7 @@ void Parser::parse_expected_package_member(const Access& access)
 	else if(reader.peek().get_type() == TokenType::PACKAGE_MEMBER_OPERATOR_MODULE)
 	{
 		report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
-		parse_expected_operator_module_b();
+		parse_expected_operator_module_b(operator_table);
 	}
 	else if(reader.peek().get_type() == TokenType::PACKAGE_MEMBER_COMPILE_FUNCTION)
 	{
@@ -355,7 +429,7 @@ std::string Parser::parse_expected_declaration_name(AnalysisEntryType analysis_e
 	}
 }
 
-void Parser::parse_and_register_expected_entrypoint(const Access& access)
+void Parser::parse_and_register_expected_entrypoint(const Access& access, std::shared_ptr<OperatorTable> operator_table)
 {
 	const std::string name = parse_expected_declaration_name(AnalysisEntryType::DECLARATION);
 
@@ -366,7 +440,7 @@ void Parser::parse_and_register_expected_entrypoint(const Access& access)
 	if(reader.peek().get_type() == TokenType::BRACKET_CURLY_OPEN)
 	{
 		report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
-		body = parse_code_block_until_end();
+		body = parse_code_block_until_end(operator_table);
 	}
 	else
 	{
@@ -429,7 +503,7 @@ void Parser::parse_expected_operator_module_a_and_register(const Access& access)
 		name
 	);
 
-	std::vector<Operator> operator_list;
+	std::vector<std::shared_ptr<const Operator>> operator_list;
 
 	if(operator_map->contains(full_id))
 	{
@@ -438,13 +512,13 @@ void Parser::parse_expected_operator_module_a_and_register(const Access& access)
 
 	for(OperatorDeclaration* op_decl : operator_declaration_ptrs)
 	{
-		operator_list.emplace_back(op_decl);
+		operator_list.push_back(std::make_shared<Operator>(op_decl));
 	}
 
 	(*operator_map)[full_id] = std::move(operator_list);
 }
 
-void Parser::parse_expected_operator_module_b()
+void Parser::parse_expected_operator_module_b(std::shared_ptr<OperatorTable> operator_table)
 {
 	if(reader.peek(0).get_type() != TokenType::IDENTIFIER || reader.peek(1).get_type() != TokenType::BRACKET_CURLY_OPEN)
 	{
@@ -471,7 +545,7 @@ void Parser::parse_expected_operator_module_b()
 		}
 		else
 		{
-			functions.push_back(parse_expected_operator_function());
+			functions.push_back(parse_expected_operator_function(operator_table));
 		}
 		token_type = reader.peek().get_type();
 	}
@@ -486,7 +560,7 @@ void Parser::parse_expected_operator_module_b()
 
 	if(it == root_node->package_members.end())
 	{
-		logger->error("Could not complete operator module; could not find by identifier.");
+		logger->error("Could not complete operator module \"" + full_identifier + "\"; could not find by identifier.");
 		return;
 	}
 
@@ -619,7 +693,7 @@ OperatorDeclaration Parser::parse_expected_operator_declaration()
 	return OperatorDeclaration{std::move(pattern), subordination, associativity, BuiltinOperatorKind::NOT_BUILT_IN};
 }
 
-OperatorFunction Parser::parse_expected_operator_function()
+OperatorFunction Parser::parse_expected_operator_function(std::shared_ptr<OperatorTable> operator_table)
 {
 	std::optional<ReferenceType> return_value = parse_reference_type(MutabilityMode::BORROW);
 
@@ -631,7 +705,7 @@ OperatorFunction Parser::parse_expected_operator_function()
 	
 	std::vector<OperatorFunctionPatternElement> pattern = parse_operator_function_pattern();
 	report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume()); // Consume the `{`
-	CodeBlock body = parse_code_block_until_end();
+	CodeBlock body = parse_code_block_until_end(operator_table);
 
 	return OperatorFunction
 	{
@@ -845,7 +919,7 @@ std::optional<ReferenceType> Parser::parse_reference_type(MutabilityMode default
 	}
 }
 
-CodeBlock Parser::parse_code_block_until_end()
+CodeBlock Parser::parse_code_block_until_end(std::shared_ptr<OperatorTable> operator_table)
 {
 	// At this point, a `{` should already be consumed
 	std::vector<std::unique_ptr<Statement>> statements;
@@ -859,7 +933,7 @@ CodeBlock Parser::parse_code_block_until_end()
 		}
 		else if(reader.peek().get_type() == TokenType::STMT_RETURN)
 		{
-			statements.push_back(parse_return_statement());
+			statements.push_back(parse_return_statement(operator_table.get()));
 		}
 		else
 		{
@@ -870,7 +944,7 @@ CodeBlock Parser::parse_code_block_until_end()
 	return CodeBlock{std::move(statements)};
 }
 
-std::unique_ptr<Statement> Parser::parse_return_statement()
+std::unique_ptr<Statement> Parser::parse_return_statement(OperatorTable* operator_table)
 {
 	// At this point, `ret` should be guaranteed.
 	report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());

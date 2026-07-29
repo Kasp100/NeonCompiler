@@ -45,6 +45,7 @@ class OperatorTable
 public:
 	explicit OperatorTable();
 	void add(std::shared_ptr<const neon_compiler::parser::Operator> op);
+	void add_all(std::shared_ptr<const OperatorTable> other);
 
 	std::shared_ptr<const neon_compiler::parser::Operator> match_prefix
 	(
@@ -71,6 +72,7 @@ private:
 	bool finalised{false};
 
 	void finalise();
+	void check_not_finalised() const;
 	void sort_operator_list(std::vector<std::shared_ptr<const neon_compiler::parser::Operator>>& list);
 
 	std::shared_ptr<const neon_compiler::parser::Operator> match

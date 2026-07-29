@@ -69,15 +69,13 @@ void Compiler::generate_analysis() const
 
 	std::vector<Parser> parsers;
 
-	OperatorTable operator_table{};
-
 	for(const std::pair<const std::string, std::vector<Token>>& pair : file_tokens)
 	{
 		const std::span<const Token> tokens_view{pair.second};
 
 		std::shared_ptr<AnalysisReporter> reporter = std::make_shared<ConsoleAnalysisReporter>(pair.first);
 
-		parsers.emplace_back(logger, tokens_view, reporter, root_node, pair.first, operator_map, &operator_table);
+		parsers.emplace_back(logger, tokens_view, reporter, root_node, pair.first, operator_map);
 	}
 
 	for(Parser& parser : parsers)
@@ -85,9 +83,11 @@ void Compiler::generate_analysis() const
 		parser.run_a();
 	}
 
+	std::shared_ptr<OperatorTable> operator_table = std::make_shared<OperatorTable>();
+
 	for(Parser& parser : parsers)
 	{
-		parser.run_b();
+		parser.run_b(operator_table);
 	}
 
 	ASTPrinter printer{};

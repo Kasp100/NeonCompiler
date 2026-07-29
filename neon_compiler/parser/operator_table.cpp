@@ -14,10 +14,7 @@ OperatorTable::OperatorTable()
 
 void OperatorTable::add(std::shared_ptr<const neon_compiler::parser::Operator> op)
 {
-	if(finalised)
-	{
-		throw std::logic_error{std::string{operator_table_error_messages::ADD_AFTER_FINALISE}};
-	}
+	check_not_finalised();
 
 	switch(op->get_fixity())
 	{
@@ -25,6 +22,34 @@ void OperatorTable::add(std::shared_ptr<const neon_compiler::parser::Operator> o
 		case Fixity::INFIX:   { infix_operators.push_back(op);    break; }
 		case Fixity::POSTFIX: { postfix_operators.push_back(op);  break; }
 		default: { throw std::invalid_argument{std::string{operator_table_error_messages::INVALID_FIXITY}}; }
+	}
+}
+
+void OperatorTable::add_all(std::shared_ptr<const OperatorTable> other)
+{
+	check_not_finalised();
+
+	for(std::shared_ptr<const Operator> op : other->prefix_operators)
+	{
+		prefix_operators.push_back(op);
+	}
+
+	for(std::shared_ptr<const Operator> op : other->infix_operators)
+	{
+		infix_operators.push_back(op);
+	}
+
+	for(std::shared_ptr<const Operator> op : other->postfix_operators)
+	{
+		postfix_operators.push_back(op);
+	}
+}
+
+void OperatorTable::check_not_finalised() const
+{
+	if(finalised)
+	{
+		throw std::logic_error{std::string{operator_table_error_messages::ADD_AFTER_FINALISE}};
 	}
 }
 
