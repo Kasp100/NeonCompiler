@@ -11,7 +11,7 @@ std::optional<CharWSourcePosition> CharReader::read_next()
 {
 	SourcePosition sp{offset_in_file, newlines_count, offset_in_line};
 
-	std::optional<unsigned char> c = convert(read_next_byte());
+	std::optional<char> c = convert(read_next_byte());
 	if(!c.has_value())
 	{
 		return std::nullopt;
@@ -48,17 +48,17 @@ int CharReader::read_next_byte()
 	return val;
 }
 
-std::optional<unsigned char> CharReader::convert(int val) const
+std::optional<char> CharReader::convert(int val) const
 {
 	if(val == EOF)
 	{
 		return std::nullopt;
 	}
 
-	return static_cast<unsigned char>(val);
+	return static_cast<char>(val);
 }
 
-unsigned char CharReader::peek(uint offset)
+char CharReader::peek(uint offset)
 {
 	try
 	{
@@ -79,9 +79,9 @@ unsigned char CharReader::peek(uint offset)
 	}
 }
 
-unsigned char CharReader::consume(uint offset)
+char CharReader::consume(uint offset)
 {
-	unsigned char result = peek(offset);
+	char result = peek(offset);
 	for(uint i = 0; i <= offset; ++i)
 	{
 		consume_from_buffer();
@@ -112,7 +112,7 @@ SourcePosition CharReader::get_source_position() const
 	return SourcePosition{offset_in_file, newlines_count, offset_in_line};
 }
 
-bool CharReader::consume_if_matches(unsigned char match)
+bool CharReader::consume_if_matches(char match)
 {
 	if(peek() == match)
 	{
@@ -124,16 +124,16 @@ bool CharReader::consume_if_matches(unsigned char match)
 
 bool CharReader::consume_all_if_next(const std::string& str)
 {
-	peek(static_cast<int>(str.size()) - 1); // Ensure enough characters in buffer for fast reading
+	peek(static_cast<uint>(str.size()) - 1); // Ensure enough characters in buffer for fast reading
 
 	for(size_t i = 0; i < str.size(); ++i)
 	{
-		if(peek(static_cast<int>(i)) != str[i])
+		if(peek(static_cast<uint>(i)) != str[i])
 		{
 			return false;
 		}
 	}
 
-	consume(static_cast<int>(str.size()) - 1);
+	consume(static_cast<uint>(str.size()) - 1);
 	return true;
 }

@@ -16,10 +16,11 @@ const Token& TokenReader::consume(uint offset)
 const Token& TokenReader::peek(uint offset) const
 {
 	uint peek_reading_index = reading_index + offset;
+	uint tokens_size = static_cast<uint>(tokens.size());
 
-	if(peek_reading_index >= tokens.size())
+	if(peek_reading_index >= tokens_size)
 	{
-		peek_reading_index = tokens.size() - 1;
+		peek_reading_index = tokens_size - 1;
 	}
 
 	return tokens[peek_reading_index];

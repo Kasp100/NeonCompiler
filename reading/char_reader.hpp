@@ -18,18 +18,18 @@ namespace reading
 			: std::runtime_error{msg} {}
 	};
 
-	/** A peek/consume reader for characters (`unsigned char`) from an `std::istream`.
+	/** A peek/consume reader for characters (`char`) from an `std::istream`.
 	 * It normalises newlines (`\r` and `\r\n` become `\n`), and keeps track of source positions. */
 	class CharReader
 	{
 	public:
 		explicit CharReader(std::unique_ptr<std::istream> input_stream);
 
-		unsigned char consume(uint offset = 0);
-		unsigned char peek(uint offset = 0);
+		char consume(uint offset = 0);
+		char peek(uint offset = 0);
 		bool end_of_file_reached();
 		SourcePosition get_source_position() const;
-		bool consume_if_matches(unsigned char match);
+		bool consume_if_matches(char match);
 		bool consume_all_if_next(const std::string& str);
 
 	private:
@@ -44,7 +44,7 @@ namespace reading
 
 		std::optional<CharWSourcePosition> read_next();
 		int read_next_byte();
-		std::optional<unsigned char> convert(int val) const;
+		std::optional<char> convert(int val) const;
 		void consume_from_buffer();
 	};
 

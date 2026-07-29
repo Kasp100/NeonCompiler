@@ -645,7 +645,7 @@ OperatorDeclaration Parser::parse_expected_operator_declaration()
 				{
 					int subord = std::stoi(std::string{reader.peek().get_lexeme().value()}, nullptr, 0);
 					if(subord < 0) { invalid_subord = true; }
-					subordination = subord;
+					subordination = static_cast<uint>(subord);
 				}
 				catch(...) { invalid_subord = true; }
 			}

@@ -33,7 +33,7 @@ std::vector<TokenisationError> Lexer::take_errors()
 
 void Lexer::skip_whitespace()
 {
-	unsigned char c;
+	char c;
 	bool whitespace;
 	do
 	{
@@ -87,7 +87,7 @@ void Lexer::read_and_tokenise_word()
 	reading::SourcePosition sp = reader->get_source_position();
 	std::string lexeme;
 
-	unsigned char c;
+	char c;
 	do
 	{
 		c = reader->consume();
@@ -154,7 +154,7 @@ void Lexer::read_and_tokenise_number()
 		}
 	}
 
-	unsigned char c = reader->peek();
+	char c = reader->peek();
 
 	while (is_digit(nn, c) || c == '_' || c == '.')
 	{
@@ -236,13 +236,13 @@ void Lexer::read_and_tokenise_character()
 	);
 }
 
-std::string Lexer::parse_text_literal(unsigned char opening_and_closing_char, bool merge_consecutive, std::string_view err_unterminated, std::string_view err_newline)
+std::string Lexer::parse_text_literal(char opening_and_closing_char, bool merge_consecutive, std::string_view err_unterminated, std::string_view err_newline)
 {
 	std::string str = "";
 
 	bool is_open = reader->consume() == opening_and_closing_char;
 
-	unsigned char c = 0;
+	char c = 0;
 	while(is_open)
 	{
 		if(reader->end_of_file_reached())
@@ -318,7 +318,7 @@ void Lexer::read_and_tokenise_symbol()
 	tokenise_custom_char(sp, custom_char);
 }
 
-void Lexer::tokenise_custom_char(reading::SourcePosition sp, unsigned char custom_char)
+void Lexer::tokenise_custom_char(reading::SourcePosition sp, char custom_char)
 {
 	std::string lexeme("");
 	lexeme += custom_char;
@@ -332,13 +332,13 @@ void Lexer::tokenise_custom_char(reading::SourcePosition sp, unsigned char custo
 	);
 }
 
-bool Lexer::is_alpha(unsigned char ch)
+bool Lexer::is_alpha(char ch)
 {
 	return (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z');
 }
 
 
-bool Lexer::is_digit(NumberNotation nn, unsigned char ch)
+bool Lexer::is_digit(NumberNotation nn, char ch)
 {
 	if(ch == '0' || ch == '1') { return true; }
 
@@ -353,12 +353,12 @@ bool Lexer::is_digit(NumberNotation nn, unsigned char ch)
 	}
 }
 
-bool Lexer::is_space(unsigned char ch)
+bool Lexer::is_space(char ch)
 {
 	return ch == ' ' || ch == '\t' || ch == '\n';
 }
 
-std::optional<unsigned char> Lexer::convert_escaped(unsigned char ch)
+std::optional<char> Lexer::convert_escaped(char ch)
 {
 	switch (ch)
 	{
@@ -373,7 +373,7 @@ std::optional<unsigned char> Lexer::convert_escaped(unsigned char ch)
 	}
 }
 
-std::optional<neon_compiler::TokenType> Lexer::convert_single_char_token(unsigned char ch)
+std::optional<neon_compiler::TokenType> Lexer::convert_single_char_token(char ch)
 {
 	switch (ch)
 	{

@@ -64,14 +64,14 @@ private:
 	void read_and_tokenise_number();
 	void read_and_tokenise_string();
 	void read_and_tokenise_character();
-	std::string parse_text_literal(unsigned char opening_and_closing_char, bool merge_consecutive, std::string_view err_unterminated, std::string_view err_newline);
+	std::string parse_text_literal(char opening_and_closing_char, bool merge_consecutive, std::string_view err_unterminated, std::string_view err_newline);
 	void read_and_tokenise_symbol();
-	void tokenise_custom_char(reading::SourcePosition sp, unsigned char custom_char);
-	static bool is_alpha(unsigned char ch);
-	static bool is_digit(NumberNotation nn, unsigned char ch);
-	static bool is_space(unsigned char ch);
-	static std::optional<unsigned char> convert_escaped(unsigned char ch);
-	static std::optional<neon_compiler::TokenType> convert_single_char_token(unsigned char ch);
+	void tokenise_custom_char(reading::SourcePosition sp, char custom_char);
+	static bool is_alpha(char ch);
+	static bool is_digit(NumberNotation nn, char ch);
+	static bool is_space(char ch);
+	static std::optional<char> convert_escaped(char ch);
+	static std::optional<neon_compiler::TokenType> convert_single_char_token(char ch);
 };
 
 }

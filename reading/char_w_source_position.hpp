@@ -8,7 +8,7 @@ namespace reading
 
 struct CharWSourcePosition
 {
-	unsigned char c;
+	char c;
 	SourcePosition sp;
 };
 
