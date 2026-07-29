@@ -86,19 +86,19 @@ class Parser
 public:
 	explicit Parser
     (
-		std::shared_ptr<logging::Logger> logger,
-        std::span<const neon_compiler::Token> tokens,
-        std::shared_ptr<neon_compiler::analysis::AnalysisReporter> analysis_reporter,
-		std::shared_ptr<neon_compiler::ast::nodes::Root> root_node,
-        std::string_view file,
-		std::shared_ptr<OperatorMap> operator_map
+		std::shared_ptr<logging::Logger> init_logger,
+        std::span<const neon_compiler::Token> init_tokens,
+        std::shared_ptr<neon_compiler::analysis::AnalysisReporter> init_analysis_reporter,
+		std::shared_ptr<neon_compiler::ast::nodes::Root> init_root_node,
+        std::string_view init_file,
+		std::shared_ptr<OperatorMap> init_operator_map
     ) :
-		logger{logger},
-		reader{tokens},
-		analysis_reporter{analysis_reporter},
-		root_node{root_node},
-		file{file},
-		operator_map{operator_map}
+		logger{init_logger},
+		reader{init_tokens},
+		analysis_reporter{init_analysis_reporter},
+		root_node{init_root_node},
+		file{init_file},
+		operator_map{init_operator_map}
 	{}
 
 	/** Should be run first in the parsing phase to register package declaration and parse operator modules. */

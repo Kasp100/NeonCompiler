@@ -17,8 +17,8 @@ struct DiscardExpression : Statement
 	/** The expression which will be evaluated, discarding the result. Typically done with `void` calls. */
 	std::unique_ptr<Expression> expression;
 
-	DiscardExpression(std::unique_ptr<Expression> expression)
-		: expression(std::move(expression)) {}
+	DiscardExpression(std::unique_ptr<Expression> init_expression)
+		: expression(std::move(init_expression)) {}
 
 	void accept(ASTVisitor& visitor) const override
 	{
@@ -56,8 +56,8 @@ struct Return : Statement
 	/** Optional return value. `nullptr` means void is returned. */
 	std::unique_ptr<Expression> value;
 
-	Return(std::unique_ptr<Expression> value)
-		: value(std::move(value)) {}
+	Return(std::unique_ptr<Expression> init_value)
+		: value(std::move(init_value)) {}
 
 	void accept(ASTVisitor& visitor) const override
 	{
@@ -72,11 +72,11 @@ struct Assignment : Expression
 
 	Assignment
 	(
-		std::unique_ptr<Expression> target,
-		std::unique_ptr<Expression> value
+		std::unique_ptr<Expression> init_target,
+		std::unique_ptr<Expression> init_value
 	) :
-		target(std::move(target)),
-		value(std::move(value))
+		target(std::move(init_target)),
+		value(std::move(init_value))
 	{}
 
 	void accept(ASTVisitor& visitor) const override
@@ -98,13 +98,13 @@ struct ObjectFunctionCall : Expression
 
 	ObjectFunctionCall
 	(
-		std::unique_ptr<Expression> object,
-		std::string function_name,
-		std::vector<std::unique_ptr<Expression>> arguments
+		std::unique_ptr<Expression> init_object,
+		std::string init_function_name,
+		std::vector<std::unique_ptr<Expression>> init_arguments
 	) :
-		object(std::move(object)),
-		function_name(std::move(function_name)),
-		arguments(std::move(arguments))
+		object(std::move(init_object)),
+		function_name(std::move(init_function_name)),
+		arguments(std::move(init_arguments))
 	{}
 
 	void accept(ASTVisitor& visitor) const override
@@ -124,11 +124,11 @@ struct ObjectRead : Expression
 
 	ObjectRead
 	(
-		std::unique_ptr<Expression> object,
-		std::string reference_name
+		std::unique_ptr<Expression> init_object,
+		std::string init_reference_name
 	) :
-		object(std::move(object)),
-		reference_name(std::move(reference_name))
+		object(std::move(init_object)),
+		reference_name(std::move(init_reference_name))
 	{}
 
 	void accept(ASTVisitor& visitor) const override
@@ -149,11 +149,11 @@ struct FunctionCall : Expression
 
 	FunctionCall
 	(
-		std::string function_name,
-		std::vector<std::unique_ptr<Expression>> arguments
+		std::string init_function_name,
+		std::vector<std::unique_ptr<Expression>> init_arguments
 	) :
-		function_name(std::move(function_name)),
-		arguments(std::move(arguments))
+		function_name(std::move(init_function_name)),
+		arguments(std::move(init_arguments))
 	{}
 
 	void accept(ASTVisitor& visitor) const override
@@ -170,9 +170,9 @@ struct SimpleRead : Expression
 
 	SimpleRead
 	(
-		std::string reference_name
+		std::string init_reference_name
 	) :
-		reference_name(std::move(reference_name))
+		reference_name(std::move(init_reference_name))
 	{}
 
 	void accept(ASTVisitor& visitor) const override
@@ -207,8 +207,8 @@ struct LiteralNumberExpression : Expression
 {
 	std::string value;
 
-	LiteralNumberExpression(std::string value)
-		: value{std::move(value)}
+	LiteralNumberExpression(std::string init_value)
+		: value{std::move(init_value)}
 	{}
 
 	void accept(ASTVisitor& visitor) const override
@@ -221,8 +221,8 @@ struct LiteralStringExpression : Expression
 {
 	std::string value;
 
-	LiteralStringExpression(std::string value)
-		: value{std::move(value)}
+	LiteralStringExpression(std::string init_value)
+		: value{std::move(init_value)}
 	{}
 
 	void accept(ASTVisitor& visitor) const override
@@ -235,8 +235,8 @@ struct LiteralBooleanExpression : Expression
 {
 	bool value;
 
-	LiteralBooleanExpression(bool value)
-		: value{value}
+	LiteralBooleanExpression(bool init_value)
+		: value{init_value}
 	{}
 
 	void accept(ASTVisitor& visitor) const override
@@ -252,10 +252,10 @@ struct OperatorCallExpression : Expression
 
 	OperatorCallExpression
 	(
-		std::vector<std::unique_ptr<Expression>> arguments,
-		std::shared_ptr<const neon_compiler::parser::Operator> op
+		std::vector<std::unique_ptr<Expression>> init_arguments,
+		std::shared_ptr<const neon_compiler::parser::Operator> init_op
 	)
-		: arguments{std::move(arguments)}, op{op}
+		: arguments{std::move(init_arguments)}, op{init_op}
 	{}
 
 	void accept(ASTVisitor& visitor) const override

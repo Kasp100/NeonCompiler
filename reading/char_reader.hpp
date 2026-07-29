@@ -15,7 +15,7 @@ namespace reading
 	{
 	public:
 		explicit ReadException(const std::string& msg)
-			: std::runtime_error{msg} {}
+		: std::runtime_error{msg} {}
 	};
 
 	/** A peek/consume reader for characters (`char`) from an `std::istream`.

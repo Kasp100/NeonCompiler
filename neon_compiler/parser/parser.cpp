@@ -206,9 +206,9 @@ const std::vector<std::shared_ptr<const Operator>>* Parser::parse_use_statement(
 
 std::optional<neon_compiler::ast::Identifier> Parser::parse_identifier(AnalysisEntryType type, AnalysisSeverity severity)
 {
-	FuncReportToken func_report_token = [this] (AnalysisEntryType type, AnalysisSeverity severity, const Token& token, std::optional<std::string> info)
+	FuncReportToken func_report_token = [this] (AnalysisEntryType report_type, AnalysisSeverity report_severity, const Token& token, std::optional<std::string> info)
 	{
-		report_token(type, severity, token, info);
+		report_token(report_type, report_severity, token, info);
 	};
 
 	ExpressionParser expression_parser{logger, &reader, &func_report_token, nullptr};

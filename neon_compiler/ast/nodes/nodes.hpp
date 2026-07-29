@@ -93,8 +93,8 @@ struct ReferenceType : ASTNode
 	/** The name of the type */
 	std::string type;
 
-	ReferenceType(bool opt, MutabilityMode mutability, bool mut, std::string type)
-		: opt{opt}, mutability{mutability}, mut{mut}, type{std::move(type)} {}
+	ReferenceType(bool init_opt, MutabilityMode init_mutability, bool init_mut, std::string init_type)
+		: opt{init_opt}, mutability{init_mutability}, mut{init_mut}, type{std::move(init_type)} {}
 
 	void accept(ASTVisitor& visitor) const override
 	{
@@ -113,8 +113,8 @@ struct VariableDeclaration : ASTNode
 	/** Optional initialisation */
 	std::unique_ptr<Expression> initialisation;
 
-	VariableDeclaration(bool var, ReferenceType reference_type, std::string reference_name, std::unique_ptr<Expression> initialisation = nullptr)
-		: var{var}, reference_type{reference_type}, reference_name{std::move(reference_name)}, initialisation{std::move(initialisation)} {}
+	VariableDeclaration(bool init_var, ReferenceType init_reference_type, std::string init_reference_name, std::unique_ptr<Expression> init_initialisation = nullptr)
+	: var{init_var}, reference_type{init_reference_type}, reference_name{std::move(init_reference_name)}, initialisation{std::move(init_initialisation)} {}
 
 	void accept(ASTVisitor& visitor) const override
 	{
@@ -131,8 +131,8 @@ struct CodeBlock : ASTNode
 {
 	std::vector<std::unique_ptr<Statement>> statements;
 
-	CodeBlock(std::vector<std::unique_ptr<Statement>> statements)
-		: statements{std::move(statements)} {}
+	CodeBlock(std::vector<std::unique_ptr<Statement>> init_statements)
+	: statements{std::move(init_statements)} {}
 
 	void accept(ASTVisitor& visitor) const override
 	{
@@ -150,8 +150,8 @@ struct Entrypoint : PackageMember
 	/** Code to run when called */
 	CodeBlock body;
 
-	Entrypoint(Access access, ParameterDeclarationList parameters, CodeBlock body)
-		: access{access}, parameters{std::move(parameters)}, body{std::move(body)} {}
+	Entrypoint(Access init_access, ParameterDeclarationList init_parameters, CodeBlock init_body)
+	: access{init_access}, parameters{std::move(init_parameters)}, body{std::move(init_body)} {}
 
 	void accept(ASTVisitor& visitor) const override
 	{
@@ -273,8 +273,8 @@ struct TokenPattern
 	/** The optional lexeme that needs to match */
 	std::optional<std::string> lexeme;
 	
-	TokenPattern(neon_compiler::TokenType token_type, std::optional<std::string> lexeme = std::nullopt)
-	: token_type{token_type}, lexeme{std::move(lexeme)} {}
+	TokenPattern(neon_compiler::TokenType init_token_type, std::optional<std::string> init_lexeme = std::nullopt)
+	: token_type{init_token_type}, lexeme{std::move(init_lexeme)} {}
 };
 
 struct OperatorSyntaxParameter
@@ -282,8 +282,8 @@ struct OperatorSyntaxParameter
 	/** Name of the parameter */
 	std::string name;
 	
-	OperatorSyntaxParameter(std::string name)
-	: name{std::move(name)} {}
+	OperatorSyntaxParameter(std::string init_name)
+	: name{std::move(init_name)} {}
 };
 
 struct OperatorFunctionParameter
@@ -291,8 +291,8 @@ struct OperatorFunctionParameter
 	/** Parameter */
 	neon_compiler::ast::nodes::VariableDeclaration parameter;
 	
-	OperatorFunctionParameter(neon_compiler::ast::nodes::VariableDeclaration& parameter)
-	: parameter{std::move(parameter)} {}
+	OperatorFunctionParameter(neon_compiler::ast::nodes::VariableDeclaration& init_parameter)
+	: parameter{std::move(init_parameter)} {}
 };
 
 using OperatorSyntaxPatternElement = std::variant<TokenPattern, OperatorSyntaxParameter>;
@@ -312,15 +312,15 @@ struct OperatorDeclaration : ASTNode
 
 	OperatorDeclaration
 	(
-		std::vector<OperatorSyntaxPatternElement> pattern,
-		uint subordination,
-		OperatorAssociativity associativity,
-		BuiltinOperatorKind builtin_operator_kind
+		std::vector<OperatorSyntaxPatternElement> init_pattern,
+		uint init_subordination,
+		OperatorAssociativity init_associativity,
+		BuiltinOperatorKind init_builtin_operator_kind
 	) :
-		pattern{std::move(pattern)},
-		subordination{subordination},
-		associativity{associativity},
-		builtin_operator_kind{builtin_operator_kind}
+		pattern{std::move(init_pattern)},
+		subordination{init_subordination},
+		associativity{init_associativity},
+		builtin_operator_kind{init_builtin_operator_kind}
 	{}
 
 	void accept(ASTVisitor& visitor) const override
@@ -338,8 +338,8 @@ struct OperatorFunction : ASTNode
 	/** Function body */
 	CodeBlock body;
 
-	OperatorFunction(ReferenceType return_type,	std::vector<OperatorFunctionPatternElement> pattern, CodeBlock body)
-	: return_type{return_type}, pattern{std::move(pattern)}, body{std::move(body)} {}
+	OperatorFunction(ReferenceType init_return_type,	std::vector<OperatorFunctionPatternElement> init_pattern, CodeBlock init_body)
+	: return_type{init_return_type}, pattern{std::move(init_pattern)}, body{std::move(init_body)} {}
 
 	void accept(ASTVisitor& visitor) const override
 	{
@@ -356,8 +356,8 @@ struct OperatorModule : PackageMember
 	/** Operator functions */
 	std::vector<OperatorFunction> functions;
 
-	OperatorModule(Access access, std::vector<OperatorDeclaration> operators, std::vector<OperatorFunction> functions)
-		: access{access}, operators{std::move(operators)}, functions{std::move(functions)} {}
+	OperatorModule(Access init_access, std::vector<OperatorDeclaration> init_operators, std::vector<OperatorFunction> init_functions)
+		: access{init_access}, operators{std::move(init_operators)}, functions{std::move(init_functions)} {}
 
 	void accept(ASTVisitor& visitor) const override
 	{

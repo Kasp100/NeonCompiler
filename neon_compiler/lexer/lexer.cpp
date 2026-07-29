@@ -2,8 +2,8 @@
 
 using namespace neon_compiler::lexer;
 
-Lexer::Lexer(std::unique_ptr<reading::CharReader> reader)
-	: reader{move(reader)}, tokens{}, errors{} {}
+Lexer::Lexer(std::unique_ptr<reading::CharReader> init_reader)
+	: reader{move(init_reader)}, tokens{}, errors{} {}
 
 void Lexer::run()
 {

@@ -49,7 +49,7 @@ enum class NumberNotation
 class Lexer
 {
 public:
-	explicit Lexer(std::unique_ptr<reading::CharReader> reader);
+	explicit Lexer(std::unique_ptr<reading::CharReader> init_reader);
 	void run();
 	std::vector<Token> take_tokens();
 	std::vector<TokenisationError> take_errors();

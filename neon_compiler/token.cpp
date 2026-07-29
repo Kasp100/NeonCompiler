@@ -2,8 +2,8 @@
 
 using namespace neon_compiler;
 
-Token::Token(TokenType type, reading::SourcePosition source_position, uint length, std::optional<std::string> lexeme)
-	: type{type}, source_position{source_position}, length{length}, lexeme{lexeme} {}
+Token::Token(TokenType init_type, reading::SourcePosition init_source_position, uint init_length, std::optional<std::string> init_lexeme)
+	: type{init_type}, source_position{init_source_position}, length{init_length}, lexeme{init_lexeme} {}
 
 TokenType Token::get_type() const
 {

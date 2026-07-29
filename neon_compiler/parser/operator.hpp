@@ -27,14 +27,14 @@ enum class Fixity
 	INVALID
 };
 
-using FuncParseExpressionWCursor = std::function<uint(uint peek_offset, uint max_subordination)>;
+using FuncParseExpressionWCursor = std::function<uint(uint peek_offset, uint expression_max_subordination)>;
 
 using PeekCursor = uint*;
 
 class Operator
 {
 public:
-	explicit Operator(const neon_compiler::ast::nodes::OperatorDeclaration* declaration);
+	explicit Operator(const neon_compiler::ast::nodes::OperatorDeclaration* init_declaration);
 
 	const neon_compiler::ast::nodes::OperatorDeclaration* get_declaration() const;
 	Fixity get_fixity() const;

@@ -87,10 +87,10 @@ class Token
 public:
 	explicit Token
 	(
-		TokenType type,
-		reading::SourcePosition source_position,
-		uint length,
-		std::optional<std::string> lexeme = std::nullopt
+		TokenType init_type,
+		reading::SourcePosition init_source_position,
+		uint init_length,
+		std::optional<std::string> init_lexeme = std::nullopt
 	);
 
 	TokenType get_type() const;

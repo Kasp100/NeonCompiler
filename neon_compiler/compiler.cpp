@@ -20,8 +20,8 @@ using namespace neon_compiler::ast::nodes;
 using namespace neon_compiler::lexer;
 using namespace neon_compiler::parser;
 
-Compiler::Compiler(std::shared_ptr<Logger> logger)
-	: logger{logger}
+Compiler::Compiler(std::shared_ptr<Logger> init_logger)
+	: logger{init_logger}
 {
 	root_node = std::make_shared<Root>();
 	operator_map = std::make_shared<OperatorMap>();

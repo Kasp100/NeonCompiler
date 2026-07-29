@@ -10,7 +10,7 @@ namespace neon_compiler
 	class TokenReader
 	{
 	public:
-		explicit TokenReader(std::span<const neon_compiler::Token> tokens);
+		explicit TokenReader(std::span<const neon_compiler::Token> init_tokens);
 
 		const neon_compiler::Token& consume(uint offset = 0);
 		const neon_compiler::Token& peek(uint offset = 0) const;

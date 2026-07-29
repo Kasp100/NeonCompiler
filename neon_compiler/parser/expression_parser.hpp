@@ -25,8 +25,8 @@ using FuncReportToken = std::function
 <
 	void
 	(
-		neon_compiler::analysis::AnalysisEntryType type,
-		neon_compiler::analysis::AnalysisSeverity severity,
+		neon_compiler::analysis::AnalysisEntryType report_type,
+		neon_compiler::analysis::AnalysisSeverity report_severity,
 		const neon_compiler::Token& token,
 		std::optional<std::string> info
 	)
@@ -37,12 +37,12 @@ class ExpressionParser
 public:
 	explicit ExpressionParser
 	(
-		std::shared_ptr<logging::Logger> logger,
-		neon_compiler::TokenReader* reader,
-		FuncReportToken* func_report_token,
-		neon_compiler::parser::OperatorTable* operator_table
+		std::shared_ptr<logging::Logger> init_logger,
+		neon_compiler::TokenReader* init_reader,
+		FuncReportToken* init_func_report_token,
+		neon_compiler::parser::OperatorTable* init_operator_table
 	)
-	: logger{logger}, reader{reader}, func_report_token{func_report_token}, operator_table{operator_table} {}
+	: logger{init_logger}, reader{init_reader}, func_report_token{init_func_report_token}, operator_table{init_operator_table} {}
 
 	std::optional<neon_compiler::ast::Identifier> parse_identifier
 	(
