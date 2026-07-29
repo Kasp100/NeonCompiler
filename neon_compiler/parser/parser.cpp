@@ -145,6 +145,8 @@ std::string Parser::append_ast(std::unique_ptr<PackageMember> node, const std::s
 	root_node->file_package_members[std::string{file}].push_back(full_identifier);
 	root_node->package_members[full_identifier] = std::move(node);
 
+	logger->info("Appended to AST: " + full_identifier);
+
 	return full_identifier;
 }
 
