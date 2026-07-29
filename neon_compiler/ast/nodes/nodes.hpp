@@ -72,7 +72,7 @@ struct Access
 	AccessType type;
 	/** Empty unless `type == AccessType::EXCLUSIVE`.
 	 * Represents the set of package member patterns that determine who can use. */
-	std::vector<PackageMemberPattern> patterns;
+	std::vector<PackageMemberPattern> patterns{};
 };
 
 enum class MutabilityMode
