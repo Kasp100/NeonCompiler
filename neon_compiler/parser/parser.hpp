@@ -21,52 +21,73 @@ namespace neon_compiler::parser
 namespace error_messages
 {
 	constexpr std::string_view UNEXPECTED_END_OF_FILE =
-		"Unexpected end of file: a terminating token is missing. "
-		"Statements are terminated with `;` and blocks with `}`.";
+		"Unexpected end of file. A terminating token is missing. Statements end with `;`, and blocks end with `}`.";
+
 	constexpr std::string_view MISSING_PACKAGE_DECLARATION =
-		"Expected a package declaration. Example: `pkg main::example;`";
+		"Expected a package declaration (e.g., `pkg main::example;`).";
+
 	constexpr std::string_view MISSING_IDENTIFIER =
-		"Expected an identifier. Keywords or other tokens cannot be used here.";
+		"Expected an identifier. Keywords and other tokens are not valid identifiers.";
+
 	constexpr std::string_view PROTECTED_PACKAGE_MEMBER =
-		"Keyword `protected` cannot be used for package members (e.g., classes), only for type members.";
+		"`protected` is only valid for type members, not package members.";
+
 	constexpr std::string_view INVALID_FILE_LEVEL_TOKEN =
-		"Invalid file level token. See documentation.";
+		"Invalid token at file scope. See the language documentation.";
+
 	constexpr std::string_view INVALID_IMPORT_STATEMENT =
-		"Expected a package member reference (e.g. `my_package::my_class`) in import statement.";
+		"Expected a package member reference (e.g., `my_package::my_class`) in the import statement.";
+
 	constexpr std::string_view INVALID_DECLARATION_NAME =
-		"Invalid name for this declaration. Keywords or other tokens cannot be used here.";
+		"Invalid declaration name. Keywords and other tokens are not valid names.";
+
 	constexpr std::string_view INVALID_REFERENCE_TYPE =
-		"Expected a reference type and type name, e.g. `opt shared mut:array<int> arr`.";
+		"Expected a reference type followed by a name (e.g., `opt shared mut:array<int> arr`).";
+
 	constexpr std::string_view INVALID_VARIABLE_DECLARATION =
-		"Expected a variable declaration, e.g. `var int age`.";
+		"Expected a variable declaration (e.g., `var int age`).";
+
 	constexpr std::string_view INVALID_PARAMETER_DECLARATION =
-		"Expected a parameter declaration, e.g. `shared mut:array<int> arr`. Terminate with `)` and separate parameter declarations with `,`.";
+		"Expected a parameter declaration (e.g., `shared mut:array<int> arr`). Separate parameters with `,` and end the parameter list with `)`.";
+
 	constexpr std::string_view MISSING_SEMICOLON =
-		"Missing a semicolon.";
+		"Expected `;`.";
+
 	constexpr std::string_view MISSING_SEMICOLON_OR_FAILED_TO_PARSE_EXPRESSION =
-		"Missing a semicolon or failed to parse expression.";
+		"Expected `;` or a valid expression. The required operator module may not be active in this scope.";
+
 	constexpr std::string_view MISSING_CODE_BLOCK =
-		"Expected a code block, starting with `{` and ending with `}`.";
+		"Expected a code block enclosed in `{}`.";
+
 	constexpr std::string_view MISSING_SECOND_PACKAGE_MEMBER_PATTERN =
-		"Expected a second package member pattern here.";
+		"Expected a second package member pattern.";
+
 	constexpr std::string_view MISSING_PACKAGE_MEMBER_PATTERNS =
-		"Expected package member patterns, starting with `{` and ending with `}`.";
+		"Expected one or more package member patterns enclosed in `{}`.";
+
 	constexpr std::string_view INVALID_PACKAGE_MEMBER_PATTERN__EXPECTED_CLOSING_BRACKET =
-		"Invalid package member pattern, expected `}`.";
+		"Invalid package member pattern. Expected `}`.";
+
 	constexpr std::string_view INVALID_PACKAGE_MEMBER_PATTERN__EXPECTED_PKG =
-		"Invalid package member pattern, expected `pkg` after `shallow` or `deep`.";
+		"Invalid package member pattern. Expected `pkg` after `shallow` or `deep`.";
+
 	constexpr std::string_view INVALID_PACKAGE_MEMBER_PATTERN_PART__EXPECTED_CLOSING_BRACKET =
-		"Expected the parameter declaration to end here with `)`.";
+		"Expected `)` to end the parameter declaration.";
+
 	constexpr std::string_view INVALID_OPERATOR_PARAMETER =
-		"Invalid operator parameter - operator parameters have a name but no type in the operator declaration.";
+		"Invalid operator parameter. Operator parameters consist of a name only and do not specify a type.";
+
 	constexpr std::string_view INVALID_SUBORDINATION =
-		"Invalid subordination; must be a natural number. 0 is the lowest subordination / highest precedence.";
+		"Invalid subordination. Expected a non-negative integer, where `0` represents the highest precedence.";
+
 	constexpr std::string_view INVALID_ASSOCIATIVITY =
-		"Invalid associativity; must be `left` or `right`, or not defined.";
+		"Invalid associativity. Expected `left`, `right`, or no associativity.";
+
 	constexpr std::string_view INVALID_OPERATOR_PROPERTY =
-		"Invalid operator property. Only `subordination` (defines precedence) and `associativity` are supported.";
+		"Invalid operator property. Supported properties are `subordination` (precedence) and `associativity`.";
+
 	constexpr std::string_view INVALID_USE_STATEMENT_ARGUMENT =
-		"Invalid `use` statement; requires a reference to an operator module.";
+		"Invalid `use` statement. Expected a reference to an operator module.";
 }
 
 namespace error_recovery

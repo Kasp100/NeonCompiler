@@ -8,19 +8,19 @@
 
 namespace neon_compiler::parser
 {
-
 namespace expression_error_messages
 {
 	constexpr std::string_view INVALID_EXPRESSION =
-		"Invalid expression; see documentation about expressions.";
+		"Invalid expression. The required operator module may not be active in this scope.";
+
 	constexpr std::string_view INVALID_PARENTHESISED_EXPRESSION__EXPECTED_CLOSING_BRACKET =
-		"Invalid parenthesised expression; expected closing bracket `)`.";
+		"Invalid parenthesised expression. Expected `)` to close the expression. The required operator module may not be active in this scope.";
+
 	constexpr std::string_view INVALID_ARGUMENT_EXPRESSION =
-		"Invalid argument expression - expected the argument to terminate here with `,` or `)`. "
-		"The expression may be invalid or the required operator module may not be active here. "
-		"(See documentation about operator modules.)";
+		"Invalid argument expression. Expected `,` or `)` after the argument. The required operator module may not be active in this scope.";
+
 	constexpr std::string_view UNEXPECTED_END_OF_FILE_IN_ARGUMENT_LIST =
-		"Unexpected end of file in argument list; a closing bracket `)` is missing.";
+		"Unexpected end of file in argument list. Expected `)`.";
 }
 
 using FuncReportToken = std::function
