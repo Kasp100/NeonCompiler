@@ -31,7 +31,25 @@ namespace builtin_operators
     inline const std::shared_ptr<const parser::Operator> MEMBER_ACCESS_DOT =
 		std::make_shared<const parser::Operator>(&MEMBER_ACCESS_DOT_DECLARATION);
 
-	inline const std::vector<std::shared_ptr<const neon_compiler::parser::Operator>> LIST{MEMBER_ACCESS_DOT};
+	inline const std::vector<neon_compiler::ast::nodes::OperatorSyntaxPatternElement> ASSIGNMENT_PATTERN
+	{
+		neon_compiler::ast::nodes::OperatorSyntaxParameter{"lhs"},
+		neon_compiler::ast::nodes::TokenPattern{neon_compiler::TokenType::EQUALS_OR_ASSIGN},
+		neon_compiler::ast::nodes::OperatorSyntaxParameter{"rhs"}
+	};
+
+	inline const neon_compiler::ast::nodes::OperatorDeclaration ASSIGNMENT_DECLARATION
+	{
+		ASSIGNMENT_PATTERN,
+		0,
+		neon_compiler::ast::nodes::OperatorAssociativity::RIGHT,
+		neon_compiler::ast::nodes::BuiltinOperatorKind::ASSIGNMENT
+	};
+
+    inline const std::shared_ptr<const parser::Operator> ASSIGNMENT =
+		std::make_shared<const parser::Operator>(&ASSIGNMENT_DECLARATION);
+
+	inline const std::vector<std::shared_ptr<const neon_compiler::parser::Operator>> LIST{MEMBER_ACCESS_DOT, ASSIGNMENT};
 }
 
 namespace operator_table_error_messages

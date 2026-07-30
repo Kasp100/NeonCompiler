@@ -263,7 +263,8 @@ enum class OperatorAssociativity
 enum class BuiltinOperatorKind
 {
 	NOT_BUILT_IN,
-	MEMBER_ACCESS
+	MEMBER_ACCESS,
+	ASSIGNMENT
 };
 
 struct TokenPattern

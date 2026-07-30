@@ -270,7 +270,9 @@ std::unique_ptr<Expression> ExpressionParser::parse_operator_call_expression
 	std::unique_ptr<Expression> first_argument
 )
 {
-	if(op->get_declaration()->builtin_operator_kind == BuiltinOperatorKind::MEMBER_ACCESS)
+	const OperatorDeclaration* declaration = op->get_declaration();
+
+	if(declaration->builtin_operator_kind == BuiltinOperatorKind::MEMBER_ACCESS)
 	{
 		return parse_member_access_dot_expression(peek_cursor, std::move(first_argument));
 	}
@@ -280,8 +282,6 @@ std::unique_ptr<Expression> ExpressionParser::parse_operator_call_expression
 	bool first_argument_passed{first_argument};
 
 	if(first_argument_passed) { arguments.push_back(std::move(first_argument)); }
-
-	const neon_compiler::ast::nodes::OperatorDeclaration* declaration = op->get_declaration();
 	const std::vector<OperatorSyntaxPatternElement>& pattern = declaration->pattern;
 
 	for(std::size_t i = (first_argument_passed ? 1 : 0); i < pattern.size(); ++i)
@@ -305,6 +305,12 @@ std::unique_ptr<Expression> ExpressionParser::parse_operator_call_expression
 		}
 
 		arguments.push_back(std::move(argument));
+	}
+
+	if(declaration->builtin_operator_kind == BuiltinOperatorKind::ASSIGNMENT)
+	{
+		// The dot operator must be declared so arguments[0] and arguments[1] always has a value here.
+		return std::make_unique<Assignment>(std::move(arguments[0]), std::move(arguments[1]));
 	}
 
 	return std::make_unique<OperatorCallExpression>(std::move(arguments), op);

@@ -147,14 +147,29 @@ void ASTPrinter::visit(const nodes::Return& node)
 
 void ASTPrinter::visit(const nodes::Assignment& node)
 {
+	print_prefix();
+	print("assignment");
+	print_line();
 
+	incr_depth();
+
+	node.target->accept(*this);
+
+	print_prefix();
+	print("new value:");
+	print_line();
+	incr_depth();
+	node.value->accept(*this);
+	decr_depth();
+
+	decr_depth();
 }
 
 void ASTPrinter::visit(const nodes::ObjectFunctionCall& node)
 {
 	print_prefix();
-	print("object function call - function name: ");
-	print(node.function_name);
+	print("object function call - member name: ");
+	print(node.member_name);
 	print_line();
 
 	incr_depth();
@@ -169,8 +184,8 @@ void ASTPrinter::visit(const nodes::ObjectFunctionCall& node)
 void ASTPrinter::visit(const nodes::ObjectRead& node)
 {
 	print_prefix();
-	print("object read - reference name: ");
-	print(node.reference_name);
+	print("object read - member name: ");
+	print(node.member_name);
 	print_line();
 	
 	incr_depth();
