@@ -239,20 +239,22 @@ std::vector<std::unique_ptr<Expression>> ExpressionParser::parse_argument_expres
 	{
 		argument_expressions.push_back(std::move(parse_expression(peek_cursor)));
 
-		if(peek_w_peek_cursor(peek_cursor).get_type() == TokenType::BRACKET_ROUND_CLOSE)
+		TokenType token_type = peek_w_peek_cursor(peek_cursor).get_type();
+
+		while(!reader->end_of_file_reached() && token_type != TokenType::COMMA)
 		{
-			return argument_expressions;
+			if(token_type == TokenType::BRACKET_ROUND_CLOSE)
+			{
+				return argument_expressions;
+			}
+
+			consume_w_peek_cursor_and_report(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, peek_cursor,
+				std::string{expression_error_messages::INVALID_ARGUMENT_EXPRESSION});
+
+			token_type = peek_w_peek_cursor(peek_cursor).get_type();
 		}
 
-		if(peek_w_peek_cursor(peek_cursor).get_type() != TokenType::COMMA)
-		{
-			consume_w_peek_cursor_and_report(AnalysisEntryType::SEPARATOR, AnalysisSeverity::ERROR, peek_cursor,
-				std::string{expression_error_messages::INVALID_ARGUMENT_LIST__EXPECTED_COMMA_OR_CLOSING_BRACKET});
-		}
-		else
-		{
-			consume_w_peek_cursor_and_report(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, peek_cursor);
-		}
+		consume_w_peek_cursor_and_report(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, peek_cursor);
 	}
 
 	consume_w_peek_cursor_and_report(AnalysisEntryType::SEPARATOR, AnalysisSeverity::ERROR, peek_cursor,
