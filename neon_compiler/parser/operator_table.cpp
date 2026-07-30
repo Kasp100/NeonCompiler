@@ -7,11 +7,6 @@ using namespace neon_compiler;
 using namespace neon_compiler::parser;
 using namespace neon_compiler::ast::nodes;
 
-OperatorTable::OperatorTable()
-{
-	add(builtin_operators::DOT);
-}
-
 void OperatorTable::add(std::shared_ptr<const neon_compiler::parser::Operator> op)
 {
 	check_not_finalised();
@@ -70,6 +65,7 @@ std::shared_ptr<const Operator> OperatorTable::match_infix
 	const FuncParseExpressionWCursor& func_parse_expression_w_cursor
 )
 {
+	std::shared_ptr<const Operator> builtin_operator_match = match(builtin_operators::BUILTIN_OPERATORS, reader, peek_cursor, func_parse_expression_w_cursor, true);
 	return match(infix_operators, reader, peek_cursor, func_parse_expression_w_cursor, true);
 }
 
@@ -107,7 +103,7 @@ void OperatorTable::sort_operator_list(std::vector<std::shared_ptr<const Operato
 
 std::shared_ptr<const Operator> OperatorTable::match
 (
-	std::vector<std::shared_ptr<const Operator>>& operators,
+	const std::vector<std::shared_ptr<const Operator>>& operators,
 	const TokenReader& reader,
 	PeekCursor peek_cursor,
 	const FuncParseExpressionWCursor& func_parse_expression_w_cursor,

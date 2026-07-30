@@ -13,10 +13,10 @@ namespace neon_compiler::parser
 
 namespace builtin_operators
 {
-	inline const std::vector<neon_compiler::ast::nodes::OperatorSyntaxPatternElement> DOT_PATTERN
+	inline const std::vector<neon_compiler::ast::nodes::OperatorSyntaxPatternElement> MEMBER_ACCESS_DOT_PATTERN
 	{
 		neon_compiler::ast::nodes::OperatorSyntaxParameter{"lhs"},
-		neon_compiler::ast::nodes::TokenPattern{neon_compiler::TokenType::DOT},
+		neon_compiler::ast::nodes::TokenPattern{neon_compiler::TokenType::MEMBER_ACCESS_DOT},
 		neon_compiler::ast::nodes::OperatorSyntaxParameter{"rhs"}
 	};
 
@@ -28,8 +28,10 @@ namespace builtin_operators
 		neon_compiler::ast::nodes::BuiltinOperatorKind::MEMBER_ACCESS
 	};
 
-    inline const std::shared_ptr<const parser::Operator> DOT =
-		std::make_shared<const parser::Operator>(&DOT_DECLARATION);
+    inline const std::shared_ptr<const parser::Operator> MEMBER_ACCESS_DOT =
+		std::make_shared<const parser::Operator>(&MEMBER_ACCESS_DOT_DECLARATION);
+
+	inline const std::vector<std::shared_ptr<const neon_compiler::parser::Operator>> BUILTIN_OPERATORS{};
 }
 
 namespace operator_table_error_messages
@@ -43,7 +45,6 @@ namespace operator_table_error_messages
 class OperatorTable
 {
 public:
-	explicit OperatorTable();
 	void add(std::shared_ptr<const neon_compiler::parser::Operator> op);
 	void add_all(std::shared_ptr<const OperatorTable> other);
 
@@ -77,7 +78,7 @@ private:
 
 	std::shared_ptr<const neon_compiler::parser::Operator> match
 	(
-		std::vector<std::shared_ptr<const neon_compiler::parser::Operator>>& operators,
+		const std::vector<std::shared_ptr<const neon_compiler::parser::Operator>>& operators,
 		const neon_compiler::TokenReader& reader,
 		PeekCursor peek_cursor,
 		const FuncParseExpressionWCursor& func_parse_expression_w_cursor,

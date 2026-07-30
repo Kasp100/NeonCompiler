@@ -272,7 +272,7 @@ std::unique_ptr<Expression> ExpressionParser::parse_operator_call_expression
 {
 	if(op->get_declaration()->builtin_operator_kind == BuiltinOperatorKind::MEMBER_ACCESS)
 	{
-		return parse_dot_expression(peek_cursor, std::move(first_argument));
+		return parse_member_access_dot_expression(peek_cursor, std::move(first_argument));
 	}
 
 	std::vector<std::unique_ptr<Expression>> arguments;
@@ -310,13 +310,13 @@ std::unique_ptr<Expression> ExpressionParser::parse_operator_call_expression
 	return std::make_unique<OperatorCallExpression>(std::move(arguments), op);
 }
 
-std::unique_ptr<Expression> ExpressionParser::parse_dot_expression
+std::unique_ptr<Expression> ExpressionParser::parse_member_access_dot_expression
 (
 	PeekCursor peek_cursor,
 	std::unique_ptr<Expression> first_argument
 )
 {
-	// Consume dot
+	// Consume `.`
 	consume_w_peek_cursor_and_report(AnalysisEntryType::OPERATOR, AnalysisSeverity::INFO, peek_cursor);
 
 	// The dot operator must be declared so first_argument always has a value here.

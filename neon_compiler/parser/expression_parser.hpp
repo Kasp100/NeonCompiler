@@ -79,7 +79,7 @@ private:
 		std::shared_ptr<const neon_compiler::parser::Operator> op,
 		std::unique_ptr<neon_compiler::ast::nodes::Expression> first_argument = nullptr
 	);
-	std::unique_ptr<neon_compiler::ast::nodes::Expression> parse_dot_expression
+	std::unique_ptr<neon_compiler::ast::nodes::Expression> parse_member_access_dot_expression
 	(
 		PeekCursor peek_cursor,
 		std::unique_ptr<neon_compiler::ast::nodes::Expression> first_argument
