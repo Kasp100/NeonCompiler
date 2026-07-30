@@ -31,7 +31,7 @@ namespace builtin_operators
     inline const std::shared_ptr<const parser::Operator> MEMBER_ACCESS_DOT =
 		std::make_shared<const parser::Operator>(&MEMBER_ACCESS_DOT_DECLARATION);
 
-	inline const std::vector<std::shared_ptr<const neon_compiler::parser::Operator>> BUILTIN_OPERATORS{};
+	inline const std::vector<std::shared_ptr<const neon_compiler::parser::Operator>> LIST{MEMBER_ACCESS_DOT};
 }
 
 namespace operator_table_error_messages

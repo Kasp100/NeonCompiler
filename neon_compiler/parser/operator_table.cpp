@@ -65,7 +65,14 @@ std::shared_ptr<const Operator> OperatorTable::match_infix
 	const FuncParseExpressionWCursor& func_parse_expression_w_cursor
 )
 {
-	std::shared_ptr<const Operator> builtin_operator_match = match(builtin_operators::BUILTIN_OPERATORS, reader, peek_cursor, func_parse_expression_w_cursor, true);
+	std::shared_ptr<const Operator> builtin_operator_match =
+		match(builtin_operators::LIST, reader, peek_cursor, func_parse_expression_w_cursor, true);
+
+	if(builtin_operator_match)
+	{
+		return builtin_operator_match;
+	}
+
 	return match(infix_operators, reader, peek_cursor, func_parse_expression_w_cursor, true);
 }
 
