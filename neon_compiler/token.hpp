@@ -27,6 +27,7 @@ enum class TokenType
 	COMMA,
 	COLON,
 	DOT,
+	EQUALS_OR_ASSIGN,
 	PACKAGE,
 	IMPORT,
 	STATIC_ACCESSOR,

@@ -387,6 +387,7 @@ std::optional<neon_compiler::TokenType> Lexer::convert_single_char_token(char ch
 		case ',': return TokenType::COMMA;
 		case ':': return TokenType::COLON;
         case '.': return TokenType::DOT;
+        case '=': return TokenType::EQUALS_OR_ASSIGN;
 		default: return std::nullopt;
 	}
 }
