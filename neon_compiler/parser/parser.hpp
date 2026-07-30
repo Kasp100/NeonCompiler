@@ -59,8 +59,6 @@ namespace error_messages
 		"Expected the parameter declaration to end here with `)`.";
 	constexpr std::string_view INVALID_OPERATOR_PARAMETER =
 		"Invalid operator parameter - operator parameters have a name but no type in the operator declaration.";
-	constexpr std::string_view INVALID_NAMED_EXPRESSION =
-		"Invalid named expression. The dot operator expects a named expression after the dot, e.g. `method_name()` or `field_name`.";
 	constexpr std::string_view INVALID_SUBORDINATION =
 		"Invalid subordination; must be a natural number. 0 is the lowest subordination / highest precedence.";
 	constexpr std::string_view INVALID_ASSOCIATIVITY =
