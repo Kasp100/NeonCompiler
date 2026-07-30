@@ -20,9 +20,9 @@ namespace builtin_operators
 		neon_compiler::ast::nodes::OperatorSyntaxParameter{"rhs"}
 	};
 
-	inline const neon_compiler::ast::nodes::OperatorDeclaration DOT_DECLARATION
+	inline const neon_compiler::ast::nodes::OperatorDeclaration MEMBER_ACCESS_DOT_DECLARATION
 	{
-		DOT_PATTERN,
+		MEMBER_ACCESS_DOT_PATTERN,
 		0,
 		neon_compiler::ast::nodes::OperatorAssociativity::LEFT,
 		neon_compiler::ast::nodes::BuiltinOperatorKind::MEMBER_ACCESS
