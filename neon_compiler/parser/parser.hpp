@@ -88,6 +88,9 @@ namespace error_messages
 
 	constexpr std::string_view INVALID_USE_STATEMENT_ARGUMENT =
 		"Invalid `use` statement. Expected a reference to an operator module.";
+
+	constexpr std::string_view INVALID_GENERIC_ARGUMENT =
+		"Invalid generic argument. Expected a number or boolean literal, or a type or constant reference.";
 }
 
 namespace error_recovery
@@ -128,6 +131,9 @@ public:
 
 	std::shared_ptr<neon_compiler::ast::nodes::Root> get_root_node() const;
 private:
+	static constexpr std::string_view VALUE_FALSE = "false";
+	static constexpr std::string_view VALUE_TRUE = "true";
+
 	std::shared_ptr<logging::Logger> logger;
 	neon_compiler::TokenReader reader;
 	std::shared_ptr<neon_compiler::analysis::AnalysisReporter> analysis_reporter;
@@ -199,6 +205,7 @@ private:
 	neon_compiler::ast::nodes::ParameterDeclarationList parse_parameter_declarations();
 	std::optional<neon_compiler::ast::nodes::VariableDeclaration> parse_variable_declaration(neon_compiler::ast::nodes::MutabilityMode default_mutability_mode);
 	std::optional<neon_compiler::ast::nodes::ReferenceType> parse_reference_type(neon_compiler::ast::nodes::MutabilityMode default_mutability_mode);
+	std::vector<neon_compiler::ast::nodes::GenericArgument> parse_generic_arguments();
 	neon_compiler::ast::nodes::CodeBlock parse_code_block_until_end(std::shared_ptr<OperatorTable> operator_table);
 	std::unique_ptr<neon_compiler::ast::nodes::Statement> parse_return_statement(neon_compiler::parser::OperatorTable* operator_table);
 	std::unique_ptr<neon_compiler::ast::nodes::Statement> parse_expected_discard_expression(neon_compiler::parser::OperatorTable* operator_table);

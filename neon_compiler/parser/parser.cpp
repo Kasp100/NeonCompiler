@@ -862,9 +862,10 @@ std::optional<VariableDeclaration> Parser::parse_variable_declaration(Mutability
 		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
 			std::string{error_messages::INVALID_VARIABLE_DECLARATION});
 
-		ReferenceType valid_ref_type{false, default_mutability_mode, false, std::string{error_recovery::PLACEHOLDER_NAME}};
+		const std::string name{error_recovery::PLACEHOLDER_NAME};
+		const ReferenceType valid_ref_type{false, default_mutability_mode, false, name, name};
 
-		return VariableDeclaration{var, valid_ref_type, ref_name};
+		return VariableDeclaration{var, std::move(valid_ref_type), std::move(ref_name)};
 	}
 	else
 	{
@@ -907,11 +908,18 @@ std::optional<ReferenceType> Parser::parse_reference_type(MutabilityMode default
 		if(reader.peek().get_type() == TokenType::COLON) { report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume()); }
 	}
 
-	if(reader.peek().get_type() == TokenType::IDENTIFIER)
+	const std::optional<neon_compiler::ast::Identifier> opt_type_id =
+		parse_identifier(AnalysisEntryType::REFERENCE, AnalysisSeverity::INFO);
+
+	if(opt_type_id.has_value())
 	{
-		report_token(AnalysisEntryType::REFERENCE, AnalysisSeverity::INFO, reader.peek());
-		std::string type_name{reader.consume().get_lexeme().value()};
-		return ReferenceType{opt, mm, mut, type_name};
+		const neon_compiler::ast::Identifier& type_id = opt_type_id.value();
+		const std::string type_id_str = type_id.to_string();
+		const std::string inferred_name = type_id.parts[type_id.parts.size() - 1];
+
+		std::vector<GenericArgument> generic_args = parse_generic_arguments();
+
+		return ReferenceType{opt, mm, mut, std::move(type_id_str), std::move(inferred_name), std::move(generic_args)};
 	}
 	else if(opt || mut || !implicit_mutability_mode)
 	{
@@ -924,6 +932,67 @@ std::optional<ReferenceType> Parser::parse_reference_type(MutabilityMode default
 	{
 		return std::nullopt;
 	}
+}
+
+std::vector<GenericArgument> Parser::parse_generic_arguments()
+{
+	std::vector<GenericArgument> args;
+
+	if(reader.peek().get_type() != TokenType::SMALLER_THAN)
+	{
+		return args;
+	}
+
+	report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
+
+	while(!reader.end_of_file_reached())
+	{
+		TokenType tt = reader.peek().get_type();
+
+		if(tt == TokenType::LITERAL_NUMBER)
+		{
+			const Token& token = reader.consume();
+			args.emplace_back(std::string{token.get_lexeme().value()});
+			report_token(AnalysisEntryType::LITERAL_NUMBER, AnalysisSeverity::INFO, token);
+		}
+		else if(tt == TokenType::BOOL_FALSE)
+		{
+			args.emplace_back(std::string{VALUE_FALSE});
+			report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
+		}
+		else if(tt == TokenType::BOOL_TRUE)
+		{
+			args.emplace_back(std::string{VALUE_TRUE});
+			report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
+		}
+		else if(tt == TokenType::IDENTIFIER)
+		{
+			const neon_compiler::ast::Identifier reference =
+				parse_identifier(AnalysisEntryType::REFERENCE, AnalysisSeverity::INFO).value();
+
+			args.emplace_back(reference.to_string(), true, parse_generic_arguments());
+		}
+
+		tt = reader.peek().get_type();
+
+		if(tt == TokenType::GREATER_THAN)
+		{
+			break;
+		}
+		else while(tt != TokenType::COMMA)
+		{
+			report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
+				std::string{error_messages::INVALID_GENERIC_ARGUMENT});
+
+			tt = reader.peek().get_type();
+		}
+
+		report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume()); // Consume `,`
+	}
+
+	report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume()); // Consume `>`
+
+	return args;
 }
 
 CodeBlock Parser::parse_code_block_until_end(std::shared_ptr<OperatorTable> operator_table)

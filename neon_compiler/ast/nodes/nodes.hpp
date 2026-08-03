@@ -82,6 +82,31 @@ enum class MutabilityMode
 	BORROW
 };
 
+enum class GenericParameterType
+{
+	TYPE,
+	NAT,
+	INT,
+	REAL,
+	BOOL
+};
+
+struct GenericParameter
+{
+	GenericParameterType type;
+	std::string reference_name;
+};
+
+struct GenericArgument
+{
+	/** A reference to a type/constant or a value from a literal */
+	std::string value;
+	/** Whether `value` is a reference to a type/constant */
+	bool is_reference{false};
+	/** If `value` is a reference to a type, these are the generic arguments associated with it */
+	std::vector<GenericArgument> nested_generic_arg{};
+};
+
 struct ReferenceType : ASTNode
 {
 	/** Whether the reference is optional */
@@ -92,9 +117,27 @@ struct ReferenceType : ASTNode
 	bool mut;
 	/** The name of the type */
 	std::string type;
+	/** Inferred name */
+	std::string inferred_name;
+	/** Generic arguments */
+	std::vector<GenericArgument> generic_arguments;
 
-	ReferenceType(bool init_opt, MutabilityMode init_mutability, bool init_mut, std::string init_type)
-		: opt{init_opt}, mutability{init_mutability}, mut{init_mut}, type{std::move(init_type)} {}
+	ReferenceType
+	(
+		bool init_opt,
+		MutabilityMode init_mutability,
+		bool init_mut,
+		std::string init_type,
+		std::string init_inferred_name = std::string{},
+		std::vector<GenericArgument> init_generic_arguments = std::vector<GenericArgument>{}
+	) :
+		opt{init_opt},
+		mutability{init_mutability},
+		mut{init_mut},
+		type{std::move(init_type)},
+		inferred_name{std::move(init_inferred_name)},
+		generic_arguments{std::move(init_generic_arguments)}
+	{}
 
 	void accept(ASTVisitor& visitor) const override
 	{
