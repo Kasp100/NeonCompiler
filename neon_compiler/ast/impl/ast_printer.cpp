@@ -314,7 +314,7 @@ void ASTPrinter::visit(const nodes::OperatorDeclaration& node)
 void ASTPrinter::visit(const nodes::OperatorFunction& node)
 {
 	print_prefix();
-	print("operator functon:");
+	print("operator function:");
 	print_line();
 
 	incr_depth();
