@@ -795,6 +795,135 @@ std::vector<OperatorFunctionPatternElement> Parser::parse_operator_function_patt
 	return pattern;
 }
 
+std::vector<GenericParameter> Parser::parse_generic_parameters()
+{
+	std::vector<GenericParameter> params;
+
+	if(reader.peek().get_type() != TokenType::SMALLER_THAN)
+	{
+		return params;
+	}
+
+	report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
+
+	while(!reader.end_of_file_reached())
+	{
+		TokenType tt = reader.peek().get_type();
+
+		std::string generic_param_type{error_recovery::PLACEHOLDER_TYPE};
+		std::string generic_param_name{error_recovery::PLACEHOLDER_NAME};
+
+		if(tt != TokenType::IDENTIFIER)
+		{
+			report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
+				std::string{error_messages::INVALID_GENERIC_PARAMETER_TYPE});
+		}
+		else
+		{
+			const Token& token = reader.consume();
+
+			generic_param_type = token.get_lexeme().value();
+
+			report_token(AnalysisEntryType::REFERENCE, AnalysisSeverity::INFO, token);
+		}
+
+		tt = reader.peek().get_type();
+
+		if(tt != TokenType::IDENTIFIER)
+		{
+			report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
+				std::string{error_messages::MISSING_IDENTIFIER});
+		}
+		else
+		{
+			const Token& token = reader.consume();
+
+			generic_param_name = token.get_lexeme().value();
+
+			report_token(AnalysisEntryType::DECLARATION, AnalysisSeverity::INFO, token);
+		}
+
+		std::vector<std::string> supertypes = parse_supertype_list();
+
+		tt = reader.peek().get_type();
+
+		params.emplace_back(std::move(generic_param_type), std::move(generic_param_name), std::move(supertypes));
+
+		if(tt == TokenType::GREATER_THAN)
+		{
+			break;
+		}
+		else while(tt != TokenType::COMMA && tt != TokenType::END_OF_FILE)
+		{
+			report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
+				std::string{error_messages::INVALID_GENERIC_PARAMETER_SEPARATOR});
+
+			tt = reader.peek().get_type();
+		}
+
+		report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume()); // Consume `,`
+	}
+
+	report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume()); // Consume `>`
+
+	return params;
+}
+
+std::vector<std::string> Parser::parse_supertype_list()
+{
+	std::vector<std::string> supertypes;
+
+	TokenType tt = reader.peek().get_type();
+
+	if(tt != TokenType::BRACKET_CURLY_OPEN)
+	{
+		return supertypes;
+	}
+
+	report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
+
+	tt = reader.peek().get_type();
+
+	while(!reader.end_of_file_reached())
+	{
+		if(tt == TokenType::BRACKET_CURLY_CLOSE)
+		{
+			break;
+		}
+
+		std::optional<neon_compiler::ast::Identifier> opt_id = parse_identifier(AnalysisEntryType::REFERENCE, AnalysisSeverity::INFO);
+
+		if(opt_id.has_value())
+		{
+			supertypes.push_back(opt_id.value().to_string());
+		}
+		
+		while(!reader.end_of_file_reached())
+		{
+			tt = reader.peek().get_type();
+
+			if(tt == TokenType::BRACKET_CURLY_CLOSE)
+			{
+				break;
+			}
+			else if(tt == TokenType::COMMA)
+			{
+				report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
+				break;
+			}
+
+			report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
+				std::string{error_messages::INVALID_SUPERTYPE_LIST_IDENTIFIER});
+		}
+
+		tt = reader.peek().get_type();
+	}
+	
+	report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume()); // Consume `}`
+
+	return supertypes;
+}
+
 ParameterDeclarationList Parser::parse_parameter_declarations()
 {
 	ParameterDeclarationList param_decl_list{};

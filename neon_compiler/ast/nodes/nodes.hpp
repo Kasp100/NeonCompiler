@@ -82,19 +82,11 @@ enum class MutabilityMode
 	BORROW
 };
 
-enum class GenericParameterType
-{
-	TYPE,
-	NAT,
-	INT,
-	REAL,
-	BOOL
-};
-
 struct GenericParameter
 {
-	GenericParameterType type;
+	std::string type;
 	std::string reference_name;
+	std::vector<std::string> supertypes;
 };
 
 struct GenericArgument

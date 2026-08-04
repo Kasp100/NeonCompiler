@@ -89,6 +89,15 @@ namespace error_messages
 
 	constexpr std::string_view INVALID_USE_STATEMENT_ARGUMENT =
 		"Invalid `use` statement. Expected a reference to an operator module.";
+
+	constexpr std::string_view INVALID_GENERIC_PARAMETER_TYPE =
+		"Invalid generic parameter. Expected a generic parameter type. See documentation about generics.";
+
+	constexpr std::string_view INVALID_GENERIC_PARAMETER_SEPARATOR =
+		"Invalid generic parameter. Expected `>` or `,`.";
+
+	constexpr std::string_view INVALID_SUPERTYPE_LIST_IDENTIFIER =
+		"Invalid supertype list. Expected a valid type identifier.";
 }
 
 namespace error_recovery
@@ -190,6 +199,8 @@ private:
 	neon_compiler::ast::nodes::OperatorFunction parse_expected_operator_function(std::shared_ptr<neon_compiler::parser::OperatorTable> operator_table);
 	std::vector<neon_compiler::ast::nodes::OperatorFunctionPatternElement> parse_operator_function_pattern();
 
+	std::vector<neon_compiler::ast::nodes::GenericParameter> parse_generic_parameters();
+	std::vector<std::string> parse_supertype_list();
 	neon_compiler::ast::nodes::ParameterDeclarationList parse_parameter_declarations();
 	std::optional<neon_compiler::ast::nodes::VariableDeclaration> parse_variable_declaration(neon_compiler::ast::nodes::MutabilityMode default_mutability_mode);
 	std::optional<neon_compiler::ast::nodes::ReferenceType> parse_reference_type(neon_compiler::ast::nodes::MutabilityMode default_mutability_mode);
