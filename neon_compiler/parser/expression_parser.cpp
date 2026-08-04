@@ -128,7 +128,7 @@ std::vector<GenericArgument> ExpressionParser::parse_generic_arguments(PeekCurso
 		{
 			break;
 		}
-		else while(tt != TokenType::COMMA)
+		else while(tt != TokenType::COMMA && tt != TokenType::END_OF_FILE)
 		{
 			consume_w_peek_cursor_and_report(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, peek_cursor,
 				std::string{expression_error_messages::INVALID_GENERIC_ARGUMENT});
