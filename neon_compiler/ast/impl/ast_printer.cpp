@@ -237,10 +237,32 @@ void ASTPrinter::visit(const nodes::FunctionCall& node)
 	print_line();
 
 	incr_depth();
+
+	if(node.generic_arguments.size() > 0)
+	{
+		print_prefix();
+		print("generic arguments: <");
+		bool first{true};
+		for(const GenericArgument& generic_arg : node.generic_arguments)
+		{
+			if(first) { first = false; } else { print(", "); }
+			print_generic_argument(generic_arg);
+		}
+		print(">");
+		print_line();
+	}
+
+	print_prefix();
+	print("arguments:");
+	print_line();
+
+	incr_depth();
 	for(const std::unique_ptr<Expression>& arg : node.arguments)
 	{
 		arg->accept(*this);
 	}
+	decr_depth();
+
 	decr_depth();
 }
 

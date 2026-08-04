@@ -21,6 +21,9 @@ namespace expression_error_messages
 
 	constexpr std::string_view UNEXPECTED_END_OF_FILE_IN_ARGUMENT_LIST =
 		"Unexpected end of file in argument list. Expected `)`.";
+
+	constexpr std::string_view INVALID_GENERIC_ARGUMENT =
+		"Invalid generic argument. Expected a number or boolean literal, or a type or constant reference.";
 }
 
 using FuncReportToken = std::function
@@ -52,8 +55,18 @@ public:
 		neon_compiler::analysis::AnalysisSeverity severity,
 		PeekCursor peek_cursor = nullptr
 	);
-	std::unique_ptr<neon_compiler::ast::nodes::Expression> parse_expression(PeekCursor peek_cursor = nullptr, uint max_subordination = INT_MAX);
+
+	std::vector<neon_compiler::ast::nodes::GenericArgument> parse_generic_arguments(PeekCursor peek_cursor = nullptr);
+
+	std::unique_ptr<neon_compiler::ast::nodes::Expression> parse_expression
+	(
+		PeekCursor peek_cursor = nullptr,
+		uint max_subordination = INT_MAX
+	);
 private:
+	static constexpr std::string_view VALUE_FALSE = "false";
+	static constexpr std::string_view VALUE_TRUE = "true";
+
 	std::shared_ptr<logging::Logger> logger;
 	neon_compiler::TokenReader* reader;
 	FuncReportToken* func_report_token;

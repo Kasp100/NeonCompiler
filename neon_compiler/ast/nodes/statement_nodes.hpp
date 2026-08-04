@@ -93,6 +93,8 @@ struct ObjectFunctionCall : Expression
 	std::unique_ptr<Expression> object;
 	/** Member function name */
 	std::string member_name;
+	/** Generic arguments */
+	std::vector<GenericArgument> generic_arguments;
 	/** Arguments */
 	std::vector<std::unique_ptr<Expression>> arguments;
 
@@ -100,10 +102,12 @@ struct ObjectFunctionCall : Expression
 	(
 		std::unique_ptr<Expression> init_object,
 		std::string init_member_name,
+		std::vector<GenericArgument> init_generic_arguments,
 		std::vector<std::unique_ptr<Expression>> init_arguments
 	) :
 		object(std::move(init_object)),
 		member_name(std::move(init_member_name)),
+		generic_arguments(std::move(init_generic_arguments)),
 		arguments(std::move(init_arguments))
 	{}
 
@@ -144,15 +148,19 @@ struct FunctionCall : Expression
 {
 	/** Function name */
 	std::string function_name;
+	/** Generic arguments */
+	std::vector<GenericArgument> generic_arguments;
 	/** Arguments */
 	std::vector<std::unique_ptr<Expression>> arguments;
 
 	FunctionCall
 	(
 		std::string init_function_name,
+		std::vector<GenericArgument> init_generic_arguments,
 		std::vector<std::unique_ptr<Expression>> init_arguments
 	) :
 		function_name(std::move(init_function_name)),
+		generic_arguments(std::move(init_generic_arguments)),
 		arguments(std::move(init_arguments))
 	{}
 

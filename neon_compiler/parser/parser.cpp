@@ -1,11 +1,28 @@
 #include "parser.hpp"
 
-#include "expression_parser.hpp"
-
 using namespace neon_compiler;
 using namespace neon_compiler::parser;
 using namespace neon_compiler::analysis;
 using namespace neon_compiler::ast::nodes;
+
+Parser::Parser
+(
+	std::shared_ptr<logging::Logger> init_logger,
+	std::span<const Token> init_tokens,
+	std::shared_ptr<AnalysisReporter> init_analysis_reporter,
+	std::shared_ptr<Root> init_root_node,
+	std::string_view init_file,
+	std::shared_ptr<OperatorMap> init_operator_map
+) :
+	logger{init_logger},
+	reader{init_tokens},
+	analysis_reporter{init_analysis_reporter},
+	root_node{init_root_node},
+	file{init_file},
+	operator_map{init_operator_map}
+{
+	
+}
 
 void Parser::run_a()
 {
@@ -204,15 +221,16 @@ const std::vector<std::shared_ptr<const Operator>>* Parser::parse_use_statement(
 	return &(*operator_map)[id_str];
 }
 
-std::optional<neon_compiler::ast::Identifier> Parser::parse_identifier(AnalysisEntryType type, AnalysisSeverity severity)
+std::optional<neon_compiler::ast::Identifier> Parser::parse_identifier(AnalysisEntryType id_type, AnalysisSeverity id_severity)
 {
-	FuncReportToken func_report_token = [this] (AnalysisEntryType report_type, AnalysisSeverity report_severity, const Token& token, std::optional<std::string> info)
+	FuncReportToken func_report_token = [this] (AnalysisEntryType type, AnalysisSeverity severity, const Token& token, std::optional<std::string> info)
 	{
-		report_token(report_type, report_severity, token, info);
+		report_token(type, severity, token, info);
 	};
 
 	ExpressionParser expression_parser{logger, &reader, &func_report_token, nullptr};
-	return expression_parser.parse_identifier(type, severity);
+
+	return expression_parser.parse_identifier(id_type, id_severity);
 }
 
 void Parser::parse_and_register_expected_package_declaration()
@@ -936,63 +954,14 @@ std::optional<ReferenceType> Parser::parse_reference_type(MutabilityMode default
 
 std::vector<GenericArgument> Parser::parse_generic_arguments()
 {
-	std::vector<GenericArgument> args;
-
-	if(reader.peek().get_type() != TokenType::SMALLER_THAN)
+	FuncReportToken func_report_token = [this] (AnalysisEntryType type, AnalysisSeverity severity, const Token& token, std::optional<std::string> info)
 	{
-		return args;
-	}
+		report_token(type, severity, token, info);
+	};
 
-	report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
+	ExpressionParser expression_parser{logger, &reader, &func_report_token, nullptr};
 
-	while(!reader.end_of_file_reached())
-	{
-		TokenType tt = reader.peek().get_type();
-
-		if(tt == TokenType::LITERAL_NUMBER)
-		{
-			const Token& token = reader.consume();
-			args.emplace_back(std::string{token.get_lexeme().value()});
-			report_token(AnalysisEntryType::LITERAL_NUMBER, AnalysisSeverity::INFO, token);
-		}
-		else if(tt == TokenType::BOOL_FALSE)
-		{
-			args.emplace_back(std::string{VALUE_FALSE});
-			report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
-		}
-		else if(tt == TokenType::BOOL_TRUE)
-		{
-			args.emplace_back(std::string{VALUE_TRUE});
-			report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
-		}
-		else if(tt == TokenType::IDENTIFIER)
-		{
-			const neon_compiler::ast::Identifier reference =
-				parse_identifier(AnalysisEntryType::REFERENCE, AnalysisSeverity::INFO).value();
-
-			args.emplace_back(reference.to_string(), true, parse_generic_arguments());
-		}
-
-		tt = reader.peek().get_type();
-
-		if(tt == TokenType::GREATER_THAN)
-		{
-			break;
-		}
-		else while(tt != TokenType::COMMA)
-		{
-			report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
-				std::string{error_messages::INVALID_GENERIC_ARGUMENT});
-
-			tt = reader.peek().get_type();
-		}
-
-		report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume()); // Consume `,`
-	}
-
-	report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume()); // Consume `>`
-
-	return args;
+	return expression_parser.parse_generic_arguments();
 }
 
 CodeBlock Parser::parse_code_block_until_end(std::shared_ptr<OperatorTable> operator_table)

@@ -84,6 +84,66 @@ std::optional<neon_compiler::ast::Identifier> ExpressionParser::parse_identifier
 	return id;
 }
 
+std::vector<GenericArgument> ExpressionParser::parse_generic_arguments(PeekCursor peek_cursor)
+{
+	std::vector<GenericArgument> args;
+
+	if(peek_w_peek_cursor(peek_cursor).get_type() != TokenType::SMALLER_THAN)
+	{
+		return args;
+	}
+
+	consume_w_peek_cursor_and_report(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, peek_cursor);
+
+	while(peek_w_peek_cursor(peek_cursor).get_type() != TokenType::END_OF_FILE)
+	{
+		TokenType tt = peek_w_peek_cursor(peek_cursor).get_type();
+
+		if(tt == TokenType::LITERAL_NUMBER)
+		{
+			const Token& token = consume_w_peek_cursor_and_report(AnalysisEntryType::LITERAL_NUMBER, AnalysisSeverity::INFO, peek_cursor);
+			args.emplace_back(std::string{token.get_lexeme().value()});
+		}
+		else if(tt == TokenType::BOOL_FALSE)
+		{
+			consume_w_peek_cursor_and_report(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, peek_cursor);
+			args.emplace_back(std::string{VALUE_FALSE});
+		}
+		else if(tt == TokenType::BOOL_TRUE)
+		{
+			consume_w_peek_cursor_and_report(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, peek_cursor);
+			args.emplace_back(std::string{VALUE_TRUE});
+		}
+		else if(tt == TokenType::IDENTIFIER)
+		{
+			const neon_compiler::ast::Identifier reference =
+				parse_identifier(AnalysisEntryType::REFERENCE, AnalysisSeverity::INFO, peek_cursor).value();
+
+			args.emplace_back(reference.to_string(), true, parse_generic_arguments(peek_cursor));
+		}
+
+		tt = peek_w_peek_cursor(peek_cursor).get_type();
+
+		if(tt == TokenType::GREATER_THAN)
+		{
+			break;
+		}
+		else while(tt != TokenType::COMMA)
+		{
+			consume_w_peek_cursor_and_report(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, peek_cursor,
+				std::string{expression_error_messages::INVALID_GENERIC_ARGUMENT});
+
+			tt = peek_w_peek_cursor(peek_cursor).get_type();
+		}
+
+		consume_w_peek_cursor_and_report(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, peek_cursor); // Consume `,`
+	}
+
+	consume_w_peek_cursor_and_report(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, peek_cursor); // Consume `>`
+
+	return args;
+}
+
 std::unique_ptr<Expression> ExpressionParser::parse_expression(PeekCursor peek_cursor, uint max_subordination)
 {
 	// Implements Pratt parsing, but with subordination instead of precedence
@@ -211,9 +271,18 @@ std::unique_ptr<Expression> ExpressionParser::parse_named_expression(PeekCursor 
 	// At this point, an identifier should be guaranteed.
 	neon_compiler::ast::Identifier id{parse_identifier(AnalysisEntryType::REFERENCE, AnalysisSeverity::INFO, peek_cursor).value()};
 
-	if(peek_w_peek_cursor(peek_cursor).get_type() != TokenType::BRACKET_ROUND_OPEN)
+	TokenType token_type = peek_w_peek_cursor(peek_cursor).get_type();
+
+	if(token_type != TokenType::BRACKET_ROUND_OPEN && token_type != TokenType::SMALLER_THAN)
 	{
 		return std::make_unique<SimpleRead>(id.to_string());
+	}
+
+	std::vector<GenericArgument> generic_args;
+
+	if(token_type == TokenType::SMALLER_THAN)
+	{
+		generic_args = parse_generic_arguments(peek_cursor);
 	}
 
 	consume_w_peek_cursor_and_report(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, peek_cursor);
@@ -228,7 +297,7 @@ std::unique_ptr<Expression> ExpressionParser::parse_named_expression(PeekCursor 
 	// Consume `)`
 	consume_w_peek_cursor_and_report(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, peek_cursor);
 
-	return std::make_unique<FunctionCall>(id.to_string(), std::move(argument_expressions));
+	return std::make_unique<FunctionCall>(id.to_string(), std::move(generic_args), std::move(argument_expressions));
 }
 
 std::vector<std::unique_ptr<Expression>> ExpressionParser::parse_argument_expressions(PeekCursor peek_cursor)
@@ -351,6 +420,13 @@ std::unique_ptr<Expression> ExpressionParser::parse_member_access_dot_expression
 			(
 				static_cast<FunctionCall*>(second_argument.release())
 			);
-		return std::make_unique<ObjectFunctionCall>(std::move(first_argument), call->function_name, std::move(call->arguments));
+
+		return std::make_unique<ObjectFunctionCall>
+		(
+			std::move(first_argument),
+			call->function_name,
+			std::move(call->generic_arguments),
+			std::move(call->arguments)
+		);
 	}
 }

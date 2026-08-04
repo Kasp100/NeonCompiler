@@ -5,6 +5,7 @@
 #include <vector>
 #include <optional>
 #include <string>
+#include "expression_parser.hpp"
 #include "operator_table.hpp"
 #include "../ast/nodes/nodes.hpp"
 #include "../ast/nodes/statement_nodes.hpp"
@@ -88,9 +89,6 @@ namespace error_messages
 
 	constexpr std::string_view INVALID_USE_STATEMENT_ARGUMENT =
 		"Invalid `use` statement. Expected a reference to an operator module.";
-
-	constexpr std::string_view INVALID_GENERIC_ARGUMENT =
-		"Invalid generic argument. Expected a number or boolean literal, or a type or constant reference.";
 }
 
 namespace error_recovery
@@ -107,21 +105,14 @@ class Parser
 {
 public:
 	explicit Parser
-    (
+	(
 		std::shared_ptr<logging::Logger> init_logger,
-        std::span<const neon_compiler::Token> init_tokens,
-        std::shared_ptr<neon_compiler::analysis::AnalysisReporter> init_analysis_reporter,
+		std::span<const neon_compiler::Token> init_tokens,
+		std::shared_ptr<neon_compiler::analysis::AnalysisReporter> init_analysis_reporter,
 		std::shared_ptr<neon_compiler::ast::nodes::Root> init_root_node,
-        std::string_view init_file,
+		std::string_view init_file,
 		std::shared_ptr<OperatorMap> init_operator_map
-    ) :
-		logger{init_logger},
-		reader{init_tokens},
-		analysis_reporter{init_analysis_reporter},
-		root_node{init_root_node},
-		file{init_file},
-		operator_map{init_operator_map}
-	{}
+	);
 
 	/** Should be run first in the parsing phase to register package declaration and parse operator modules. */
 	void run_a();
@@ -131,9 +122,6 @@ public:
 
 	std::shared_ptr<neon_compiler::ast::nodes::Root> get_root_node() const;
 private:
-	static constexpr std::string_view VALUE_FALSE = "false";
-	static constexpr std::string_view VALUE_TRUE = "true";
-
 	std::shared_ptr<logging::Logger> logger;
 	neon_compiler::TokenReader reader;
 	std::shared_ptr<neon_compiler::analysis::AnalysisReporter> analysis_reporter;
@@ -173,8 +161,8 @@ private:
 
 	std::optional<neon_compiler::ast::Identifier> parse_identifier
 	(
-		neon_compiler::analysis::AnalysisEntryType type,
-		neon_compiler::analysis::AnalysisSeverity severity
+		neon_compiler::analysis::AnalysisEntryType id_type,
+		neon_compiler::analysis::AnalysisSeverity id_severity
 	);
 	void parse_and_register_expected_package_declaration();
 	void parse_and_register_import_statement();
