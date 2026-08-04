@@ -824,7 +824,7 @@ ParameterDeclarationList Parser::parse_parameter_declarations()
 			continue;
 		}
 
-		param_decl_list.parameters.push_back(std::move(var_decl.value()));
+		param_decl_list.push_back(std::move(var_decl.value()));
 	}
 
 	return param_decl_list;

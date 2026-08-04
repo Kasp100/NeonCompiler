@@ -104,7 +104,7 @@ struct GenericArgument
 	/** Whether `value` is a reference to a type/constant */
 	bool is_reference{false};
 	/** If `value` is a reference to a type, these are the generic arguments associated with it */
-	std::vector<GenericArgument> nested_generic_arg{};
+	std::vector<GenericArgument> nested_generic_args{};
 };
 
 struct ReferenceType : ASTNode
@@ -165,10 +165,7 @@ struct VariableDeclaration : ASTNode
 	}
 };
 
-struct ParameterDeclarationList
-{
-	std::vector<VariableDeclaration> parameters;
-};
+using ParameterDeclarationList = std::vector<VariableDeclaration>;
 
 struct CodeBlock : ASTNode
 {

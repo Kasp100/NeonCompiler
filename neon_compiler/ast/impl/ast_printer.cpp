@@ -31,6 +31,25 @@ void ASTPrinter::visit(const nodes::Entrypoint& node)
 	print_line();
 
 	incr_depth();
+
+	print_prefix();
+	print("parameters:");
+	print_line();
+
+	incr_depth();
+	for(const VariableDeclaration& var_decl : node.parameters)
+	{
+		print_prefix();
+		var_decl.accept(*this);
+		print_line();
+	}
+	decr_depth();
+
+	print_prefix();
+	print("body:");
+	print_line();
+
+	incr_depth();
 	node.body.accept(*this);
 	decr_depth();
 }
@@ -42,7 +61,16 @@ void ASTPrinter::visit(const nodes::Type& node)
 
 void ASTPrinter::visit(const nodes::VariableDeclaration& node)
 {
+	if(node.var)
+	{
+		print("var ");
+	}
 
+	node.reference_type.accept(*this);
+
+	print(" ");
+
+	print(node.reference_name);
 }
 
 void ASTPrinter::visit(const nodes::Field& node)
@@ -62,9 +90,6 @@ void ASTPrinter::visit(const nodes::Constant& node)
 
 void ASTPrinter::visit(const nodes::ReferenceType& node)
 {
-	print_prefix();
-	print("reference type: ");
-
 	if(node.opt)
 	{
 		print("opt ");
@@ -93,7 +118,18 @@ void ASTPrinter::visit(const nodes::ReferenceType& node)
 
 	print(node.type);
 
-	print_line();
+	if(node.generic_arguments.size() == 0) { return; }
+
+	print("<");
+
+	bool first{true};
+	for(const GenericArgument& generic_arg : node.generic_arguments)
+	{
+		if(first) { first = false; } else { print(", "); }
+		print_generic_argument(generic_arg);
+	}
+
+	print(">");
 }
 
 void ASTPrinter::visit(const nodes::CodeBlock& node)
@@ -323,51 +359,46 @@ void ASTPrinter::visit(const nodes::OperatorFunction& node)
 	print("pattern:");
 	print_line();
 
-		incr_depth();
-		for(const OperatorFunctionPatternElement& elem : node.pattern)
+	incr_depth();
+	for(const OperatorFunctionPatternElement& elem : node.pattern)
+	{
+		print_prefix();
+		if(std::holds_alternative<OperatorFunctionParameter>(elem))
 		{
-			print_prefix();
-			if(std::holds_alternative<OperatorFunctionParameter>(elem))
-			{
-				const OperatorFunctionParameter& param = std::get<OperatorFunctionParameter>(elem);
-				
-				print("parameter:");
-				incr_depth();
-				param.parameter.accept(*this);
-				decr_depth();
-			}
-			else
-			{
-				const TokenPattern& tp = std::get<TokenPattern>(elem);
-
-				print("token - type: ");
-				print(std::to_string(static_cast<int>(tp.token_type)));
-
-				if(tp.lexeme.has_value())
-				{
-					print(", lexeme: ");
-					print(tp.lexeme.value());
-				}
-			}
-			print_line();
+			const OperatorFunctionParameter& param = std::get<OperatorFunctionParameter>(elem);
+			
+			print("parameter: ");
+			param.parameter.accept(*this);
 		}
-		decr_depth();
+		else
+		{
+			const TokenPattern& tp = std::get<TokenPattern>(elem);
+
+			print("token - type: ");
+			print(std::to_string(static_cast<int>(tp.token_type)));
+
+			if(tp.lexeme.has_value())
+			{
+				print(", lexeme: ");
+				print(tp.lexeme.value());
+			}
+		}
+		print_line();
+	}
+	decr_depth();
 
 	print_prefix();
-	print("return type:");
+	print("return type: ");
+	node.return_type.accept(*this);
 	print_line();
-
-		incr_depth();
-		node.return_type.accept(*this);
-		decr_depth();
 
 	print_prefix();
 	print("body:");
 	print_line();
 
-		incr_depth();
-		node.body.accept(*this);
-		decr_depth();
+	incr_depth();
+	node.body.accept(*this);
+	decr_depth();
 
 	decr_depth();
 }
@@ -535,4 +566,26 @@ void ASTPrinter::print_package_member_pattern(const nodes::PackageMemberPattern&
 		print("extends ");
 		print(pmp.supertype.value().to_string());
 	}
+}
+
+void ASTPrinter::print_generic_argument(const nodes::GenericArgument& generic_arg) const
+{
+	print(generic_arg.value);
+
+	if(generic_arg.nested_generic_args.size() == 0)
+	{
+		return;
+	}
+
+	print("<");
+
+	bool first{true};
+	for(const nodes::GenericArgument& element_generic_arg : generic_arg.nested_generic_args)
+	{
+		if(first) { first = false; } else { print(", "); }
+
+		print_generic_argument(element_generic_arg);
+	}
+
+	print(">");
 }
