@@ -14,9 +14,9 @@ constexpr std::size_t PATTERN_MIN_SIZE = 2;
 namespace operator_error_messages
 {
 	constexpr std::string_view TOO_FEW_PATTERN_ELEMENTS =
-		"Too few pattern elements; an operator must have at least one parameter and one token, e.g. `(v)!`.";
+		"Too few pattern elements. An operator must have at least one parameter and one token, e.g. `__!`.";
 	constexpr std::string_view OUTSIDE_PARAMETER_MISSING =
-		"Outside parameter missing; an operator must have at least one parameter at the outside, e.g. `-(v)`";
+		"Outside parameter missing. An operator must have at least one parameter at the outside, e.g. `-__`.";
 }
 
 enum class Fixity
