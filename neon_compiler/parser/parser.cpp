@@ -20,9 +20,7 @@ Parser::Parser
 	root_node{init_root_node},
 	file{init_file},
 	operator_map{init_operator_map}
-{
-	
-}
+{}
 
 void Parser::run_a()
 {
@@ -83,6 +81,7 @@ void Parser::run_b(std::shared_ptr<OperatorTable> operator_table)
 		}
 
 		const Access access = parse_access(); // `private` if no keyword is present.
+
 		parse_expected_package_member(access, operator_table);
 	}
 }
@@ -617,6 +616,7 @@ OperatorDeclaration Parser::parse_expected_operator_declaration()
 	OperatorAssociativity associativity{OperatorAssociativity::NONE};
 
 	TokenType token_type = reader.peek().get_type();
+
 	while(!reader.end_of_file_reached() && token_type != TokenType::BRACKET_CURLY_OPEN)
 	{
 		if(token_type == TokenType::BRACKET_ROUND_OPEN)
@@ -737,6 +737,7 @@ OperatorFunction Parser::parse_expected_operator_function(std::shared_ptr<Operat
 	
 	std::vector<OperatorFunctionPatternElement> pattern = parse_operator_function_pattern();
 	report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume()); // Consume the `{`
+
 	CodeBlock body = parse_code_block_until_end(operator_table);
 
 	return OperatorFunction
@@ -815,10 +816,10 @@ std::vector<GenericParameter> Parser::parse_generic_parameters()
 
 	while(!reader.end_of_file_reached())
 	{
-		TokenType tt = reader.peek().get_type();
-
 		std::string generic_param_type{error_recovery::PLACEHOLDER_TYPE};
 		std::string generic_param_name{error_recovery::PLACEHOLDER_NAME};
+
+		TokenType tt = reader.peek().get_type();
 
 		if(tt != TokenType::IDENTIFIER)
 		{
