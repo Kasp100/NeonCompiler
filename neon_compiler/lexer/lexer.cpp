@@ -304,18 +304,25 @@ void Lexer::read_and_tokenise_symbol()
 		return;
 	}
 
+	if(reader->consume_if_matches('_'))
 	{
-		std::optional<TokenType> optTokenType = convert_single_char_token(reader->peek());
-		if(optTokenType.has_value())
+		uint length{1};
+		while(reader->consume_if_matches('_')) { ++length; }
+		tokens.emplace_back(TokenType::EMPTY_PARAMETER, sp, length, std::nullopt);
+		return;
+	}
+
+	{
+		std::optional<TokenType> opt_token_type = convert_single_char_token(reader->peek());
+		if(opt_token_type.has_value())
 		{
 			reader->consume();
-			tokens.emplace_back(optTokenType.value(), sp, 1, std::nullopt);
+			tokens.emplace_back(opt_token_type.value(), sp, 1, std::nullopt);
 			return;
 		}
 	}
 
-	char custom_char = reader->consume();
-	tokenise_custom_char(sp, custom_char);
+	tokenise_custom_char(sp, reader->consume());
 }
 
 void Lexer::tokenise_custom_char(reading::SourcePosition sp, char custom_char)
