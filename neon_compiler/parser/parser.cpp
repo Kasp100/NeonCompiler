@@ -537,7 +537,14 @@ void Parser::parse_expected_operator_module_a_and_register(const Access& access)
 
 	for(OperatorDeclaration* op_decl : operator_declaration_ptrs)
 	{
+		try
+	{
 		operator_list.push_back(std::make_shared<Operator>(op_decl));
+		}
+		catch(const std::invalid_argument& e)
+		{
+			logger->info("Invalid operator: " + std::string{e.what()});
+		}
 	}
 
 	(*operator_map)[full_id] = std::move(operator_list);
