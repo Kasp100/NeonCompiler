@@ -75,9 +75,6 @@ namespace error_messages
 	constexpr std::string_view INVALID_PACKAGE_MEMBER_PATTERN_PART__EXPECTED_CLOSING_BRACKET =
 		"Expected `)` to end the parameter declaration.";
 
-	constexpr std::string_view INVALID_OPERATOR_PARAMETER =
-		"Invalid operator parameter. Operator parameters consist of a name only and do not specify a type.";
-
 	constexpr std::string_view INVALID_SUBORDINATION =
 		"Invalid subordination. Expected a non-negative integer, where `0` represents the highest precedence.";
 

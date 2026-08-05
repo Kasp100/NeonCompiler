@@ -310,14 +310,7 @@ struct TokenPattern
 	: token_type{init_token_type}, lexeme{std::move(init_lexeme)} {}
 };
 
-struct OperatorSyntaxParameter
-{
-	/** Name of the parameter */
-	std::string name;
-	
-	OperatorSyntaxParameter(std::string init_name)
-	: name{std::move(init_name)} {}
-};
+struct OperatorSyntaxParameter{};
 
 struct OperatorFunctionParameter
 {

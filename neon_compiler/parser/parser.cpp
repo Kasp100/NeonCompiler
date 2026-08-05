@@ -619,21 +619,10 @@ OperatorDeclaration Parser::parse_expected_operator_declaration()
 
 	while(!reader.end_of_file_reached() && token_type != TokenType::BRACKET_CURLY_OPEN)
 	{
-		if(token_type == TokenType::BRACKET_ROUND_OPEN)
-		{
-			report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
-
-			if(reader.peek(0).get_type() != TokenType::IDENTIFIER || reader.peek(1).get_type() != TokenType::BRACKET_ROUND_CLOSE)
+		if(token_type == TokenType::EMPTY_PARAMETER)
 			{
-				report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(), std::string{error_messages::INVALID_OPERATOR_PARAMETER});
-			}
-			else
-			{
-				report_token(AnalysisEntryType::DECLARATION, AnalysisSeverity::INFO, reader.peek(), std::string{reader.peek().get_lexeme().value()});
-				pattern.push_back(OperatorSyntaxParameter{std::string{reader.consume().get_lexeme().value()}});
-
-				report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
-			}
+			report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
+			pattern.push_back(OperatorSyntaxParameter{});
 		}
 		else
 		{

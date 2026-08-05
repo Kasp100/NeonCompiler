@@ -15,9 +15,9 @@ namespace builtin_operators
 {
 	inline const std::vector<neon_compiler::ast::nodes::OperatorSyntaxPatternElement> MEMBER_ACCESS_DOT_PATTERN
 	{
-		neon_compiler::ast::nodes::OperatorSyntaxParameter{"lhs"},
+		neon_compiler::ast::nodes::OperatorSyntaxParameter{},
 		neon_compiler::ast::nodes::TokenPattern{neon_compiler::TokenType::MEMBER_ACCESS_DOT},
-		neon_compiler::ast::nodes::OperatorSyntaxParameter{"rhs"}
+		neon_compiler::ast::nodes::OperatorSyntaxParameter{}
 	};
 
 	inline const neon_compiler::ast::nodes::OperatorDeclaration MEMBER_ACCESS_DOT_DECLARATION
@@ -33,9 +33,9 @@ namespace builtin_operators
 
 	inline const std::vector<neon_compiler::ast::nodes::OperatorSyntaxPatternElement> ASSIGNMENT_PATTERN
 	{
-		neon_compiler::ast::nodes::OperatorSyntaxParameter{"lhs"},
+		neon_compiler::ast::nodes::OperatorSyntaxParameter{},
 		neon_compiler::ast::nodes::TokenPattern{neon_compiler::TokenType::EQUALS_OR_ASSIGN},
-		neon_compiler::ast::nodes::OperatorSyntaxParameter{"rhs"}
+		neon_compiler::ast::nodes::OperatorSyntaxParameter{}
 	};
 
 	inline const neon_compiler::ast::nodes::OperatorDeclaration ASSIGNMENT_DECLARATION

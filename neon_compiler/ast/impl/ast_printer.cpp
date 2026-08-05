@@ -348,8 +348,7 @@ void ASTPrinter::visit(const nodes::OperatorDeclaration& node)
 		{
 			const OperatorSyntaxParameter& param = std::get<OperatorSyntaxParameter>(elem);
 
-			print("parameter - name: ");
-			print(param.name);
+			print("parameter");
 		}
 		else
 		{
@@ -490,8 +489,7 @@ void ASTPrinter::visit(const nodes::OperatorCallExpression& node)
 		{
 			const OperatorSyntaxParameter& param = std::get<OperatorSyntaxParameter>(elem);
 			print_prefix();
-			print("param ");
-			print(param.name);
+			print("parameter");
 			print_line();
 
 			incr_depth();
