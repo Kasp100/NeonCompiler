@@ -50,6 +50,7 @@ private:
 	void print_access(const nodes::Access& a) const;
 	void print_package_member_pattern(const nodes::PackageMemberPattern& pmp) const;
 	void print_generic_argument(const nodes::GenericArgument& generic_arg) const;
+	void print_generic_parameters(const std::vector<nodes::GenericParameter>& generic_params) const;
 };
 
 }

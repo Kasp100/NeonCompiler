@@ -537,8 +537,8 @@ void Parser::parse_expected_operator_module_a_and_register(const Access& access)
 	for(OperatorDeclaration* op_decl : operator_declaration_ptrs)
 	{
 		try
-	{
-		operator_list.push_back(std::make_shared<Operator>(op_decl));
+		{
+			operator_list.push_back(std::make_shared<Operator>(op_decl));
 		}
 		catch(const std::invalid_argument& e)
 		{
@@ -620,7 +620,7 @@ OperatorDeclaration Parser::parse_expected_operator_declaration()
 	while(!reader.end_of_file_reached() && token_type != TokenType::BRACKET_CURLY_OPEN)
 	{
 		if(token_type == TokenType::EMPTY_PARAMETER)
-			{
+		{
 			report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
 			pattern.push_back(OperatorSyntaxParameter{});
 		}
@@ -716,25 +716,31 @@ OperatorDeclaration Parser::parse_expected_operator_declaration()
 
 OperatorFunction Parser::parse_expected_operator_function(std::shared_ptr<OperatorTable> operator_table)
 {
-	std::optional<ReferenceType> return_value = parse_reference_type(MutabilityMode::BORROW);
+	std::optional<ReferenceType> opt_return_value = parse_reference_type(MutabilityMode::BORROW);
 
-	if(!return_value.has_value())
+	if(!opt_return_value.has_value())
 	{
 		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
 			std::string{error_messages::INVALID_REFERENCE_TYPE});
 	}
-	
+
+	ReferenceType return_value = opt_return_value.value_or
+	(
+		ReferenceType{false, MutabilityMode::BORROW, false, std::string{error_recovery::PLACEHOLDER_TYPE}}
+	);
+
 	std::vector<OperatorFunctionPatternElement> pattern = parse_operator_function_pattern();
+
+	std::vector<GenericParameter> generic_parameters = parse_generic_parameters();
+
 	report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume()); // Consume the `{`
 
 	CodeBlock body = parse_code_block_until_end(operator_table);
 
 	return OperatorFunction
 	{
-		return_value.value_or
-		(
-			ReferenceType{false, MutabilityMode::BORROW, false, std::string{error_recovery::PLACEHOLDER_TYPE}}
-		),
+		std::move(return_value),
+		std::move(generic_parameters),
 		std::move(pattern),
 		std::move(body)
 	};
@@ -744,22 +750,23 @@ std::vector<OperatorFunctionPatternElement> Parser::parse_operator_function_patt
 {
 	std::vector<OperatorFunctionPatternElement> pattern;
 
-	while(!reader.end_of_file_reached() && reader.peek().get_type() != TokenType::BRACKET_CURLY_OPEN)
+	TokenType token_type = reader.peek().get_type();
+
+	while(!reader.end_of_file_reached() && token_type != TokenType::BRACKET_CURLY_OPEN)
 	{
-		if(reader.peek().get_type() == TokenType::BRACKET_ROUND_OPEN)
+		if(token_type == TokenType::BRACKET_ROUND_OPEN)
 		{
 			report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
 
-			VariableDeclaration parameter = parse_variable_declaration(MutabilityMode::BORROW)
-				.value_or
-				(
-					VariableDeclaration
-					{
-						false,
-						ReferenceType{false, MutabilityMode::BORROW, false, std::string{error_recovery::PLACEHOLDER_TYPE}},
-						std::string{error_recovery::PLACEHOLDER_NAME}
-					}
-				);
+			VariableDeclaration parameter = parse_variable_declaration(MutabilityMode::BORROW).value_or
+			(
+				VariableDeclaration
+				{
+					false,
+					ReferenceType{false, MutabilityMode::BORROW, false, std::string{error_recovery::PLACEHOLDER_TYPE}},
+					std::string{error_recovery::PLACEHOLDER_NAME}
+				}
+			);
 
 			pattern.push_back(OperatorFunctionParameter{parameter});
 
@@ -775,6 +782,24 @@ std::vector<OperatorFunctionPatternElement> Parser::parse_operator_function_patt
 		}
 		else
 		{
+			if(token_type == TokenType::SMALLER_THAN)
+			{
+				// Break if these are the generic parameters
+				uint peek_offset{1};
+				token_type = reader.peek(peek_offset).get_type();
+
+				while(token_type != TokenType::END_OF_FILE && token_type != TokenType::GREATER_THAN)
+				{
+					++peek_offset;
+					token_type = reader.peek(peek_offset).get_type();
+				}
+
+				++peek_offset;
+				token_type = reader.peek(peek_offset).get_type();
+
+				if(token_type == TokenType::BRACKET_CURLY_OPEN) { break; }
+			}
+
 			const Token& token = reader.peek();
 			std::optional<std::string> lexeme{std::nullopt};
 
@@ -787,6 +812,8 @@ std::vector<OperatorFunctionPatternElement> Parser::parse_operator_function_patt
 	
 			pattern.push_back(TokenPattern{token.get_type(), lexeme});
 		}
+
+		token_type = reader.peek().get_type();
 	}
 
 	return pattern;

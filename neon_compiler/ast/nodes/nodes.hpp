@@ -359,13 +359,25 @@ struct OperatorFunction : ASTNode
 {
 	/** The reference type this pure function returns. */
 	ReferenceType return_type;
+	/** Generic parameters */
+	std::vector<GenericParameter> generic_parameters;
 	/** Pattern to match, must use a valid operator */
 	std::vector<OperatorFunctionPatternElement> pattern;
 	/** Function body */
 	CodeBlock body;
 
-	OperatorFunction(ReferenceType init_return_type,	std::vector<OperatorFunctionPatternElement> init_pattern, CodeBlock init_body)
-	: return_type{init_return_type}, pattern{std::move(init_pattern)}, body{std::move(init_body)} {}
+	OperatorFunction
+	(
+		ReferenceType init_return_type,
+		std::vector<GenericParameter> init_generic_parameters,
+		std::vector<OperatorFunctionPatternElement> init_pattern,
+		CodeBlock init_body
+	) :
+		return_type{std::move(init_return_type)},
+		generic_parameters{std::move(init_generic_parameters)},
+		pattern{std::move(init_pattern)},
+		body{std::move(init_body)}
+	{}
 
 	void accept(ASTVisitor& visitor) const override
 	{

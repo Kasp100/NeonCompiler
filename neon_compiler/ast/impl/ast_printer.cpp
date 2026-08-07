@@ -376,6 +376,14 @@ void ASTPrinter::visit(const nodes::OperatorFunction& node)
 
 	incr_depth();
 
+	if(node.generic_parameters.size() > 0)
+	{
+		print_prefix();
+		print("generic parameters: ");
+		print_generic_parameters(node.generic_parameters);
+		print_line();
+	}
+
 	print_prefix();
 	print("pattern:");
 	print_line();
@@ -605,6 +613,39 @@ void ASTPrinter::print_generic_argument(const nodes::GenericArgument& generic_ar
 		if(first) { first = false; } else { print(", "); }
 
 		print_generic_argument(element_generic_arg);
+	}
+
+	print(">");
+}
+
+void ASTPrinter::print_generic_parameters(const std::vector<nodes::GenericParameter>& generic_params) const
+{
+	print("<");
+
+	bool first_p{true};
+	for(const nodes::GenericParameter& p : generic_params)
+	{
+		if(first_p) { first_p = false; } else { print(", "); }
+
+		print(p.type);
+		print(" ");
+		print(p.reference_name);
+
+		const std::vector<std::string>& supertypes = p.supertypes;
+
+		if(supertypes.size() == 0) { continue; }
+
+		print(" {");
+
+		bool first_st{true};
+		for(const std::string& st : supertypes)
+		{
+			if(first_st) { first_st = false; } else { print(", "); }
+
+			print(st);
+		}
+
+		print("}");
 	}
 
 	print(">");
