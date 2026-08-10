@@ -159,7 +159,10 @@ void ASTPrinter::visit(const nodes::DiscardExpression& node)
 
 void ASTPrinter::visit(const nodes::LocalDeclaration& node)
 {
-
+	print_prefix();
+	print("local declaration: ");
+	node.variable_declaration.accept(*this);
+	print_line();
 }
 
 void ASTPrinter::visit(const nodes::AutoCall& node)

@@ -1132,15 +1132,50 @@ CodeBlock Parser::parse_code_block_until_end(std::shared_ptr<OperatorTable> oper
 			break;
 		}
 
+		std::unique_ptr<Statement> stmt;
+
 		switch(token_type)
 		{
-			case TokenType::STMT_RETURN:	statements.push_back(parse_return_statement(operator_table.get())); break;
-			case TokenType::STMT_USE:		operator_table = parse_use_statement_and_create_operator_table(operator_table); break;
-			default:						statements.push_back(parse_expected_discard_expression(operator_table.get()));
+			case TokenType::STMT_RETURN: stmt = parse_return_statement(operator_table.get()); break;
+			case TokenType::STMT_USE:    operator_table = parse_use_statement_and_create_operator_table(operator_table); break;
+			default:
+			{
+				std::optional<VariableDeclaration> vardecl = parse_variable_declaration(MutabilityMode::OWN);
+
+				if(vardecl.has_value())
+				{
+					parse_expected_end_of_statement_after_expression();
+					stmt = std::make_unique<LocalDeclaration>(std::move(vardecl.value()));
+				}
+				else
+				{
+					stmt = parse_expected_discard_expression(operator_table.get());
+				}
+			}
+		}
+
+		if(stmt)
+		{
+			statements.push_back(std::move(stmt));
+		}
+		else
+		{
+			logger->info("Parsing encountered an invalid statement.");
 		}
 	}
 
 	return CodeBlock{std::move(statements)};
+}
+
+void Parser::parse_expected_end_of_statement_after_expression()
+{
+	while(!reader.end_of_file_reached() && reader.peek().get_type() != TokenType::END_STATEMENT)
+	{
+		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
+			std::string{error_messages::MISSING_SEMICOLON_OR_FAILED_TO_PARSE_EXPRESSION});
+	}
+
+	report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
 }
 
 std::unique_ptr<Statement> Parser::parse_return_statement(OperatorTable* operator_table)
@@ -1162,13 +1197,7 @@ std::unique_ptr<Statement> Parser::parse_return_statement(OperatorTable* operato
 		value = expression_parser.parse_expression();
 	}
 
-	while(!reader.end_of_file_reached() && reader.peek().get_type() != TokenType::END_STATEMENT)
-	{
-		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
-			std::string{error_messages::MISSING_SEMICOLON_OR_FAILED_TO_PARSE_EXPRESSION});
-	}
-
-	report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
+	parse_expected_end_of_statement_after_expression();
 
 	return std::make_unique<Return>(std::move(value));
 }
@@ -1182,15 +1211,16 @@ std::unique_ptr<Statement> Parser::parse_expected_discard_expression(OperatorTab
 
 	ExpressionParser expression_parser{logger, &reader, &func_report_token, operator_table};
 
-	std::unique_ptr<DiscardExpression> result = std::make_unique<DiscardExpression>(expression_parser.parse_expression());
+	std::unique_ptr<Expression> expression = expression_parser.parse_expression();
 
-	while(!reader.end_of_file_reached() && reader.peek().get_type() != TokenType::END_STATEMENT)
+	std::unique_ptr<DiscardExpression> result;
+
+	if(expression)
 	{
-		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
-			std::string{error_messages::MISSING_SEMICOLON_OR_FAILED_TO_PARSE_EXPRESSION});
+		result = std::make_unique<DiscardExpression>(std::move(expression));
 	}
 
-	report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
+	parse_expected_end_of_statement_after_expression();
 
 	return result;
 }

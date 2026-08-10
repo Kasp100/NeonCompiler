@@ -203,6 +203,8 @@ private:
 	std::optional<neon_compiler::ast::nodes::ReferenceType> parse_reference_type(neon_compiler::ast::nodes::MutabilityMode default_mutability_mode);
 	std::vector<neon_compiler::ast::nodes::GenericArgument> parse_generic_arguments();
 	neon_compiler::ast::nodes::CodeBlock parse_code_block_until_end(std::shared_ptr<OperatorTable> operator_table);
+
+	void parse_expected_end_of_statement_after_expression();
 	std::unique_ptr<neon_compiler::ast::nodes::Statement> parse_return_statement(neon_compiler::parser::OperatorTable* operator_table);
 	std::unique_ptr<neon_compiler::ast::nodes::Statement> parse_expected_discard_expression(neon_compiler::parser::OperatorTable* operator_table);
 };

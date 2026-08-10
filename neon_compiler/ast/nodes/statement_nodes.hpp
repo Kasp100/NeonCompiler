@@ -31,6 +31,13 @@ struct LocalDeclaration : Statement
 	/** The variable declaration within this statement */
 	VariableDeclaration variable_declaration;
 
+	LocalDeclaration
+	(
+		VariableDeclaration init_variable_declaration
+	) :
+		variable_declaration{std::move(init_variable_declaration)}
+	{}
+
 	void accept(ASTVisitor& visitor) const override
 	{
 		visitor.visit(*this);
