@@ -17,10 +17,6 @@ Neoncode enforces safety and predictability through secure and immutable behavio
 - Variables declared without `var` cannot be **reassigned**  
 - Regular classes without `extendable` cannot be extended (i.e., used as supertypes)
 
-### Separation Between Internal and External Data
-A type marked `serialisable` indicates that its data may come directly from I/O operations.  
-This enforces a clear boundary between trusted internal data and untrusted external input.
-
 ### Safe Memory Model
 Neoncode eliminates manual memory management by using **reference counting**, allowing for predictable lifetime management and **C interoperability**.
 
@@ -28,7 +24,7 @@ Neoncode eliminates manual memory management by using **reference counting**, al
 Neoncode combines **object-oriented** and **functional** programming paradigms to promote code reuse, modularity, and safety.
 
 #### Private Fields
-Fields in non-serialisable types are **inaccessible from outside code** (i.e., private).  
+Fields in types are **inaccessible from outside code** (i.e., private).  
 Manual or auto-generated getters and setters make data access safe and explicit.
 
 ### Strictly Pure Functions

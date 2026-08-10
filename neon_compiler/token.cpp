@@ -87,8 +87,6 @@ std::optional<TokenType> Token::keyword_to_token_type(std::string_view word)
 	else if (word == "extendable")            return TokenType::DECL_CLASS_EXTENDABLE;
 	else if (word == "override")              return TokenType::DECL_METHOD_OVERRIDE;
 	else if (word == "overridable")           return TokenType::DECL_METHOD_OVERRIDABLE;
-	else if (word == "copyable")              return TokenType::DECL_TYPE_COPYABLE;
-	else if (word == "serialisable")          return TokenType::DECL_TYPE_SERIALISABLE;
 	else if (word == "true")                  return TokenType::BOOL_TRUE;
 	else if (word == "false")                 return TokenType::BOOL_FALSE;
 	else if (word == "void")                  return TokenType::RETURN_TYPE_VOID;
@@ -98,10 +96,8 @@ std::optional<TokenType> Token::keyword_to_token_type(std::string_view word)
 	else if (word == "for")                   return TokenType::STMT_FOR;
 	else if (word == "for_each_in")           return TokenType::STMT_FOR_EACH_IN;
 	else if (word == "while")                 return TokenType::STMT_WHILE;
-	else if (word == "serialising")           return TokenType::STMT_SERIALISING;
 	else if (word == "ret")                   return TokenType::STMT_RETURN;
 	else if (word == "give")                  return TokenType::STMT_GIVE;
-	else if (word == "copy")                  return TokenType::STMT_COPY;
 
 	return std::nullopt;
 }
