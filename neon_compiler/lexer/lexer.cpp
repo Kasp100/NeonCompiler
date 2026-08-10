@@ -79,7 +79,6 @@ void Lexer::tokenise_next()
 	}
 
 	read_and_tokenise_symbol();
-
 }
 
 void Lexer::read_and_tokenise_word()
@@ -304,6 +303,12 @@ void Lexer::read_and_tokenise_symbol()
 		return;
 	}
 
+	if(reader->consume_all_if_next("=="))
+	{
+		tokens.emplace_back(TokenType::EQUALS, sp, 2, std::nullopt);
+		return;
+	}
+
 	if(reader->consume_if_matches('_'))
 	{
 		uint length{1};
@@ -394,7 +399,7 @@ std::optional<neon_compiler::TokenType> Lexer::convert_single_char_token(char ch
 		case ',': return TokenType::COMMA;
 		case ':': return TokenType::COLON;
         case '.': return TokenType::MEMBER_ACCESS_DOT;
-        case '=': return TokenType::EQUALS_OR_ASSIGN;
+        case '=': return TokenType::ASSIGN;
 		default: return std::nullopt;
 	}
 }
