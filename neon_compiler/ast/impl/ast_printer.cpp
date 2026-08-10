@@ -495,7 +495,6 @@ void ASTPrinter::visit(const nodes::OperatorCallExpression& node)
 		}
 		else
 		{
-			const OperatorSyntaxParameter& param = std::get<OperatorSyntaxParameter>(elem);
 			print_prefix();
 			print("parameter");
 			print_line();
