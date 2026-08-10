@@ -77,6 +77,7 @@ enum class TokenType
 	STMT_FOR,
 	STMT_FOR_EACH_IN,
 	STMT_WHILE,
+	STMT_DO,
 	STMT_RETURN,
 	STMT_GIVE
 };
