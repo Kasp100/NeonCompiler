@@ -34,7 +34,7 @@ namespace builtin_operators
 	inline const std::vector<neon_compiler::ast::nodes::OperatorSyntaxPatternElement> ASSIGNMENT_PATTERN
 	{
 		neon_compiler::ast::nodes::OperatorSyntaxParameter{},
-		neon_compiler::ast::nodes::TokenPattern{neon_compiler::TokenType::EQUALS_OR_ASSIGN},
+		neon_compiler::ast::nodes::TokenPattern{neon_compiler::TokenType::ASSIGN},
 		neon_compiler::ast::nodes::OperatorSyntaxParameter{}
 	};
 

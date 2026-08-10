@@ -193,18 +193,38 @@ private:
 	void parse_expected_operator_module_a_and_register(const neon_compiler::ast::nodes::Access& access);
 	neon_compiler::ast::nodes::OperatorDeclaration parse_expected_operator_declaration();
 	void parse_expected_operator_module_b(std::shared_ptr<OperatorTable> operator_table);
-	neon_compiler::ast::nodes::OperatorFunction parse_expected_operator_function(std::shared_ptr<neon_compiler::parser::OperatorTable> operator_table);
-	std::vector<neon_compiler::ast::nodes::OperatorFunctionPatternElement> parse_operator_function_pattern();
+	neon_compiler::ast::nodes::OperatorFunction parse_expected_operator_function
+	(
+		std::shared_ptr<neon_compiler::parser::OperatorTable> operator_table
+	);
+	std::vector<neon_compiler::ast::nodes::OperatorFunctionPatternElement> parse_operator_function_pattern
+	(
+		neon_compiler::parser::OperatorTable* operator_table
+	);
 
 	std::vector<neon_compiler::ast::nodes::GenericParameter> parse_generic_parameters();
 	std::vector<std::string> parse_supertype_list();
-	neon_compiler::ast::nodes::ParameterDeclarationList parse_parameter_declarations();
-	std::optional<neon_compiler::ast::nodes::VariableDeclaration> parse_variable_declaration(neon_compiler::ast::nodes::MutabilityMode default_mutability_mode);
-	std::optional<neon_compiler::ast::nodes::ReferenceType> parse_reference_type(neon_compiler::ast::nodes::MutabilityMode default_mutability_mode);
+
+	neon_compiler::ast::nodes::ParameterDeclarationList parse_parameter_declarations
+	(
+		neon_compiler::parser::OperatorTable* operator_table
+	);
+	std::optional<neon_compiler::ast::nodes::VariableDeclaration> parse_variable_declaration
+	(
+		neon_compiler::ast::nodes::MutabilityMode default_mutability_mode,
+		neon_compiler::parser::OperatorTable* operator_table
+	);
+	std::optional<neon_compiler::ast::nodes::ReferenceType> parse_reference_type
+	(
+		neon_compiler::ast::nodes::MutabilityMode default_mutability_mode
+	);
+
 	std::vector<neon_compiler::ast::nodes::GenericArgument> parse_generic_arguments();
 	neon_compiler::ast::nodes::CodeBlock parse_code_block_until_end(std::shared_ptr<OperatorTable> operator_table);
 
+	std::unique_ptr<neon_compiler::ast::nodes::Expression> parse_expression(neon_compiler::parser::OperatorTable* operator_table);
 	void parse_expected_end_of_statement_after_expression();
+
 	std::unique_ptr<neon_compiler::ast::nodes::Statement> parse_return_statement(neon_compiler::parser::OperatorTable* operator_table);
 	std::unique_ptr<neon_compiler::ast::nodes::Statement> parse_expected_discard_expression(neon_compiler::parser::OperatorTable* operator_table);
 };

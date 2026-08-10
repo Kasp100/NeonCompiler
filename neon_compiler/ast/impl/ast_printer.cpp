@@ -39,9 +39,7 @@ void ASTPrinter::visit(const nodes::Entrypoint& node)
 	incr_depth();
 	for(const VariableDeclaration& var_decl : node.parameters)
 	{
-		print_prefix();
 		var_decl.accept(*this);
-		print_line();
 	}
 	decr_depth();
 
@@ -61,6 +59,8 @@ void ASTPrinter::visit(const nodes::Type& node)
 
 void ASTPrinter::visit(const nodes::VariableDeclaration& node)
 {
+	print_prefix();
+
 	if(node.var)
 	{
 		print("var ");
@@ -71,6 +71,20 @@ void ASTPrinter::visit(const nodes::VariableDeclaration& node)
 	print(" ");
 
 	print(node.reference_name);
+
+	if(node.initialisation)
+	{
+		print(" =");
+		print_line();
+
+		incr_depth();
+		node.initialisation->accept(*this);
+		decr_depth();
+	}
+	else
+	{
+		print_line();
+	}
 }
 
 void ASTPrinter::visit(const nodes::Field& node)
@@ -160,9 +174,12 @@ void ASTPrinter::visit(const nodes::DiscardExpression& node)
 void ASTPrinter::visit(const nodes::LocalDeclaration& node)
 {
 	print_prefix();
-	print("local declaration: ");
-	node.variable_declaration.accept(*this);
+	print("local declaration:");
 	print_line();
+
+	incr_depth();
+	node.variable_declaration.accept(*this);
+	decr_depth();
 }
 
 void ASTPrinter::visit(const nodes::AutoCall& node)
@@ -399,8 +416,12 @@ void ASTPrinter::visit(const nodes::OperatorFunction& node)
 		{
 			const OperatorFunctionParameter& param = std::get<OperatorFunctionParameter>(elem);
 			
-			print("parameter: ");
+			print("parameter:");
+			print_line();
+
+			incr_depth();
 			param.parameter.accept(*this);
+			decr_depth();
 		}
 		else
 		{
@@ -414,8 +435,9 @@ void ASTPrinter::visit(const nodes::OperatorFunction& node)
 				print(", lexeme: ");
 				print(tp.lexeme.value());
 			}
+
+			print_line();
 		}
-		print_line();
 	}
 	decr_depth();
 

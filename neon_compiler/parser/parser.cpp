@@ -457,7 +457,7 @@ void Parser::parse_and_register_expected_entrypoint(const Access& access, std::s
 {
 	const std::string name = parse_expected_declaration_name(AnalysisEntryType::DECLARATION);
 
-	ParameterDeclarationList parameters = parse_parameter_declarations();
+	ParameterDeclarationList parameters = parse_parameter_declarations(operator_table.get());
 
 	CodeBlock body{std::vector<std::unique_ptr<Statement>>{}};
 
@@ -729,7 +729,7 @@ OperatorFunction Parser::parse_expected_operator_function(std::shared_ptr<Operat
 		ReferenceType{false, MutabilityMode::BORROW, false, std::string{error_recovery::PLACEHOLDER_TYPE}}
 	);
 
-	std::vector<OperatorFunctionPatternElement> pattern = parse_operator_function_pattern();
+	std::vector<OperatorFunctionPatternElement> pattern = parse_operator_function_pattern(operator_table.get());
 
 	std::vector<GenericParameter> generic_parameters = parse_generic_parameters();
 
@@ -746,7 +746,7 @@ OperatorFunction Parser::parse_expected_operator_function(std::shared_ptr<Operat
 	};
 }
 
-std::vector<OperatorFunctionPatternElement> Parser::parse_operator_function_pattern()
+std::vector<OperatorFunctionPatternElement> Parser::parse_operator_function_pattern(OperatorTable* operator_table)
 {
 	std::vector<OperatorFunctionPatternElement> pattern;
 
@@ -758,7 +758,7 @@ std::vector<OperatorFunctionPatternElement> Parser::parse_operator_function_patt
 		{
 			report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
 
-			VariableDeclaration parameter = parse_variable_declaration(MutabilityMode::BORROW).value_or
+			VariableDeclaration parameter = parse_variable_declaration(MutabilityMode::BORROW, operator_table).value_or
 			(
 				VariableDeclaration
 				{
@@ -948,7 +948,7 @@ std::vector<std::string> Parser::parse_supertype_list()
 	return supertypes;
 }
 
-ParameterDeclarationList Parser::parse_parameter_declarations()
+ParameterDeclarationList Parser::parse_parameter_declarations(OperatorTable* operator_table)
 {
 	ParameterDeclarationList param_decl_list{};
 
@@ -986,7 +986,7 @@ ParameterDeclarationList Parser::parse_parameter_declarations()
 
 		first = false;
 
-		std::optional<VariableDeclaration> var_decl = parse_variable_declaration(MutabilityMode::BORROW);
+		std::optional<VariableDeclaration> var_decl = parse_variable_declaration(MutabilityMode::BORROW, operator_table);
 
 		if(!var_decl.has_value())
 		{
@@ -1001,7 +1001,7 @@ ParameterDeclarationList Parser::parse_parameter_declarations()
 	return param_decl_list;
 }
 
-std::optional<VariableDeclaration> Parser::parse_variable_declaration(MutabilityMode default_mutability_mode)
+std::optional<VariableDeclaration> Parser::parse_variable_declaration(MutabilityMode default_mutability_mode, OperatorTable* operator_table)
 {
 	bool var{reader.peek().get_type() == TokenType::VAR};
 
@@ -1026,7 +1026,15 @@ std::optional<VariableDeclaration> Parser::parse_variable_declaration(Mutability
 
 	if(ref_type.has_value())
 	{
-		return VariableDeclaration{var, ref_type.value(), ref_name}; // TODO: parse optional expression for initialisation
+		if(reader.peek().get_type() == TokenType::ASSIGN)
+		{
+			report_token(AnalysisEntryType::OPERATOR, AnalysisSeverity::INFO, reader.consume());
+			return VariableDeclaration{var, ref_type.value(), ref_name, parse_expression(operator_table)};
+		}
+		else
+		{
+			return VariableDeclaration{var, ref_type.value(), ref_name};
+		}
 	}
 	else if(var)
 	{
@@ -1140,7 +1148,7 @@ CodeBlock Parser::parse_code_block_until_end(std::shared_ptr<OperatorTable> oper
 			case TokenType::STMT_USE:    operator_table = parse_use_statement_and_create_operator_table(operator_table); break;
 			default:
 			{
-				std::optional<VariableDeclaration> vardecl = parse_variable_declaration(MutabilityMode::OWN);
+				std::optional<VariableDeclaration> vardecl = parse_variable_declaration(MutabilityMode::OWN, operator_table.get());
 
 				if(vardecl.has_value())
 				{
@@ -1167,6 +1175,18 @@ CodeBlock Parser::parse_code_block_until_end(std::shared_ptr<OperatorTable> oper
 	return CodeBlock{std::move(statements)};
 }
 
+std::unique_ptr<Expression> Parser::parse_expression(OperatorTable* operator_table)
+{
+	FuncReportToken func_report_token = [this] (AnalysisEntryType type, AnalysisSeverity severity, const Token& token, std::optional<std::string> info)
+	{
+		report_token(type, severity, token, info);
+	};
+
+	ExpressionParser expression_parser{logger, &reader, &func_report_token, operator_table};
+
+	return expression_parser.parse_expression();
+}
+
 void Parser::parse_expected_end_of_statement_after_expression()
 {
 	while(!reader.end_of_file_reached() && reader.peek().get_type() != TokenType::END_STATEMENT)
@@ -1187,14 +1207,7 @@ std::unique_ptr<Statement> Parser::parse_return_statement(OperatorTable* operato
 
 	if(reader.peek().get_type() != TokenType::END_STATEMENT)
 	{
-		FuncReportToken func_report_token = [this] (AnalysisEntryType type, AnalysisSeverity severity, const Token& token, std::optional<std::string> info)
-		{
-			report_token(type, severity, token, info);
-		};
-
-		ExpressionParser expression_parser{logger, &reader, &func_report_token, operator_table};
-
-		value = expression_parser.parse_expression();
+		value = parse_expression(operator_table);
 	}
 
 	parse_expected_end_of_statement_after_expression();
@@ -1204,14 +1217,8 @@ std::unique_ptr<Statement> Parser::parse_return_statement(OperatorTable* operato
 
 std::unique_ptr<Statement> Parser::parse_expected_discard_expression(OperatorTable* operator_table)
 {
-	FuncReportToken func_report_token = [this] (AnalysisEntryType type, AnalysisSeverity severity, const Token& token, std::optional<std::string> info)
-	{
-		report_token(type, severity, token, info);
-	};
 
-	ExpressionParser expression_parser{logger, &reader, &func_report_token, operator_table};
-
-	std::unique_ptr<Expression> expression = expression_parser.parse_expression();
+	std::unique_ptr<Expression> expression = parse_expression(operator_table);
 
 	std::unique_ptr<DiscardExpression> result;
 
