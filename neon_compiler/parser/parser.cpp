@@ -1013,15 +1013,15 @@ std::optional<VariableDeclaration> Parser::parse_variable_declaration(Mutability
 	std::optional<ReferenceType> ref_type = parse_reference_type(default_mutability_mode);
 
 	std::string ref_name{error_recovery::PLACEHOLDER_NAME};
+
 	if(reader.peek().get_type() == TokenType::IDENTIFIER)
 	{
 		report_token(AnalysisEntryType::DECLARATION, AnalysisSeverity::INFO, reader.peek());
 		ref_name = reader.consume().get_lexeme().value();
 	}
-	else
+	else if(ref_type.has_value())
 	{
-		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
-			std::string{error_messages::MISSING_IDENTIFIER});
+		ref_name = std::move(ref_type->inferred_name);
 	}
 
 	if(ref_type.has_value())
