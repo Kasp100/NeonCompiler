@@ -80,7 +80,7 @@ enum class TokenType
 	STMT_WHILE,
 	STMT_DO,
 	STMT_RETURN,
-	STMT_GIVE
+	GIVE
 };
 
 class Token

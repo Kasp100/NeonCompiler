@@ -55,6 +55,14 @@ std::shared_ptr<const Operator> OperatorTable::match_prefix
 	const FuncParseExpressionWCursor& func_parse_expression_w_cursor
 )
 {
+	std::shared_ptr<const Operator> builtin_operator_match =
+		match(builtin_operators::PREFIX, reader, peek_cursor, func_parse_expression_w_cursor, false);
+
+	if(builtin_operator_match)
+	{
+		return builtin_operator_match;
+	}
+
 	return match(prefix_operators, reader, peek_cursor, func_parse_expression_w_cursor, false);
 }
 
@@ -66,7 +74,7 @@ std::shared_ptr<const Operator> OperatorTable::match_infix
 )
 {
 	std::shared_ptr<const Operator> builtin_operator_match =
-		match(builtin_operators::LIST, reader, peek_cursor, func_parse_expression_w_cursor, true);
+		match(builtin_operators::INFIX, reader, peek_cursor, func_parse_expression_w_cursor, true);
 
 	if(builtin_operator_match)
 	{

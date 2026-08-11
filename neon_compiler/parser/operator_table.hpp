@@ -13,6 +13,8 @@ namespace neon_compiler::parser
 
 namespace builtin_operators
 {
+	// `.` operator
+
 	inline const std::vector<neon_compiler::ast::nodes::OperatorSyntaxPatternElement> MEMBER_ACCESS_DOT_PATTERN
 	{
 		neon_compiler::ast::nodes::OperatorSyntaxParameter{},
@@ -30,6 +32,8 @@ namespace builtin_operators
 
     inline const std::shared_ptr<const parser::Operator> MEMBER_ACCESS_DOT =
 		std::make_shared<const parser::Operator>(&MEMBER_ACCESS_DOT_DECLARATION);
+
+	// `=` operator
 
 	inline const std::vector<neon_compiler::ast::nodes::OperatorSyntaxPatternElement> ASSIGNMENT_PATTERN
 	{
@@ -49,7 +53,27 @@ namespace builtin_operators
     inline const std::shared_ptr<const parser::Operator> ASSIGNMENT =
 		std::make_shared<const parser::Operator>(&ASSIGNMENT_DECLARATION);
 
-	inline const std::vector<std::shared_ptr<const neon_compiler::parser::Operator>> LIST{MEMBER_ACCESS_DOT, ASSIGNMENT};
+	// `give` operator
+
+	inline const std::vector<neon_compiler::ast::nodes::OperatorSyntaxPatternElement> GIVE_PATTERN
+	{
+		neon_compiler::ast::nodes::TokenPattern{neon_compiler::TokenType::GIVE},
+		neon_compiler::ast::nodes::OperatorSyntaxParameter{}
+	};
+
+	inline const neon_compiler::ast::nodes::OperatorDeclaration GIVE_DECLARATION
+	{
+		GIVE_PATTERN,
+		0,
+		neon_compiler::ast::nodes::OperatorAssociativity::RIGHT,
+		neon_compiler::ast::nodes::BuiltinOperatorKind::GIVE
+	};
+
+    inline const std::shared_ptr<const parser::Operator> GIVE =
+		std::make_shared<const parser::Operator>(&GIVE_DECLARATION);
+
+	inline const std::vector<std::shared_ptr<const neon_compiler::parser::Operator>> PREFIX{GIVE};
+	inline const std::vector<std::shared_ptr<const neon_compiler::parser::Operator>> INFIX{MEMBER_ACCESS_DOT, ASSIGNMENT};
 }
 
 namespace operator_table_error_messages

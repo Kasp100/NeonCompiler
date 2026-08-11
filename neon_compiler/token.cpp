@@ -99,7 +99,7 @@ std::optional<TokenType> Token::keyword_to_token_type(std::string_view word)
 	else if (word == "while")                 return TokenType::STMT_WHILE;
 	else if (word == "do")                    return TokenType::STMT_DO;
 	else if (word == "ret")                   return TokenType::STMT_RETURN;
-	else if (word == "give")                  return TokenType::STMT_GIVE;
+	else if (word == "give")                  return TokenType::GIVE;
 
 	return std::nullopt;
 }
