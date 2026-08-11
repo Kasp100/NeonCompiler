@@ -306,7 +306,12 @@ std::vector<std::unique_ptr<Expression>> ExpressionParser::parse_argument_expres
 
 	while(!reader->end_of_file_reached(peek_cursor ? *peek_cursor : 0))
 	{
-		argument_expressions.push_back(std::move(parse_expression(peek_cursor)));
+		std::unique_ptr<Expression> arg_expr = parse_expression(peek_cursor);
+
+		if(arg_expr)
+		{
+			argument_expressions.push_back(std::move(arg_expr));
+		}
 
 		TokenType token_type = peek_w_peek_cursor(peek_cursor).get_type();
 
