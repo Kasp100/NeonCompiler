@@ -394,6 +394,12 @@ std::unique_ptr<Expression> ExpressionParser::parse_operator_call_expression
 		return std::make_unique<Assignment>(std::move(arguments[0]), std::move(arguments[1]));
 	}
 
+	if(declaration->builtin_operator_kind == BuiltinOperatorKind::GIVE)
+	{
+		// The `give` operator must be declared so arguments[0] always has a value here.
+		return std::make_unique<Give>(std::move(arguments[0]));
+	}
+
 	return std::make_unique<OperatorCallExpression>(std::move(arguments), op);
 }
 

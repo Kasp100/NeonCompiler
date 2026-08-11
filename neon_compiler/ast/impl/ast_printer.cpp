@@ -221,6 +221,17 @@ void ASTPrinter::visit(const nodes::Assignment& node)
 	decr_depth();
 }
 
+void ASTPrinter::visit(const nodes::Give& node)
+{
+	print_prefix();
+	print("give");
+	print_line();
+
+	incr_depth();
+	node.value->accept(*this);
+	decr_depth();
+}
+
 void ASTPrinter::visit(const nodes::ObjectFunctionCall& node)
 {
 	print_prefix();
