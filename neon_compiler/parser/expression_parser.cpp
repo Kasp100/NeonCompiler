@@ -158,7 +158,7 @@ std::unique_ptr<Expression> ExpressionParser::parse_expression(PeekCursor peek_c
 
 	if(!left)
 	{
-		logger->info("Parsing encountered an invalid expression.");
+		logger->info("Parsing encountered an invalid expression. (prefix)");
 		return nullptr;
 	}
 
@@ -173,6 +173,12 @@ std::unique_ptr<Expression> ExpressionParser::parse_expression(PeekCursor peek_c
 		if(op->get_declaration()->subordination > max_subordination) { break; }
 
 		left = parse_operator_call_expression(peek_cursor, op, std::move(left));
+
+		if(!left)
+		{
+			logger->info("Parsing encountered an invalid expression. (infix/postfix)");
+			return nullptr;
+		}
 	}
 
 	return left;
@@ -370,6 +376,7 @@ std::unique_ptr<Expression> ExpressionParser::parse_operator_call_expression
 
 		uint max_subordination = declaration->subordination - 1;
 		if(i == pattern.size() - 1 && declaration->associativity == OperatorAssociativity::RIGHT) { ++max_subordination; }
+
 		std::unique_ptr<Expression> argument = parse_expression(peek_cursor, max_subordination);
 
 		if(!argument)
