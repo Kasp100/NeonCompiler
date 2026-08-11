@@ -94,7 +94,8 @@ std::optional<TokenType> Token::keyword_to_token_type(std::string_view word)
 	else if (word == "if")                    return TokenType::STMT_IF;
 	else if (word == "else")                  return TokenType::STMT_ELSE;
 	else if (word == "for")                   return TokenType::STMT_FOR;
-	else if (word == "for_each_in")           return TokenType::STMT_FOR_EACH_IN;
+	else if (word == "for_each")              return TokenType::STMT_FOR_EACH;
+	else if (word == "in")                    return TokenType::IN_CLAUSE;
 	else if (word == "while")                 return TokenType::STMT_WHILE;
 	else if (word == "do")                    return TokenType::STMT_DO;
 	else if (word == "ret")                   return TokenType::STMT_RETURN;
