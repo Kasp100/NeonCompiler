@@ -383,7 +383,7 @@ std::unique_ptr<Expression> ExpressionParser::parse_operator_call_expression
 
 	if(declaration->builtin_operator_kind == BuiltinOperatorKind::ASSIGNMENT)
 	{
-		// The dot operator must be declared so arguments[0] and arguments[1] always has a value here.
+		// The assignment operator must be declared so arguments[0] and arguments[1] always has a value here.
 		return std::make_unique<Assignment>(std::move(arguments[0]), std::move(arguments[1]));
 	}
 
