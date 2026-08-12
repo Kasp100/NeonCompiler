@@ -176,9 +176,9 @@ struct ConstantDeclaration : ASTNode
         std::unique_ptr<Expression> init_value
     ) :
         type{std::move(init_type)},
-        generic_arguments{std::move(generic_arguments)},
-        reference_name{std::move(reference_name)},
-        value{std::move(value)}
+        generic_arguments{std::move(init_generic_arguments)},
+        reference_name{std::move(init_reference_name)},
+        value{std::move(init_value)}
     {}
 
 	void accept(ASTVisitor& visitor) const override
