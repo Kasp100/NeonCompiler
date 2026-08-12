@@ -379,8 +379,6 @@ void ASTPrinter::visit(const nodes::OperatorDeclaration& node)
 		print_prefix();
 		if(std::holds_alternative<OperatorSyntaxParameter>(elem))
 		{
-			const OperatorSyntaxParameter& param = std::get<OperatorSyntaxParameter>(elem);
-
 			print("parameter");
 		}
 		else
