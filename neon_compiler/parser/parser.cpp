@@ -469,7 +469,7 @@ void Parser::parse_and_register_expected_entrypoint(const Access& access, std::s
 	else
 	{
 		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
-			std::string{error_messages::MISSING_CODE_BLOCK});
+			std::string{error_messages::INVALID_ENTRYPOINT__MISSING_CODE_BLOCK});
 	}
 
 	std::unique_ptr<PackageMember> package_member = std::make_unique<Entrypoint>(access, std::move(parameters), std::move(body));
@@ -488,7 +488,7 @@ void Parser::parse_expected_operator_module_a_and_register(const Access& access)
 	else
 	{
 		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
-			std::string{error_messages::MISSING_CODE_BLOCK});
+			std::string{error_messages::INVALID_OPERATOR_MODULE__MISSING_CURLY_BRACKETS});
 	}
 
 	std::vector<OperatorDeclaration> operators;

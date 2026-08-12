@@ -57,9 +57,6 @@ namespace error_messages
 	constexpr std::string_view MISSING_SEMICOLON_OR_FAILED_TO_PARSE_EXPRESSION =
 		"Expected `;` or a valid expression. The required operator module may not be active in this scope.";
 
-	constexpr std::string_view MISSING_CODE_BLOCK =
-		"Expected a code block enclosed in `{}`.";
-
 	constexpr std::string_view MISSING_SECOND_PACKAGE_MEMBER_PATTERN =
 		"Expected a second package member pattern.";
 
@@ -95,6 +92,12 @@ namespace error_messages
 
 	constexpr std::string_view INVALID_SUPERTYPE_LIST_IDENTIFIER =
 		"Invalid supertype list. Expected a valid type identifier.";
+
+	constexpr std::string_view INVALID_ENTRYPOINT__MISSING_CODE_BLOCK =
+		"Invalid entrypoint. Expected a code block enclosed in `{}`.";
+
+	constexpr std::string_view INVALID_OPERATOR_MODULE__MISSING_CURLY_BRACKETS =
+		"Invalid operator module. Expected `{}`.";
 }
 
 namespace error_recovery
