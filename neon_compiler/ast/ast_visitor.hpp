@@ -11,6 +11,7 @@ namespace neon_compiler::ast::nodes
 	struct Entrypoint;
 	struct Type;
 	struct VariableDeclaration;
+    struct ConstantDeclaration;
 	struct Field;
 	struct Method;
 	struct Constant;
@@ -53,6 +54,7 @@ public:
 	virtual void visit(const nodes::Entrypoint& node) = 0;
 	virtual void visit(const nodes::Type& node) = 0;
 	virtual void visit(const nodes::VariableDeclaration& node) = 0;
+	virtual void visit(const nodes::ConstantDeclaration& node) = 0;
 	virtual void visit(const nodes::Field& node) = 0;
 	virtual void visit(const nodes::Method& node) = 0;
 	virtual void visit(const nodes::Constant& node) = 0;

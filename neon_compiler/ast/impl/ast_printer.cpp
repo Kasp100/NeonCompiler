@@ -87,6 +87,11 @@ void ASTPrinter::visit(const nodes::VariableDeclaration& node)
 	}
 }
 
+void ASTPrinter::visit(const nodes::ConstantDeclaration& node)
+{
+
+}
+
 void ASTPrinter::visit(const nodes::Field& node)
 {
 

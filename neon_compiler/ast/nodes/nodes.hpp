@@ -157,6 +157,36 @@ struct VariableDeclaration : ASTNode
 	}
 };
 
+struct ConstantDeclaration : ASTNode
+{
+	/** The name of the type */
+	std::string type;
+	/** Generic arguments */
+	std::vector<GenericArgument> generic_arguments;
+	/** The reference name */
+	std::string reference_name;
+	/** Value */
+	std::unique_ptr<Expression> value;
+
+    ConstantDeclaration
+    (
+        std::string init_type,
+        std::vector<GenericArgument> init_generic_arguments,
+        std::string init_reference_name,
+        std::unique_ptr<Expression> init_value
+    ) :
+        type{std::move(init_type)},
+        generic_arguments{std::move(generic_arguments)},
+        reference_name{std::move(reference_name)},
+        value{std::move(value)}
+    {}
+
+	void accept(ASTVisitor& visitor) const override
+	{
+		visitor.visit(*this);
+	}
+};
+
 using ParameterDeclarationList = std::vector<VariableDeclaration>;
 
 struct CodeBlock : ASTNode
@@ -259,6 +289,8 @@ struct PureFunctionSet : PackageMember
 {
 	/** The access which determines who can use this pure function set */
 	Access access;
+    /** Constants */
+    std::vector<ConstantDeclaration> constants;
 	/** Mapping from function name to functions with the same name, but different parameters (overloads). */
 	std::unordered_map<std::string, std::vector<PureFunction>> methods;
 

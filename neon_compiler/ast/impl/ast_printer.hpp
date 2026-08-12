@@ -14,6 +14,7 @@ public:
 	void visit(const nodes::Entrypoint& node) override;
 	void visit(const nodes::Type& node) override;
 	void visit(const nodes::VariableDeclaration& node) override;
+    void visit(const nodes::ConstantDeclaration& node) override;
 	void visit(const nodes::Field& node) override;
 	void visit(const nodes::Method& node) override;
 	void visit(const nodes::Constant& node) override;
