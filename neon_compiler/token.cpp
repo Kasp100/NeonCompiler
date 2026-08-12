@@ -63,6 +63,7 @@ std::optional<TokenType> Token::keyword_to_token_type(std::string_view word)
 	else if (word == "mut")                   return TokenType::MUT;
 	else if (word == "var")                   return TokenType::VAR;
 	else if (word == "opt")                   return TokenType::OPTIONAL;
+	else if (word == "empty")                 return TokenType::EMPTY;
 	else if (word == "auto")                  return TokenType::AUTO;
 	else if (word == "own")                   return TokenType::REF_TYPE_OWN;
 	else if (word == "shared")                return TokenType::REF_TYPE_SHARED;
@@ -100,6 +101,9 @@ std::optional<TokenType> Token::keyword_to_token_type(std::string_view word)
 	else if (word == "do")                    return TokenType::STMT_DO;
 	else if (word == "ret")                   return TokenType::STMT_RETURN;
 	else if (word == "give")                  return TokenType::GIVE;
+	else if (word == "present")               return TokenType::CHECK_PRESENCE;
+	else if (word == "absent")                return TokenType::CHECK_ABSENCE;
+	else if (word == "or")                    return TokenType::FALLBACK_OR;
 
 	return std::nullopt;
 }

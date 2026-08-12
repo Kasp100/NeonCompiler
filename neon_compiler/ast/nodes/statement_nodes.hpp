@@ -213,22 +213,11 @@ struct SimpleRead : Expression
 	}
 };
 
-struct OptFunctionCall : Expression
+/** The node representing `empty` */
+struct OptionalEmpty : Expression
 {
-	/** The name of the optional function. */
-	std::string function_name;
-	/** Arguments */
-	std::vector<std::unique_ptr<Expression>> arguments;
+	OptionalEmpty() {}
 
-	void accept(ASTVisitor& visitor) const override
-	{
-		visitor.visit(*this);
-	}
-};
-
-/** The node representing `opt:empty` */
-struct OptEmpty : Expression
-{
 	void accept(ASTVisitor& visitor) const override
 	{
 		visitor.visit(*this);
@@ -288,6 +277,54 @@ struct OperatorCallExpression : Expression
 		std::shared_ptr<const neon_compiler::parser::Operator> init_op
 	)
 		: arguments{std::move(init_arguments)}, op{init_op}
+	{}
+
+	void accept(ASTVisitor& visitor) const override
+	{
+		visitor.visit(*this);
+	}
+};
+
+struct CheckPresence : Expression
+{
+	/** Value to check for presence. */
+	std::unique_ptr<Expression> value;
+
+	CheckPresence(std::unique_ptr<Expression> init_value)
+		: value(std::move(init_value)) {}
+
+	void accept(ASTVisitor& visitor) const override
+	{
+		visitor.visit(*this);
+	}
+};
+
+struct CheckAbsence : Expression
+{
+	/** Value to check for absence. */
+	std::unique_ptr<Expression> value;
+
+	CheckAbsence(std::unique_ptr<Expression> init_value)
+		: value(std::move(init_value)) {}
+
+	void accept(ASTVisitor& visitor) const override
+	{
+		visitor.visit(*this);
+	}
+};
+
+struct Fallback : Expression
+{
+	std::unique_ptr<Expression> optional;
+	std::unique_ptr<Expression> fallback;
+
+	Fallback
+	(
+		std::unique_ptr<Expression> init_optional,
+		std::unique_ptr<Expression> init_fallback
+	) :
+		optional(std::move(init_optional)),
+		fallback(std::move(init_fallback))
 	{}
 
 	void accept(ASTVisitor& visitor) const override

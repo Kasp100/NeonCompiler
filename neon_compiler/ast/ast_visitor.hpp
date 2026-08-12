@@ -26,8 +26,7 @@ namespace neon_compiler::ast::nodes
 	struct ObjectRead;
 	struct FunctionCall;
 	struct SimpleRead;
-	struct OptFunctionCall;
-	struct OptEmpty;
+	struct OptionalEmpty;
 	struct PureFunctionSet;
 	struct PureFunction;
 	struct OperatorModule;
@@ -38,6 +37,9 @@ namespace neon_compiler::ast::nodes
 	struct LiteralStringExpression;
 	struct LiteralBooleanExpression;
 	struct OperatorCallExpression;
+	struct CheckPresence;
+	struct CheckAbsence;
+	struct Fallback;
 }
 
 namespace neon_compiler::ast
@@ -66,8 +68,7 @@ public:
 	virtual void visit(const nodes::ObjectRead& node) = 0;
 	virtual void visit(const nodes::FunctionCall& node) = 0;
 	virtual void visit(const nodes::SimpleRead& node) = 0;
-	virtual void visit(const nodes::OptFunctionCall& node) = 0;
-	virtual void visit(const nodes::OptEmpty& node) = 0;
+	virtual void visit(const nodes::OptionalEmpty& node) = 0;
 	virtual void visit(const nodes::PureFunctionSet& node) = 0;
 	virtual void visit(const nodes::PureFunction& node) = 0;
 	virtual void visit(const nodes::OperatorModule& node) = 0;
@@ -78,6 +79,9 @@ public:
 	virtual void visit(const nodes::LiteralStringExpression& node) = 0;
 	virtual void visit(const nodes::LiteralBooleanExpression& node) = 0;
 	virtual void visit(const nodes::OperatorCallExpression& node) = 0;
+	virtual void visit(const nodes::CheckPresence& node) = 0;
+	virtual void visit(const nodes::CheckAbsence& node) = 0;
+	virtual void visit(const nodes::Fallback& node) = 0;
 };
 
 }

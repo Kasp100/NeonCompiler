@@ -29,8 +29,7 @@ public:
 	void visit(const nodes::ObjectRead& node) override;
 	void visit(const nodes::FunctionCall& node) override;
 	void visit(const nodes::SimpleRead& node) override;
-	void visit(const nodes::OptFunctionCall& node) override;
-	void visit(const nodes::OptEmpty& node) override;
+	void visit(const nodes::OptionalEmpty& node) override;
 	void visit(const nodes::PureFunctionSet& node) override;
 	void visit(const nodes::PureFunction& node) override;
 	void visit(const nodes::OperatorModule& node) override;
@@ -41,6 +40,9 @@ public:
 	void visit(const nodes::LiteralStringExpression& node) override;
 	void visit(const nodes::LiteralBooleanExpression& node) override;
 	void visit(const nodes::OperatorCallExpression& node) override;
+	void visit(const nodes::CheckPresence& node) override;
+	void visit(const nodes::CheckAbsence& node) override;
+	void visit(const nodes::Fallback& node) override;
 private:
 	uint depth{0};
 	void incr_depth();

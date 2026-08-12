@@ -297,7 +297,10 @@ enum class BuiltinOperatorKind
 	NOT_BUILT_IN,
 	MEMBER_ACCESS,
 	ASSIGNMENT,
-	GIVE
+	GIVE,
+	CHECK_PRESENCE,
+	CHECK_ABSENCE,
+	FALLBACK
 };
 
 struct TokenPattern

@@ -91,6 +91,14 @@ std::shared_ptr<const Operator> OperatorTable::match_postfix
 	const FuncParseExpressionWCursor& func_parse_expression_w_cursor
 )
 {
+	std::shared_ptr<const Operator> builtin_operator_match =
+		match(builtin_operators::POSTFIX, reader, peek_cursor, func_parse_expression_w_cursor, true);
+
+	if(builtin_operator_match)
+	{
+		return builtin_operator_match;
+	}
+
 	return match(postfix_operators, reader, peek_cursor, func_parse_expression_w_cursor, true);
 }
 

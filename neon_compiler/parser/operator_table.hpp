@@ -72,8 +72,67 @@ namespace builtin_operators
     inline const std::shared_ptr<const parser::Operator> GIVE =
 		std::make_shared<const parser::Operator>(&GIVE_DECLARATION);
 
+	// `present` operator
+
+	inline const std::vector<neon_compiler::ast::nodes::OperatorSyntaxPatternElement> CHECK_PRESENCE_PATTERN
+	{
+		neon_compiler::ast::nodes::OperatorSyntaxParameter{},
+		neon_compiler::ast::nodes::TokenPattern{neon_compiler::TokenType::CHECK_PRESENCE}
+	};
+
+	inline const neon_compiler::ast::nodes::OperatorDeclaration CHECK_PRESENCE_DECLARATION
+	{
+		CHECK_PRESENCE_PATTERN,
+		0,
+		neon_compiler::ast::nodes::OperatorAssociativity::LEFT,
+		neon_compiler::ast::nodes::BuiltinOperatorKind::CHECK_PRESENCE
+	};
+
+    inline const std::shared_ptr<const parser::Operator> CHECK_PRESENCE =
+		std::make_shared<const parser::Operator>(&CHECK_PRESENCE_DECLARATION);
+
+	// `absent` operator
+
+	inline const std::vector<neon_compiler::ast::nodes::OperatorSyntaxPatternElement> CHECK_ABSENCE_PATTERN
+	{
+		neon_compiler::ast::nodes::OperatorSyntaxParameter{},
+		neon_compiler::ast::nodes::TokenPattern{neon_compiler::TokenType::CHECK_ABSENCE}
+	};
+
+	inline const neon_compiler::ast::nodes::OperatorDeclaration CHECK_ABSENCE_DECLARATION
+	{
+		CHECK_ABSENCE_PATTERN,
+		0,
+		neon_compiler::ast::nodes::OperatorAssociativity::LEFT,
+		neon_compiler::ast::nodes::BuiltinOperatorKind::CHECK_ABSENCE
+	};
+
+    inline const std::shared_ptr<const parser::Operator> CHECK_ABSENCE =
+		std::make_shared<const parser::Operator>(&CHECK_ABSENCE_DECLARATION);
+
+	// `or` operator
+
+	inline const std::vector<neon_compiler::ast::nodes::OperatorSyntaxPatternElement> FALLBACK_OR_PATTERN
+	{
+		neon_compiler::ast::nodes::OperatorSyntaxParameter{},
+		neon_compiler::ast::nodes::TokenPattern{neon_compiler::TokenType::FALLBACK_OR},
+		neon_compiler::ast::nodes::OperatorSyntaxParameter{}
+	};
+
+	inline const neon_compiler::ast::nodes::OperatorDeclaration FALLBACK_OR_DECLARATION
+	{
+		FALLBACK_OR_PATTERN,
+		0,
+		neon_compiler::ast::nodes::OperatorAssociativity::LEFT,
+		neon_compiler::ast::nodes::BuiltinOperatorKind::FALLBACK
+	};
+
+    inline const std::shared_ptr<const parser::Operator> FALLBACK_OR =
+		std::make_shared<const parser::Operator>(&FALLBACK_OR_DECLARATION);
+
 	inline const std::vector<std::shared_ptr<const neon_compiler::parser::Operator>> PREFIX{GIVE};
-	inline const std::vector<std::shared_ptr<const neon_compiler::parser::Operator>> INFIX{MEMBER_ACCESS_DOT, ASSIGNMENT};
+	inline const std::vector<std::shared_ptr<const neon_compiler::parser::Operator>> INFIX{MEMBER_ACCESS_DOT, ASSIGNMENT, FALLBACK_OR};
+	inline const std::vector<std::shared_ptr<const neon_compiler::parser::Operator>> POSTFIX{CHECK_PRESENCE, CHECK_ABSENCE};
 }
 
 namespace operator_table_error_messages

@@ -305,14 +305,11 @@ void ASTPrinter::visit(const nodes::SimpleRead& node)
 	print_line();
 }
 
-void ASTPrinter::visit(const nodes::OptFunctionCall& node)
+void ASTPrinter::visit(const nodes::OptionalEmpty& node)
 {
-
-}
-
-void ASTPrinter::visit(const nodes::OptEmpty& node)
-{
-
+	print_prefix();
+	print("empty");
+	print_line();
 }
 
 void ASTPrinter::visit(const nodes::PureFunctionSet& node)
@@ -541,6 +538,53 @@ void ASTPrinter::visit(const nodes::OperatorCallExpression& node)
 			++arg_i;
 		}
 	}
+	decr_depth();
+}
+
+void ASTPrinter::visit(const nodes::CheckPresence& node)
+{
+	print_prefix();
+	print("check presence");
+	print_line();
+	
+	incr_depth();
+	node.value->accept(*this);
+	decr_depth();
+}
+
+void ASTPrinter::visit(const nodes::CheckAbsence& node)
+{
+	print_prefix();
+	print("check absence");
+	print_line();
+	
+	incr_depth();
+	node.value->accept(*this);
+	decr_depth();
+}
+
+void ASTPrinter::visit(const nodes::Fallback& node)
+{
+	print_prefix();
+	print("fallback");
+	print_line();
+
+	incr_depth();
+
+	print_prefix();
+	print("optional:");
+	print_line();
+	incr_depth();
+	node.optional->accept(*this);
+	decr_depth();
+
+	print_prefix();
+	print("fallback:");
+	print_line();
+	incr_depth();
+	node.fallback->accept(*this);
+	decr_depth();
+
 	decr_depth();
 }
 

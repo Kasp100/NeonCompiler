@@ -241,6 +241,12 @@ std::unique_ptr<Expression> ExpressionParser::parse_terminating_expression(PeekC
 		return std::make_unique<LiteralBooleanExpression>(false);
 	}
 
+	if(peek_w_peek_cursor(peek_cursor).get_type() == TokenType::EMPTY)
+	{
+		consume_w_peek_cursor_and_report(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, peek_cursor);
+		return std::make_unique<OptionalEmpty>();
+	}
+
 	if(peek_w_peek_cursor(peek_cursor).get_type() == TokenType::IDENTIFIER)
 	{
 		return parse_named_expression(peek_cursor);
@@ -398,6 +404,24 @@ std::unique_ptr<Expression> ExpressionParser::parse_operator_call_expression
 	{
 		// The `give` operator must be declared so arguments[0] always has a value here.
 		return std::make_unique<Give>(std::move(arguments[0]));
+	}
+
+	if(declaration->builtin_operator_kind == BuiltinOperatorKind::CHECK_PRESENCE)
+	{
+		// The `present` operator must be declared so arguments[0] always has a value here.
+		return std::make_unique<CheckPresence>(std::move(arguments[0]));
+	}
+
+	if(declaration->builtin_operator_kind == BuiltinOperatorKind::CHECK_ABSENCE)
+	{
+		// The `absent` operator must be declared so arguments[0] always has a value here.
+		return std::make_unique<CheckAbsence>(std::move(arguments[0]));
+	}
+
+	if(declaration->builtin_operator_kind == BuiltinOperatorKind::FALLBACK)
+	{
+		// The fallback operator must be declared so arguments[0] and arguments[1] always has a value here.
+		return std::make_unique<Fallback>(std::move(arguments[0]), std::move(arguments[1]));
 	}
 
 	return std::make_unique<OperatorCallExpression>(std::move(arguments), op);

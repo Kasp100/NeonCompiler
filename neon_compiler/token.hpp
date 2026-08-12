@@ -43,6 +43,7 @@ enum class TokenType
 	MUT,
 	VAR,
 	OPTIONAL,
+	EMPTY,
 	AUTO,
 	REF_TYPE_OWN,
 	REF_TYPE_SHARED,
@@ -80,7 +81,10 @@ enum class TokenType
 	STMT_WHILE,
 	STMT_DO,
 	STMT_RETURN,
-	GIVE
+	GIVE,
+	CHECK_PRESENCE,
+	CHECK_ABSENCE,
+	FALLBACK_OR
 };
 
 class Token
