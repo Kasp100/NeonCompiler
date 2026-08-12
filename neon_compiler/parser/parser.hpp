@@ -98,6 +98,9 @@ namespace error_messages
 
 	constexpr std::string_view INVALID_OPERATOR_MODULE__MISSING_CURLY_BRACKETS =
 		"Invalid operator module. Expected `{}`.";
+
+	constexpr std::string_view INVALID_PURE_FUNCTION_SET__MISSING_CURLY_BRACKETS =
+		"Invalid pure function set. Expected `{}`.";
 }
 
 namespace error_recovery
@@ -230,6 +233,12 @@ private:
 
 	std::unique_ptr<neon_compiler::ast::nodes::Statement> parse_return_statement(neon_compiler::parser::OperatorTable* operator_table);
 	std::unique_ptr<neon_compiler::ast::nodes::Statement> parse_expected_discard_expression(neon_compiler::parser::OperatorTable* operator_table);
+
+    void parse_and_register_expected_pure_function_set
+    (
+        const neon_compiler::ast::nodes::Access& access,
+        std::shared_ptr<OperatorTable> operator_table
+    );
 };
 
 }

@@ -406,6 +406,7 @@ void Parser::parse_expected_package_member(const Access& access, std::shared_ptr
 	else if(reader.peek().get_type() == TokenType::PACKAGE_MEMBER_PURE_FUNCTION_SET)
 	{
 		report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
+        parse_and_register_expected_pure_function_set(access, operator_table);
 	}
 	else if(reader.peek().get_type() == TokenType::PACKAGE_MEMBER_OPERATOR_MODULE)
 	{
@@ -1230,4 +1231,32 @@ std::unique_ptr<Statement> Parser::parse_expected_discard_expression(OperatorTab
 	parse_expected_end_of_statement_after_expression();
 
 	return result;
+}
+
+void Parser::parse_and_register_expected_pure_function_set
+(
+    const Access& access,
+    std::shared_ptr<OperatorTable> operator_table
+)
+{
+	const std::string name = parse_expected_declaration_name(AnalysisEntryType::DECLARATION);
+
+	CodeBlock body{std::vector<std::unique_ptr<Statement>>{}};
+
+	if(reader.peek().get_type() == TokenType::BRACKET_CURLY_OPEN)
+	{
+		report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
+		body = parse_code_block_until_end(operator_table);
+	}
+	else
+	{
+		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
+			std::string{error_messages::INVALID_PURE_FUNCTION_SET__MISSING_CURLY_BRACKETS});
+	}
+
+    // TODO
+
+	// std::unique_ptr<PackageMember> package_member = std::make_unique<PureFunctionSet>(access);
+
+	// append_ast(std::move(package_member), name);
 }
