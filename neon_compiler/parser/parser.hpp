@@ -43,7 +43,7 @@ namespace error_messages
 		"Invalid declaration name. Keywords and other tokens are not valid names.";
 
 	constexpr std::string_view INVALID_REFERENCE_TYPE =
-		"Expected a reference type followed by a name (e.g., `opt shared mut:array<int> arr`).";
+		"Expected a reference type (e.g., `opt int`).";
 
 	constexpr std::string_view INVALID_VARIABLE_DECLARATION =
 		"Expected a variable declaration (e.g., `var int age`).";
