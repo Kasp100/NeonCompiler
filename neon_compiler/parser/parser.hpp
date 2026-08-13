@@ -149,6 +149,7 @@ private:
 	void skip_until_statement_end();
 	void skip_until_block_start();
 	void skip_until_block_end();
+	void report_error_until_member_declaration_end(const std::string& error_message);
 
 	void report_token
 	(
@@ -160,46 +161,41 @@ private:
 
 	std::string append_ast(std::unique_ptr<neon_compiler::ast::nodes::PackageMember> node, const std::string& identifier);
 
-	/* Names:
-	 * **with** "expected": a check is done to see if what the reader sees is the expected thing
-	 * **without** "expected": no check is done and assumes what the reader sees is the (optional/required) thing
-	 */
-
-	std::shared_ptr<neon_compiler::parser::OperatorTable> parse_use_statement_and_create_operator_table
+	std::shared_ptr<neon_compiler::parser::OperatorTable> parse_use_statement_after_keyword_and_create_operator_table
 	(
 		std::shared_ptr<neon_compiler::parser::OperatorTable> previous
 	);
-	const std::vector<std::shared_ptr<const neon_compiler::parser::Operator>>* parse_use_statement();
+	const std::vector<std::shared_ptr<const neon_compiler::parser::Operator>>* parse_use_statement_after_keyword();
 
 	std::optional<neon_compiler::ast::Identifier> parse_identifier
 	(
 		neon_compiler::analysis::AnalysisEntryType id_type,
 		neon_compiler::analysis::AnalysisSeverity id_severity
 	);
-	void parse_and_register_expected_package_declaration();
-	void parse_and_register_import_statement();
+	void parse_and_register_package_declaration();
+	void parse_and_register_import_statement_after_keyword();
 	neon_compiler::ast::nodes::Access parse_access();
 	neon_compiler::ast::nodes::PackageMemberPattern parse_package_member_pattern();
 
-	void parse_expected_package_member
+	void parse_package_member
 	(
 		const neon_compiler::ast::nodes::Access& access,
 		std::shared_ptr<neon_compiler::parser::OperatorTable> operator_table
 	);
-	std::string parse_expected_declaration_name
+	std::string parse_declaration_name
 	(
 		neon_compiler::analysis::AnalysisEntryType analysis_entry_type
 	);
-	void parse_and_register_expected_entrypoint
+	void parse_and_register_entrypoint_after_keyword
 	(
 		const neon_compiler::ast::nodes::Access& access,
 		std::shared_ptr<neon_compiler::parser::OperatorTable> operator_table
 	);
 
-	void parse_expected_operator_module_a_and_register(const neon_compiler::ast::nodes::Access& access);
-	neon_compiler::ast::nodes::OperatorDeclaration parse_expected_operator_declaration();
-	void parse_expected_operator_module_b(std::shared_ptr<OperatorTable> operator_table);
-	neon_compiler::ast::nodes::OperatorFunction parse_expected_operator_function
+	void parse_operator_module_a_and_register_after_keyword(const neon_compiler::ast::nodes::Access& access);
+	neon_compiler::ast::nodes::OperatorDeclaration parse_operator_declaration_after_keyword();
+	void parse_operator_module_b_after_keyword(std::shared_ptr<OperatorTable> operator_table);
+	neon_compiler::ast::nodes::OperatorFunction parse_operator_function
 	(
 		std::shared_ptr<neon_compiler::parser::OperatorTable> operator_table
 	);
@@ -226,15 +222,15 @@ private:
 	);
 
 	std::vector<neon_compiler::ast::nodes::GenericArgument> parse_generic_arguments();
-	neon_compiler::ast::nodes::CodeBlock parse_code_block_until_end(std::shared_ptr<OperatorTable> operator_table);
+	neon_compiler::ast::nodes::CodeBlock parse_code_block_after_opening_bracket(std::shared_ptr<OperatorTable> operator_table);
 
 	std::unique_ptr<neon_compiler::ast::nodes::Expression> parse_expression(neon_compiler::parser::OperatorTable* operator_table);
-	void parse_expected_end_of_statement_after_expression();
+	void parse_end_of_statement_after_expression();
 
-	std::unique_ptr<neon_compiler::ast::nodes::Statement> parse_return_statement(neon_compiler::parser::OperatorTable* operator_table);
-	std::unique_ptr<neon_compiler::ast::nodes::Statement> parse_expected_discard_expression(neon_compiler::parser::OperatorTable* operator_table);
+	std::unique_ptr<neon_compiler::ast::nodes::Statement> parse_return_statement_after_keyword(neon_compiler::parser::OperatorTable* operator_table);
+	std::unique_ptr<neon_compiler::ast::nodes::Statement> parse_discard_expression(neon_compiler::parser::OperatorTable* operator_table);
 
-    void parse_and_register_expected_pure_function_set
+    void parse_and_register_pure_function_set_after_keyword
     (
         const neon_compiler::ast::nodes::Access& access,
         std::shared_ptr<OperatorTable> operator_table
