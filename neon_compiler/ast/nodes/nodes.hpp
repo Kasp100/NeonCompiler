@@ -148,8 +148,18 @@ struct VariableDeclaration : ASTNode
 	/** Optional initialisation */
 	std::unique_ptr<Expression> initialisation;
 
-	VariableDeclaration(bool init_var, ReferenceType init_reference_type, std::string init_reference_name, std::unique_ptr<Expression> init_initialisation = nullptr)
-	: var{init_var}, reference_type{init_reference_type}, reference_name{std::move(init_reference_name)}, initialisation{std::move(init_initialisation)} {}
+	VariableDeclaration
+	(
+		bool init_var,
+		ReferenceType init_reference_type,
+		std::string init_reference_name,
+		std::unique_ptr<Expression> init_initialisation = nullptr
+	) :
+		var{init_var},
+		reference_type{init_reference_type},
+		reference_name{std::move(init_reference_name)},
+		initialisation{std::move(init_initialisation)}
+	{}
 
 	void accept(ASTVisitor& visitor) const override
 	{
