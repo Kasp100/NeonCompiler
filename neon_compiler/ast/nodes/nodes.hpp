@@ -289,7 +289,18 @@ struct PureFunctionSet : PackageMember
     /** Constants */
     std::vector<ConstantDeclaration> constants;
 	/** Mapping from function name to functions with the same name, but different parameters (overloads). */
-	std::unordered_map<std::string, std::vector<PureFunction>> methods;
+	std::unordered_map<std::string, std::vector<PureFunction>> functions;
+
+	PureFunctionSet
+	(
+		Access init_access,
+		std::vector<ConstantDeclaration> init_constants,
+		std::unordered_map<std::string, std::vector<PureFunction>> init_functions
+	) :
+		access{std::move(init_access)},
+		constants{std::move(init_constants)},
+		functions{std::move(init_functions)}
+	{}
 
 	void accept(ASTVisitor& visitor) const override
 	{
