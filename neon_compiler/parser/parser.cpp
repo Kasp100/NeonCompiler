@@ -498,7 +498,13 @@ void Parser::parse_and_register_entrypoint_after_keyword(const Access& access, s
 {
 	const std::string name = parse_declaration_name(AnalysisEntryType::DECLARATION);
 
-	ParameterDeclarationList parameters = parse_parameter_declarations(operator_table.get());
+	ParameterDeclarationList parameters;
+
+	if(reader.peek().get_type() == TokenType::BRACKET_ROUND_OPEN)
+	{
+		report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
+		parameters = parse_parameter_declarations_after_opening_bracket(operator_table.get());
+	}
 
 	CodeBlock body{std::vector<std::unique_ptr<Statement>>{}};
 
@@ -1001,18 +1007,9 @@ std::vector<std::string> Parser::parse_supertype_list()
 	return supertypes;
 }
 
-ParameterDeclarationList Parser::parse_parameter_declarations(OperatorTable* operator_table)
+ParameterDeclarationList Parser::parse_parameter_declarations_after_opening_bracket(OperatorTable* operator_table)
 {
-	ParameterDeclarationList param_decl_list{};
-
-	if(reader.peek().get_type() == TokenType::BRACKET_ROUND_OPEN)
-	{
-		report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
-	}
-	else
-	{
-		return param_decl_list;
-	}
+	ParameterDeclarationList param_decl_list;
 
 	bool first{true};
 

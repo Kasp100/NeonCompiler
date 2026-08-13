@@ -207,7 +207,7 @@ private:
 	std::vector<neon_compiler::ast::nodes::GenericParameter> parse_generic_parameters();
 	std::vector<std::string> parse_supertype_list();
 
-	neon_compiler::ast::nodes::ParameterDeclarationList parse_parameter_declarations
+	neon_compiler::ast::nodes::ParameterDeclarationList parse_parameter_declarations_after_opening_bracket
 	(
 		neon_compiler::parser::OperatorTable* operator_table
 	);
