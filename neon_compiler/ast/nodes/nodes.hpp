@@ -240,7 +240,7 @@ struct Type : PackageMember
 	/** Mapping from method name to methods with the same name, but different parameters (overloads). */
 	std::unordered_map<std::string, std::vector<Method>> methods;
 	/** Mapping from reference name to constant declaration. */
-	std::unordered_map<std::string, Constant> constants;
+	std::unordered_map<std::string, ConstantDeclaration> constants;
 	/** Mapping from pure function name to pure functions with the same name, but different parameters (overloads). */
 	std::unordered_map<std::string, std::vector<PureFunction>> pure_functions;
 
@@ -275,19 +275,6 @@ struct Method : ASTNode
 	ParameterDeclarationList parameters;
 	/** Method body. Empty means it's not implemented (an abstract method). */
 	std::optional<CodeBlock> implementation;
-
-	void accept(ASTVisitor& visitor) const override
-	{
-		visitor.visit(*this);
-	}
-};
-
-struct Constant : ASTNode
-{
-	/** The access which determines who can use this constant */
-	Access access;
-	/** The type of this constant */
-	ReferenceType type;
 
 	void accept(ASTVisitor& visitor) const override
 	{

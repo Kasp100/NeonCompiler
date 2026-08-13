@@ -14,7 +14,6 @@ namespace neon_compiler::ast::nodes
     struct ConstantDeclaration;
 	struct Field;
 	struct Method;
-	struct Constant;
 	struct ReferenceType;
 	struct CodeBlock;
 	struct DiscardExpression;
@@ -57,7 +56,6 @@ public:
 	virtual void visit(const nodes::ConstantDeclaration& node) = 0;
 	virtual void visit(const nodes::Field& node) = 0;
 	virtual void visit(const nodes::Method& node) = 0;
-	virtual void visit(const nodes::Constant& node) = 0;
 	virtual void visit(const nodes::ReferenceType& node) = 0;
 	virtual void visit(const nodes::CodeBlock& node) = 0;
 	virtual void visit(const nodes::DiscardExpression& node) = 0;

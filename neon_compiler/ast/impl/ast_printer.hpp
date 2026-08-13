@@ -17,7 +17,6 @@ public:
     void visit(const nodes::ConstantDeclaration& node) override;
 	void visit(const nodes::Field& node) override;
 	void visit(const nodes::Method& node) override;
-	void visit(const nodes::Constant& node) override;
 	void visit(const nodes::ReferenceType& node) override;
 	void visit(const nodes::CodeBlock& node) override;
 	void visit(const nodes::DiscardExpression& node) override;

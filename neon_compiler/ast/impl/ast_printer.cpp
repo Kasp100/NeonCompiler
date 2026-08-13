@@ -102,11 +102,6 @@ void ASTPrinter::visit(const nodes::Method& node)
 
 }
 
-void ASTPrinter::visit(const nodes::Constant& node)
-{
-
-}
-
 void ASTPrinter::visit(const nodes::ReferenceType& node)
 {
 	if(node.opt)
