@@ -318,22 +318,26 @@ struct PureFunction : ASTNode
 	Access access;
 	/** The immutable type this pure function returns. */
 	ReferenceType return_type;
+	/** Generic parameters */
+	std::vector<GenericParameter> generic_parameters;
 	/** Parameters (should be immutable values) */
 	ParameterDeclarationList parameters;
-	/** Pure function body. Empty means it's not implemented (an abstract pure function). */
-	std::optional<CodeBlock> implementation;
+	/** Pure function body */
+	CodeBlock body;
 
 	PureFunction
 	(
 		Access init_access,
 		ReferenceType init_return_type,
+		std::vector<GenericParameter> init_generic_parameters,
 		ParameterDeclarationList init_parameters,
-		std::optional<CodeBlock> init_implementation
+		CodeBlock init_body
 	) :
 		access{std::move(init_access)},
 		return_type{std::move(init_return_type)},
+		generic_parameters{std::move(init_generic_parameters)},
 		parameters{std::move(init_parameters)},
-		implementation{std::move(init_implementation)}
+		body{std::move(init_body)}
 	{}
 
 	void accept(ASTVisitor& visitor) const override

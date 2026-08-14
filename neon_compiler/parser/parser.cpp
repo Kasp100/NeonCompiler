@@ -1365,6 +1365,8 @@ void Parser::parse_and_register_pure_function_set_after_keyword
 			continue;
 		}
 
+		std::vector<GenericParameter> generic_parameters = parse_generic_parameters();
+
 		if(reader.peek().get_type() == TokenType::BRACKET_ROUND_OPEN)
 		{
 			report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
@@ -1379,7 +1381,7 @@ void Parser::parse_and_register_pure_function_set_after_keyword
 
 			report_token(AnalysisEntryType::OPERATOR, AnalysisSeverity::INFO, reader.consume());
 
-			std::optional<CodeBlock> body = parse_code_block_after_opening_bracket(operator_table);
+			CodeBlock body = parse_code_block_after_opening_bracket(operator_table);
 
 			if(!functions.contains(member_name))
 			{
@@ -1392,6 +1394,7 @@ void Parser::parse_and_register_pure_function_set_after_keyword
 				{
 					access,
 					ref_type,
+					std::move(generic_parameters),
 					std::move(params),
 					std::move(body)
 				}

@@ -89,7 +89,21 @@ void ASTPrinter::visit(const nodes::VariableDeclaration& node)
 
 void ASTPrinter::visit(const nodes::ConstantDeclaration& node)
 {
+	print_prefix();
+	print_access(node.access);
+	print(" const ");
+	print(node.type);
+	print_generic_arguments(node.generic_arguments);
 
+	print(" ");
+	print(node.reference_name);
+
+	print(" =");
+	print_line();
+
+	incr_depth();
+	node.value->accept(*this);
+	decr_depth();
 }
 
 void ASTPrinter::visit(const nodes::Field& node)
@@ -132,18 +146,6 @@ void ASTPrinter::visit(const nodes::ReferenceType& node)
 
 	print(node.type);
 
-	if(node.generic_arguments.size() == 0) { return; }
-
-	print("<");
-
-	bool first{true};
-	for(const GenericArgument& generic_arg : node.generic_arguments)
-	{
-		if(first) { first = false; } else { print(", "); }
-		print_generic_argument(generic_arg);
-	}
-
-	print(">");
 }
 
 void ASTPrinter::visit(const nodes::CodeBlock& node)
@@ -272,14 +274,8 @@ void ASTPrinter::visit(const nodes::FunctionCall& node)
 	if(node.generic_arguments.size() > 0)
 	{
 		print_prefix();
-		print("generic arguments: <");
-		bool first{true};
-		for(const GenericArgument& generic_arg : node.generic_arguments)
-		{
-			if(first) { first = false; } else { print(", "); }
-			print_generic_argument(generic_arg);
-		}
-		print(">");
+		print("generic arguments: ");
+		print_generic_arguments(node.generic_arguments);
 		print_line();
 	}
 
@@ -314,12 +310,77 @@ void ASTPrinter::visit(const nodes::OptionalEmpty& node)
 
 void ASTPrinter::visit(const nodes::PureFunctionSet& node)
 {
+	print_prefix();
+	print_access(node.access);
+	print(" pure_function_set");
+	print_line();
 
+	incr_depth();
+
+	for(const nodes::ConstantDeclaration& constant : node.constants)
+	{
+		constant.accept(*this);
+	}
+
+	for(const std::pair<const std::string, std::vector<PureFunction>>& pair : node.functions)
+	{
+		print_prefix();
+		print("overloads named ");
+		print(pair.first);
+		print_line();
+
+		incr_depth();
+		for(const nodes::PureFunction& pure_function : pair.second)
+		{
+			pure_function.accept(*this);
+		}
+		decr_depth();
+	}
+
+	decr_depth();
 }
 
 void ASTPrinter::visit(const nodes::PureFunction& node)
 {
+	print_prefix();
+	print("pure function:");
+	print_line();
 
+	incr_depth();
+
+	print_prefix();
+	print("return type: ");
+	node.return_type.accept(*this);
+	print_line();
+
+	if(node.generic_parameters.size() > 0)
+	{
+		print_prefix();
+		print("generic parameters: ");
+		print_generic_parameters(node.generic_parameters);
+		print_line();
+	}
+
+	print_prefix();
+	print("parameters:");
+	print_line();
+
+	incr_depth();
+	for(const VariableDeclaration& var_decl : node.parameters)
+	{
+		var_decl.accept(*this);
+	}
+	decr_depth();
+
+	print_prefix();
+	print("body:");
+	print_line();
+
+	incr_depth();
+	node.body.accept(*this);
+	decr_depth();
+
+	decr_depth();
 }
 
 void ASTPrinter::visit(const nodes::OperatorModule& node)
@@ -673,23 +734,18 @@ void ASTPrinter::print_package_member_pattern(const nodes::PackageMemberPattern&
 	}
 }
 
-void ASTPrinter::print_generic_argument(const nodes::GenericArgument& generic_arg) const
+void ASTPrinter::print_generic_arguments(const std::vector<nodes::GenericArgument>& generic_args) const
 {
-	print(generic_arg.value);
-
-	if(generic_arg.nested_generic_args.size() == 0)
-	{
-		return;
-	}
+	if(generic_args.size() == 0) { return; }
 
 	print("<");
 
 	bool first{true};
-	for(const nodes::GenericArgument& element_generic_arg : generic_arg.nested_generic_args)
+	for(const GenericArgument& generic_arg : generic_args)
 	{
 		if(first) { first = false; } else { print(", "); }
-
-		print_generic_argument(element_generic_arg);
+		print(generic_arg.value);
+		print_generic_arguments(generic_arg.nested_generic_args);
 	}
 
 	print(">");
