@@ -169,6 +169,8 @@ struct VariableDeclaration : ASTNode
 
 struct ConstantDeclaration : ASTNode
 {
+	/** The access which determines who can use this constant */
+	Access access;
 	/** The name of the type */
 	std::string type;
 	/** Generic arguments */
@@ -180,11 +182,13 @@ struct ConstantDeclaration : ASTNode
 
     ConstantDeclaration
     (
+		Access init_access,
         std::string init_type,
         std::vector<GenericArgument> init_generic_arguments,
         std::string init_reference_name,
         std::unique_ptr<Expression> init_value
     ) :
+		access{std::move(init_access)},
         type{std::move(init_type)},
         generic_arguments{std::move(init_generic_arguments)},
         reference_name{std::move(init_reference_name)},
@@ -318,6 +322,19 @@ struct PureFunction : ASTNode
 	ParameterDeclarationList parameters;
 	/** Pure function body. Empty means it's not implemented (an abstract pure function). */
 	std::optional<CodeBlock> implementation;
+
+	PureFunction
+	(
+		Access init_access,
+		ReferenceType init_return_type,
+		ParameterDeclarationList init_parameters,
+		std::optional<CodeBlock> init_implementation
+	) :
+		access{std::move(init_access)},
+		return_type{std::move(init_return_type)},
+		parameters{std::move(init_parameters)},
+		implementation{std::move(init_implementation)}
+	{}
 
 	void accept(ASTVisitor& visitor) const override
 	{

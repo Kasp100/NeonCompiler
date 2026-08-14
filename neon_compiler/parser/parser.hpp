@@ -101,6 +101,12 @@ namespace error_messages
 
 	constexpr std::string_view INVALID_PURE_FUNCTION_SET__MISSING_CURLY_BRACKETS =
 		"Invalid pure function set. Expected `{}`.";
+
+	constexpr std::string_view INVALID_PURE_FUNCTION__MISSING_CODE_BLOCK =
+		"Invalid pure function. Expected a code block enclosed in `{}` and no keywords.";
+
+	constexpr std::string_view INVALID_PURE_FUNCTION_SET_MEMBER =
+		"Invalid pure function set member. Pure functions contain constants and pure functions.";
 }
 
 namespace error_recovery

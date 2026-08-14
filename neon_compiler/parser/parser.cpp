@@ -1207,12 +1207,12 @@ CodeBlock Parser::parse_code_block_after_opening_bracket(std::shared_ptr<Operato
 			}
 			default:
 			{
-				std::optional<VariableDeclaration> vardecl = parse_variable_declaration(MutabilityMode::OWN, operator_table.get());
+				std::optional<VariableDeclaration> var_decl = parse_variable_declaration(MutabilityMode::OWN, operator_table.get());
 
-				if(vardecl.has_value())
+				if(var_decl.has_value())
 				{
 					parse_end_of_statement_after_expression();
-					stmt = std::make_unique<LocalDeclaration>(std::move(vardecl.value()));
+					stmt = std::make_unique<LocalDeclaration>(std::move(var_decl.value()));
 				}
 				else
 				{
@@ -1293,4 +1293,124 @@ void Parser::parse_and_register_pure_function_set_after_keyword
     std::shared_ptr<OperatorTable> operator_table
 )
 {
+	const std::string name = parse_declaration_name(AnalysisEntryType::DECLARATION);
+
+    std::vector<ConstantDeclaration> constants;
+	std::unordered_map<std::string, std::vector<PureFunction>> functions;
+
+	if(reader.peek().get_type() != TokenType::BRACKET_CURLY_OPEN)
+	{
+		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
+			std::string{error_messages::INVALID_PURE_FUNCTION_SET__MISSING_CURLY_BRACKETS});
+		return;
+	}
+
+	report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
+
+	while(!reader.end_of_file_reached())
+	{
+		if(reader.peek().get_type() == TokenType::BRACKET_CURLY_CLOSE)
+		{
+			break;
+		}
+
+		Access member_access = parse_access();
+
+		std::optional<ReferenceType> opt_ref_type = parse_reference_type(MutabilityMode::BORROW);
+
+		if(!opt_ref_type.has_value())
+		{
+			report_error_until_member_declaration_end(std::string{error_messages::INVALID_REFERENCE_TYPE});
+			continue;
+		}
+
+		const ReferenceType& ref_type = opt_ref_type.value();
+
+		std::string member_name;
+
+		if(reader.peek().get_type() == TokenType::IDENTIFIER)
+		{
+			member_name = reader.consume().get_lexeme().value();
+		}
+		else if(reader.peek().get_type() == TokenType::ASSIGN)
+		{
+			member_name = std::move(ref_type.inferred_name);
+		}
+		else
+		{
+			report_error_until_member_declaration_end(std::string{error_messages::MISSING_IDENTIFIER});
+			continue;
+		}
+
+		if(reader.peek().get_type() == TokenType::ASSIGN)
+		{
+			report_token(AnalysisEntryType::OPERATOR, AnalysisSeverity::INFO, reader.consume());
+
+			std::unique_ptr<Expression> value = parse_expression(operator_table.get());
+
+			constants.push_back
+			(
+				ConstantDeclaration
+				{
+					access,
+					std::move(ref_type.type),
+					std::move(ref_type.generic_arguments),
+					std::move(member_name),
+					std::move(value)
+				}
+			);
+
+			parse_end_of_statement_after_expression();
+
+			continue;
+		}
+
+		if(reader.peek().get_type() == TokenType::BRACKET_ROUND_OPEN)
+		{
+			report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
+
+			ParameterDeclarationList params = parse_parameter_declarations_after_opening_bracket(operator_table.get());
+
+			if(reader.peek().get_type() != TokenType::BRACKET_CURLY_OPEN)
+			{
+				report_error_until_member_declaration_end(std::string{error_messages::INVALID_PURE_FUNCTION__MISSING_CODE_BLOCK});
+				continue;
+			}
+
+			report_token(AnalysisEntryType::OPERATOR, AnalysisSeverity::INFO, reader.consume());
+
+			std::optional<CodeBlock> body = parse_code_block_after_opening_bracket(operator_table);
+
+			if(!functions.contains(member_name))
+			{
+				functions[member_name] = std::vector<PureFunction>{};
+			}
+
+			functions[member_name].push_back
+			(
+				PureFunction
+				{
+					access,
+					ref_type,
+					std::move(params),
+					std::move(body)
+				}
+			);
+
+			continue;
+		}
+
+		report_error_until_member_declaration_end(std::string{error_messages::INVALID_PURE_FUNCTION_SET_MEMBER});
+	}
+
+	report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
+
+	std::unique_ptr<PackageMember> package_member = std::make_unique<PureFunctionSet>
+	(
+		std::move(access),
+		std::move(constants),
+		std::move(functions)
+	);
+
+	append_ast(std::move(package_member), name);
 }
