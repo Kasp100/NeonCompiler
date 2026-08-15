@@ -343,7 +343,8 @@ void ASTPrinter::visit(const nodes::PureFunctionSet& node)
 void ASTPrinter::visit(const nodes::PureFunction& node)
 {
 	print_prefix();
-	print("pure function:");
+	print_access(node.access);
+	print(" pure function:");
 	print_line();
 
 	incr_depth();
