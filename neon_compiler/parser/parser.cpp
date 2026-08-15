@@ -1352,7 +1352,7 @@ void Parser::parse_and_register_pure_function_set_after_keyword
 			(
 				ConstantDeclaration
 				{
-					access,
+					std::move(member_access),
 					std::move(ref_type.type),
 					std::move(ref_type.generic_arguments),
 					std::move(member_name),
@@ -1392,7 +1392,7 @@ void Parser::parse_and_register_pure_function_set_after_keyword
 			(
 				PureFunction
 				{
-					access,
+					std::move(member_access),
 					ref_type,
 					std::move(generic_parameters),
 					std::move(params),
