@@ -4,8 +4,12 @@
 
 using namespace reading;
 
-CharReader::CharReader(std::unique_ptr<std::istream> input_stream)
-	: reader{std::move(input_stream)} {}
+CharReader::CharReader
+(
+	std::unique_ptr<std::istream> input_stream
+) :
+	reader{std::move(input_stream)}
+{}
 
 std::optional<CharWSourcePosition> CharReader::read_next()
 {

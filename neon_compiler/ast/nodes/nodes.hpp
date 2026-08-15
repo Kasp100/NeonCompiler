@@ -114,7 +114,7 @@ struct ReferenceType : ASTNode
 	/** Generic arguments */
 	std::vector<GenericArgument> generic_arguments;
 
-	ReferenceType
+	explicit ReferenceType
 	(
 		bool init_opt,
 		MutabilityMode init_mutability,
@@ -148,7 +148,7 @@ struct VariableDeclaration : ASTNode
 	/** Optional initialisation */
 	std::unique_ptr<Expression> initialisation;
 
-	VariableDeclaration
+	explicit VariableDeclaration
 	(
 		bool init_var,
 		ReferenceType init_reference_type,
@@ -156,7 +156,7 @@ struct VariableDeclaration : ASTNode
 		std::unique_ptr<Expression> init_initialisation = nullptr
 	) :
 		var{init_var},
-		reference_type{init_reference_type},
+		reference_type{std::move(init_reference_type)},
 		reference_name{std::move(init_reference_name)},
 		initialisation{std::move(init_initialisation)}
 	{}
@@ -180,7 +180,7 @@ struct ConstantDeclaration : ASTNode
 	/** Value */
 	std::unique_ptr<Expression> value;
 
-    ConstantDeclaration
+    explicit ConstantDeclaration
     (
 		Access init_access,
         std::string init_type,
@@ -207,8 +207,12 @@ struct CodeBlock : ASTNode
 {
 	std::vector<std::unique_ptr<Statement>> statements;
 
-	CodeBlock(std::vector<std::unique_ptr<Statement>> init_statements)
-	: statements{std::move(init_statements)} {}
+	explicit CodeBlock
+	(
+		std::vector<std::unique_ptr<Statement>> init_statements
+	) :
+		statements{std::move(init_statements)}
+	{}
 
 	void accept(ASTVisitor& visitor) const override
 	{
@@ -226,8 +230,17 @@ struct Entrypoint : PackageMember
 	/** Code to run when called */
 	CodeBlock body;
 
-	Entrypoint(Access init_access, ParameterDeclarationList init_parameters, CodeBlock init_body)
-	: access{init_access}, parameters{std::move(init_parameters)}, body{std::move(init_body)} {}
+	explicit Entrypoint
+	(
+		Access init_access,
+		ParameterDeclarationList
+		init_parameters,
+		CodeBlock init_body
+	) :
+		access{std::move(init_access)},
+		parameters{std::move(init_parameters)},
+		body{std::move(init_body)}
+	{}
 
 	void accept(ASTVisitor& visitor) const override
 	{
@@ -295,7 +308,7 @@ struct PureFunctionSet : PackageMember
 	/** Mapping from function name to functions with the same name, but different parameters (overloads). */
 	std::unordered_map<std::string, std::vector<PureFunction>> functions;
 
-	PureFunctionSet
+	explicit PureFunctionSet
 	(
 		Access init_access,
 		std::vector<ConstantDeclaration> init_constants,
@@ -325,7 +338,7 @@ struct PureFunction : ASTNode
 	/** Pure function body */
 	CodeBlock body;
 
-	PureFunction
+	explicit PureFunction
 	(
 		Access init_access,
 		ReferenceType init_return_type,
@@ -371,8 +384,14 @@ struct TokenPattern
 	/** The optional lexeme that needs to match */
 	std::optional<std::string> lexeme;
 	
-	TokenPattern(neon_compiler::TokenType init_token_type, std::optional<std::string> init_lexeme = std::nullopt)
-	: token_type{init_token_type}, lexeme{std::move(init_lexeme)} {}
+	explicit TokenPattern
+	(
+		neon_compiler::TokenType init_token_type,
+		std::optional<std::string> init_lexeme = std::nullopt
+	) :
+		token_type{init_token_type},
+		lexeme{std::move(init_lexeme)}
+	{}
 };
 
 struct OperatorSyntaxParameter{};
@@ -382,8 +401,11 @@ struct OperatorFunctionParameter
 	/** Parameter */
 	neon_compiler::ast::nodes::VariableDeclaration parameter;
 	
-	OperatorFunctionParameter(neon_compiler::ast::nodes::VariableDeclaration& init_parameter)
-	: parameter{std::move(init_parameter)} {}
+	explicit OperatorFunctionParameter(
+		neon_compiler::ast::nodes::VariableDeclaration& init_parameter
+	) :
+		parameter{std::move(init_parameter)}
+	{}
 };
 
 using OperatorSyntaxPatternElement = std::variant<TokenPattern, OperatorSyntaxParameter>;
@@ -401,7 +423,7 @@ struct OperatorDeclaration : ASTNode
 	/** The kind of built-in operator. NOT_BUILT_IN means it's not built-in. */
 	BuiltinOperatorKind builtin_operator_kind;
 
-	OperatorDeclaration
+	explicit OperatorDeclaration
 	(
 		std::vector<OperatorSyntaxPatternElement> init_pattern,
 		uint init_subordination,
@@ -431,7 +453,7 @@ struct OperatorFunction : ASTNode
 	/** Function body */
 	CodeBlock body;
 
-	OperatorFunction
+	explicit OperatorFunction
 	(
 		ReferenceType init_return_type,
 		std::vector<GenericParameter> init_generic_parameters,
@@ -459,8 +481,16 @@ struct OperatorModule : PackageMember
 	/** Operator functions */
 	std::vector<OperatorFunction> functions;
 
-	OperatorModule(Access init_access, std::vector<OperatorDeclaration> init_operators, std::vector<OperatorFunction> init_functions)
-		: access{init_access}, operators{std::move(init_operators)}, functions{std::move(init_functions)} {}
+	explicit OperatorModule
+	(
+		Access init_access,
+		std::vector<OperatorDeclaration> init_operators,
+		std::vector<OperatorFunction> init_functions
+	) :
+		access{std::move(init_access)},
+		operators{std::move(init_operators)},
+		functions{std::move(init_functions)}
+	{}
 
 	void accept(ASTVisitor& visitor) const override
 	{

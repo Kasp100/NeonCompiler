@@ -5,8 +5,6 @@
 
 using namespace logging;
 
-Logger::Logger() {}
-
 constexpr const char* PREFIX_LOG = "[Log] ";
 
 void Logger::error(const std::string& message) const

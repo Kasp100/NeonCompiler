@@ -8,8 +8,12 @@ using namespace neon_compiler;
 using namespace neon_compiler::parser;
 using namespace neon_compiler::ast::nodes;
 
-Operator::Operator(const neon_compiler::ast::nodes::OperatorDeclaration* init_declaration)
-	: declaration{init_declaration}, fixity{Fixity::INVALID}
+Operator::Operator
+(
+	const neon_compiler::ast::nodes::OperatorDeclaration* init_declaration
+) :
+	declaration{init_declaration},
+	fixity{Fixity::INVALID}
 {
 	validate();
 }

@@ -11,42 +11,43 @@
 
 namespace reading
 {
-	class ReadException : public std::runtime_error
-	{
-	public:
-		explicit ReadException(const std::string& msg)
-		: std::runtime_error{msg} {}
-	};
 
-	/** A peek/consume reader for characters (`char`) from an `std::istream`.
-	 * It normalises newlines (`\r` and `\r\n` become `\n`), and keeps track of source positions. */
-	class CharReader
-	{
-	public:
-		explicit CharReader(std::unique_ptr<std::istream> input_stream);
+class ReadException : public std::runtime_error
+{
+public:
+	explicit ReadException(const std::string& msg)
+	: std::runtime_error{msg} {}
+};
 
-		char consume(uint offset = 0);
-		char peek(uint offset = 0);
-		bool end_of_file_reached();
-		SourcePosition get_source_position() const;
-		bool consume_if_matches(char match);
-		bool consume_all_if_next(const std::string& str);
+/** A peek/consume reader for characters (`char`) from an `std::istream`.
+ * It normalises newlines (`\r` and `\r\n` become `\n`), and keeps track of source positions. */
+class CharReader
+{
+public:
+	explicit CharReader(std::unique_ptr<std::istream> input_stream);
 
-	private:
-		std::unique_ptr<std::istream> reader;
-		std::deque<CharWSourcePosition> buffer;
-		bool eof_reached = false;
+	char consume(uint offset = 0);
+	char peek(uint offset = 0);
+	bool end_of_file_reached();
+	SourcePosition get_source_position() const;
+	bool consume_if_matches(char match);
+	bool consume_all_if_next(const std::string& str);
 
-		// stream source position
-		uint32_t offset_in_file = 0;
-		uint32_t newlines_count = 0;
-		uint32_t offset_in_line = 0;
+private:
+	std::unique_ptr<std::istream> reader;
+	std::deque<CharWSourcePosition> buffer;
+	bool eof_reached = false;
 
-		std::optional<CharWSourcePosition> read_next();
-		int read_next_byte();
-		std::optional<char> convert(int val) const;
-		void consume_from_buffer();
-	};
+	// stream source position
+	uint32_t offset_in_file = 0;
+	uint32_t newlines_count = 0;
+	uint32_t offset_in_line = 0;
+
+	std::optional<CharWSourcePosition> read_next();
+	int read_next_byte();
+	std::optional<char> convert(int val) const;
+	void consume_from_buffer();
+};
 
 }
 

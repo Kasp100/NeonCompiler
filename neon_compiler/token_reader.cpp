@@ -2,8 +2,12 @@
 
 using namespace neon_compiler;
 
-TokenReader::TokenReader(std::span<const neon_compiler::Token> init_tokens)
-	: tokens{init_tokens} {}
+TokenReader::TokenReader
+(
+	std::span<const neon_compiler::Token> init_tokens
+) :
+	tokens{init_tokens}
+{}
 
 const Token& TokenReader::consume(uint offset)
 {

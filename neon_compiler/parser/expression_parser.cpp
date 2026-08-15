@@ -5,6 +5,19 @@ using namespace neon_compiler::parser;
 using namespace neon_compiler::ast::nodes;
 using namespace neon_compiler::analysis;
 
+ExpressionParser::ExpressionParser
+(
+	std::shared_ptr<logging::Logger> init_logger,
+	neon_compiler::TokenReader* init_reader,
+	FuncReportToken* init_func_report_token,
+	neon_compiler::parser::OperatorTable* init_operator_table
+) :
+	logger{init_logger},
+	reader{init_reader},
+	func_report_token{init_func_report_token},
+	operator_table{init_operator_table}
+{}
+
 const Token& ExpressionParser::peek_w_peek_cursor(PeekCursor peek_cursor, uint offset)
 {
 	return reader->peek((peek_cursor ? *peek_cursor : 0) + offset);
