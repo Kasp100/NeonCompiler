@@ -248,18 +248,40 @@ struct Entrypoint : PackageMember
 	}
 };
 
+enum class TypeAbstractionLevel
+{
+	INTERFACE,
+	ABSTRACT_CLASS,
+	CLASS
+};
+
 struct Type : PackageMember
 {
 	/** The access which determines who can use this package member */
 	Access access;
+	/** The type's abstraction level */
+	TypeAbstractionLevel abstraction_level;
+	/** Mapping from reference name to constant declaration. */
+	std::unordered_map<std::string, ConstantDeclaration> constants;
 	/** Mapping from reference name to field declaration. */
 	std::unordered_map<std::string, Field> fields;
 	/** Mapping from method name to methods with the same name, but different parameters (overloads). */
 	std::unordered_map<std::string, std::vector<Method>> methods;
-	/** Mapping from reference name to constant declaration. */
-	std::unordered_map<std::string, ConstantDeclaration> constants;
-	/** Mapping from pure function name to pure functions with the same name, but different parameters (overloads). */
-	std::unordered_map<std::string, std::vector<PureFunction>> pure_functions;
+
+	explicit Type
+	(
+		Access init_access,
+		TypeAbstractionLevel init_abstraction_level,
+		std::unordered_map<std::string, ConstantDeclaration> init_constants,
+		std::unordered_map<std::string, Field> init_fields,
+		std::unordered_map<std::string, std::vector<Method>> init_methods
+	) :
+		access{std::move(init_access)},
+		abstraction_level{init_abstraction_level},
+		constants{std::move(init_constants)},
+		fields{std::move(init_fields)},
+		methods{std::move(init_methods)}
+	{}
 
 	void accept(ASTVisitor& visitor) const override
 	{

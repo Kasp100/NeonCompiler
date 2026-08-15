@@ -241,6 +241,13 @@ private:
         const neon_compiler::ast::nodes::Access& access,
         std::shared_ptr<OperatorTable> operator_table
     );
+
+    void parse_and_register_type_after_keyword
+    (
+        const neon_compiler::ast::nodes::Access& access,
+		neon_compiler::ast::nodes::TypeAbstractionLevel abstraction_level,
+        std::shared_ptr<OperatorTable> operator_table
+    );
 };
 
 }

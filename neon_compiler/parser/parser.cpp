@@ -460,15 +460,18 @@ void Parser::parse_package_member(const Access& access, std::shared_ptr<Operator
 	else if(reader.peek().get_type() == TokenType::PACKAGE_MEMBER_CLASS)
 	{
 		report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
+		parse_and_register_type_after_keyword(access, TypeAbstractionLevel::CLASS, operator_table);
 	}
 	else if(reader.peek().get_type() == TokenType::MEMBER_ABSTRACT && reader.peek(1).get_type() == TokenType::PACKAGE_MEMBER_CLASS)
 	{
 		report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
 		report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
+		parse_and_register_type_after_keyword(access, TypeAbstractionLevel::ABSTRACT_CLASS, operator_table);
 	}
 	else if(reader.peek().get_type() == TokenType::PACKAGE_MEMBER_INTERFACE)
 	{
 		report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
+		parse_and_register_type_after_keyword(access, TypeAbstractionLevel::INTERFACE, operator_table);
 	}
 	else
 	{
@@ -1416,4 +1419,14 @@ void Parser::parse_and_register_pure_function_set_after_keyword
 	);
 
 	append_ast(std::move(package_member), name);
+}
+
+void Parser::parse_and_register_type_after_keyword
+(
+    const Access& access,
+	TypeAbstractionLevel abstraction_level,
+    std::shared_ptr<OperatorTable> operator_table
+)
+{
+	const std::string name = parse_declaration_name(AnalysisEntryType::DECLARATION);
 }
