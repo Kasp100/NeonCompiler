@@ -299,6 +299,15 @@ struct Field : ASTNode
 	/** The reference type of this field. */
 	ReferenceType reference_type;
 
+	explicit Field
+	(
+		bool init_var,
+		ReferenceType init_reference_type
+	) :
+		var{init_var},
+		reference_type{init_reference_type}
+	{}
+
 	void accept(ASTVisitor& visitor) const override
 	{
 		visitor.visit(*this);
@@ -319,6 +328,23 @@ struct Method : ASTNode
 	ParameterDeclarationList parameters;
 	/** Method body. Empty means it's not implemented (an abstract method). */
 	std::optional<CodeBlock> implementation;
+
+	explicit Method
+	(
+		Access init_access,
+		std::optional<ReferenceType> init_return_type,
+		bool init_mutating,
+		bool init_io,
+		ParameterDeclarationList init_parameters,
+		std::optional<CodeBlock> init_implementation
+	) :
+		access{std::move(init_access)},
+		return_type{std::move(init_return_type)},
+		mutating{init_mutating},
+		io{init_io},
+		parameters{std::move(init_parameters)},
+		implementation{std::move(init_implementation)}
+	{}
 
 	void accept(ASTVisitor& visitor) const override
 	{
