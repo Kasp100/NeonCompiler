@@ -1218,17 +1218,7 @@ CodeBlock Parser::parse_code_block_after_opening_bracket(std::shared_ptr<Operato
 			}
 			default:
 			{
-				std::optional<VariableDeclaration> var_decl = parse_variable_declaration(MutabilityMode::OWN, operator_table.get());
-
-				if(var_decl.has_value())
-				{
-					parse_end_of_statement_after_expression();
-					stmt = std::make_unique<LocalDeclaration>(std::move(var_decl.value()));
-				}
-				else
-				{
-					stmt = parse_discard_expression(operator_table.get());
-				}
+				stmt = parse_discard_expression(operator_table.get());
 			}
 		}
 
@@ -1284,6 +1274,7 @@ std::unique_ptr<Statement> Parser::parse_return_statement_after_keyword(Operator
 
 std::unique_ptr<Statement> Parser::parse_discard_expression(OperatorTable* operator_table)
 {
+	// TODO: parse local variable declaration
 	std::unique_ptr<Expression> expression = parse_expression(operator_table);
 
 	std::unique_ptr<DiscardExpression> result;
