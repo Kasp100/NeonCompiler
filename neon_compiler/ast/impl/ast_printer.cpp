@@ -28,6 +28,7 @@ void ASTPrinter::visit(const nodes::Entrypoint& node)
 	print_prefix();
 	print_access(node.access);
 	print(" entrypoint");
+	if(node.io) { print(" io"); }
 	print_line();
 
 	incr_depth();
