@@ -258,40 +258,6 @@ enum class TypeAbstractionLevel
 	CLASS
 };
 
-struct Type : PackageMember
-{
-	/** The access which determines who can use this package member */
-	Access access;
-	/** The type's abstraction level */
-	TypeAbstractionLevel abstraction_level;
-	/** Mapping from reference name to constant declaration. */
-	std::unordered_map<std::string, ConstantDeclaration> constants;
-	/** Mapping from reference name to field declaration. */
-	std::unordered_map<std::string, Field> fields;
-	/** Mapping from method name to methods with the same name, but different parameters (overloads). */
-	std::unordered_map<std::string, std::vector<Method>> methods;
-
-	explicit Type
-	(
-		Access init_access,
-		TypeAbstractionLevel init_abstraction_level,
-		std::unordered_map<std::string, ConstantDeclaration> init_constants,
-		std::unordered_map<std::string, Field> init_fields,
-		std::unordered_map<std::string, std::vector<Method>> init_methods
-	) :
-		access{std::move(init_access)},
-		abstraction_level{init_abstraction_level},
-		constants{std::move(init_constants)},
-		fields{std::move(init_fields)},
-		methods{std::move(init_methods)}
-	{}
-
-	void accept(ASTVisitor& visitor) const override
-	{
-		visitor.visit(*this);
-	}
-};
-
 struct Field : ASTNode
 {
 	/** Whether it is reassignable after construction */
@@ -352,24 +318,32 @@ struct Method : ASTNode
 	}
 };
 
-struct PureFunctionSet : PackageMember
+struct Type : PackageMember
 {
-	/** The access which determines who can use this pure function set */
+	/** The access which determines who can use this package member */
 	Access access;
-    /** Constants */
-    std::vector<ConstantDeclaration> constants;
-	/** Mapping from function name to functions with the same name, but different parameters (overloads). */
-	std::unordered_map<std::string, std::vector<PureFunction>> functions;
+	/** The type's abstraction level */
+	TypeAbstractionLevel abstraction_level;
+	/** Mapping from reference name to constant declaration. */
+	std::unordered_map<std::string, ConstantDeclaration> constants;
+	/** Mapping from reference name to field declaration. */
+	std::unordered_map<std::string, Field> fields;
+	/** Mapping from method name to methods with the same name, but different parameters (overloads). */
+	std::unordered_map<std::string, std::vector<Method>> methods;
 
-	explicit PureFunctionSet
+	explicit Type
 	(
 		Access init_access,
-		std::vector<ConstantDeclaration> init_constants,
-		std::unordered_map<std::string, std::vector<PureFunction>> init_functions
+		TypeAbstractionLevel init_abstraction_level,
+		std::unordered_map<std::string, ConstantDeclaration> init_constants,
+		std::unordered_map<std::string, Field> init_fields,
+		std::unordered_map<std::string, std::vector<Method>> init_methods
 	) :
 		access{std::move(init_access)},
+		abstraction_level{init_abstraction_level},
 		constants{std::move(init_constants)},
-		functions{std::move(init_functions)}
+		fields{std::move(init_fields)},
+		methods{std::move(init_methods)}
 	{}
 
 	void accept(ASTVisitor& visitor) const override
@@ -404,6 +378,32 @@ struct PureFunction : ASTNode
 		generic_parameters{std::move(init_generic_parameters)},
 		parameters{std::move(init_parameters)},
 		body{std::move(init_body)}
+	{}
+
+	void accept(ASTVisitor& visitor) const override
+	{
+		visitor.visit(*this);
+	}
+};
+
+struct PureFunctionSet : PackageMember
+{
+	/** The access which determines who can use this pure function set */
+	Access access;
+    /** Constants */
+    std::vector<ConstantDeclaration> constants;
+	/** Mapping from function name to functions with the same name, but different parameters (overloads). */
+	std::unordered_map<std::string, std::vector<PureFunction>> functions;
+
+	explicit PureFunctionSet
+	(
+		Access init_access,
+		std::vector<ConstantDeclaration> init_constants,
+		std::unordered_map<std::string, std::vector<PureFunction>> init_functions
+	) :
+		access{std::move(init_access)},
+		constants{std::move(init_constants)},
+		functions{std::move(init_functions)}
 	{}
 
 	void accept(ASTVisitor& visitor) const override
