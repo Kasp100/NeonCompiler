@@ -41,6 +41,7 @@ enum class TokenType
 	MEMBER_PURE,
 	MEMBER_CONST,
 	MUT,
+	IO,
 	VAR,
 	OPTIONAL,
 	EMPTY,

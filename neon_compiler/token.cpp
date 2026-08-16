@@ -71,6 +71,7 @@ std::optional<TokenType> Token::keyword_to_token_type(std::string_view word)
 	else if (word == "pure")                  return TokenType::MEMBER_PURE;
 	else if (word == "const")                 return TokenType::MEMBER_CONST;
 	else if (word == "mut")                   return TokenType::MUT;
+	else if (word == "io")                    return TokenType::IO;
 	else if (word == "var")                   return TokenType::VAR;
 	else if (word == "opt")                   return TokenType::OPTIONAL;
 	else if (word == "empty")                 return TokenType::EMPTY;

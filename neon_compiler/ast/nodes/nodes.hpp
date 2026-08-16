@@ -227,18 +227,21 @@ struct Entrypoint : PackageMember
 	Access access;
 	/** Parameters */
 	ParameterDeclarationList parameters;
+	/** Whether this entrypoint may perform IO */
+	bool io;
 	/** Code to run when called */
 	CodeBlock body;
 
 	explicit Entrypoint
 	(
 		Access init_access,
-		ParameterDeclarationList
-		init_parameters,
+		ParameterDeclarationList init_parameters,
+		bool init_io,
 		CodeBlock init_body
 	) :
 		access{std::move(init_access)},
 		parameters{std::move(init_parameters)},
+		io{init_io},
 		body{std::move(init_body)}
 	{}
 
@@ -310,6 +313,8 @@ struct Method : ASTNode
 	std::optional<ReferenceType> return_type;
 	/** Whether this method may mutate the object. */
 	bool mutating;
+	/** Whether this method may perform IO. */
+	bool io;
 	/** Parameters */
 	ParameterDeclarationList parameters;
 	/** Method body. Empty means it's not implemented (an abstract method). */

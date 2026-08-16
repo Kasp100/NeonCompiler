@@ -509,6 +509,14 @@ void Parser::parse_and_register_entrypoint_after_keyword(const Access& access, s
 		parameters = parse_parameter_declarations_after_opening_bracket(operator_table.get());
 	}
 
+	bool io{false};
+
+	if(reader.peek().get_type() == TokenType::IO)
+	{
+		report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
+		io = true;
+	}
+
 	CodeBlock body{std::vector<std::unique_ptr<Statement>>{}};
 
 	if(reader.peek().get_type() == TokenType::BRACKET_CURLY_OPEN)
@@ -522,7 +530,7 @@ void Parser::parse_and_register_entrypoint_after_keyword(const Access& access, s
 			std::string{error_messages::INVALID_ENTRYPOINT__MISSING_CODE_BLOCK});
 	}
 
-	std::unique_ptr<PackageMember> package_member = std::make_unique<Entrypoint>(access, std::move(parameters), std::move(body));
+	std::unique_ptr<PackageMember> package_member = std::make_unique<Entrypoint>(access, std::move(parameters), io, std::move(body));
 
 	append_ast(std::move(package_member), name);
 }
