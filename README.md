@@ -1,8 +1,6 @@
 # NeonCompiler: The Neoncode Compiler and Language Server
 
-This repository hosts **NeonCompiler**, the compiler and language server for **Neoncode**.
-
-Neoncode is a general-purpose, compiled programming language designed for **safe**, **efficient**, and **expressive** programming.
+This repository contains the compiler for Neoncode, a programming language focused on safe defaults, explicit capabilities, and controlled side effects.
 
 ---
 
