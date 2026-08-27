@@ -8,10 +8,9 @@ Neoncode is a general-purpose, compiled programming language designed for **safe
 
 ## The Neoncode Programming Language
 
-The full language specification is not yet published, but here are some of the core principles and features of the language:
+The full language specification is found [here](https://github.com/Kasp100/Neoncode-docs). This is a small overview of the language.
 
 ### Default = Safest
-Neoncode enforces safety and predictability through secure and immutable behavior unless explicitly relaxed.
 
 - Types without `mut` are **immutable**  
 - Variables declared without `var` cannot be **reassigned**  
