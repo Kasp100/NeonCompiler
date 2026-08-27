@@ -1,57 +1,30 @@
-# NeonCompiler: The Neoncode Compiler and Language Server
+# NeonCompiler
 
-This repository contains the compiler for Neoncode, a programming language focused on safe defaults, explicit capabilities, and controlled side effects.
+This repository contains NeonCompiler, the eventual compiler and language server for Neoncode.
 
----
+Neoncode is a statically typed, compiled, object-oriented programming language designed around **safe defaults, explicit capabilities, and controlled side effects**.
 
-## The Neoncode Programming Language
+The full language specification is found .
 
-The full language specification is found [here](https://github.com/Kasp100/Neoncode-docs). This is a small overview of the language.
+The Neoncode compiler uses **LLVM** for code generation and provides compiler-inserted **reference-counted memory management**, so memory management does not need to be handled manually by the programmer.
 
-### Default = Safest
+Some of Neoncode's core characteristics include:
 
-- Types without `mut` are **immutable**  
-- Variables declared without `var` cannot be **reassigned**  
-- Regular classes without `extendable` cannot be extended (i.e., used as supertypes)
-- Functions and methods must have effect annotations to be able perform certain operations:
-    - `mut`: mutate this object
-    - `share_mut`: shared mutable state
-    - `io`: perform I/O
+* **Static typing** with no type inference
+* **Object-oriented programming** with generics
+* **Reference semantics** - values behave as references from the programmer's perspective, with `=` used for reassignment
+* **Explicit mutation control** through `mut:`, `own`, `borrow`, and `shared`
+* **Explicit effect annotations** for mutation and I/O
+* **Compiler-managed concurrency**, including mutex and atomic behaviour
+* **Result/error values** for error handling
+* A strong focus on **C interoperability**
 
-### Safe Memory Model
-Neoncode eliminates manual memory management by using **reference counting**, allowing for predictable lifetime management and **C interoperability**.
+Neoncode does not use nullable types. The term *optional* is reserved for values or features that are genuinely optional rather than being used as a general nullability mechanism.
 
-### Programming Paradigms
-Neoncode combines **object-oriented** and **functional** programming paradigms to promote code reuse, modularity, and safety.
+For the language's design principles and complete semantics, see the [Neoncode language specification](https://github.com/Kasp100/Neoncode-docs).
 
-#### Private Fields
-Fields in types are **inaccessible from outside code** (i.e., private).  
-Manual or auto-generated getters and setters make data access safe and explicit.
+NeonCompiler is being developed as both the compiler and language server for Neoncode. The language server will provide IDE integration, including real-time syntax highlighting, code structure analysis, diagnostics, and other language-aware features.
 
-### Interoperability with Other Languages
-**C interoperability** enables Neoncode to directly use existing C libraries and codebases.
+## Status
 
-### Metaprogramming
-Neoncode supports compile-time metaprogramming and code generation through "**compile functions**" — functions written in Neoncode that operate on the **AST (Abstract Syntax Tree)**.  
-Compile function calls are explicit and use the `auto:` prefix.
-
-### Custom Expression Grammar
-Neoncode supports custom **expression grammar** through custom operator modules containing operator and operator function definitions, enabling domain-specific syntax extensions.
-
----
-
-## Compiler and Language Server
-
-NeonCompiler serves as both the **compiler** and the **language server** for Neoncode.
-
-### Compiler
-The compiler is built on **LLVM** for flexible and efficient compilation, supporting multiple compilation targets.
-
-### Language Server
-NeonCompiler also acts as a **language server** for IDE integration.
-
-Planned and implemented features include:
-- Real-time syntax highlighting  
-- Code navigation and structure analysis  
-- Diagnostics, warnings, and errors  
-- Potentially other advanced features to support efficient development in Neoncode
+NeonCompiler is currently in very early development. The parser and AST are under development, and many compiler and language-server features are not yet implemented.
