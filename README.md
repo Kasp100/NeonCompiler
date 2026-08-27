@@ -16,6 +16,10 @@ Neoncode enforces safety and predictability through secure and immutable behavio
 - Types without `mut` are **immutable**  
 - Variables declared without `var` cannot be **reassigned**  
 - Regular classes without `extendable` cannot be extended (i.e., used as supertypes)
+- Functions and methods must have effect annotations to be able perform certain operations:
+    - `mut`: mutate this object
+    - `share_mut`: shared mutable state
+    - `io`: perform I/O
 
 ### Safe Memory Model
 Neoncode eliminates manual memory management by using **reference counting**, allowing for predictable lifetime management and **C interoperability**.
@@ -26,15 +30,6 @@ Neoncode combines **object-oriented** and **functional** programming paradigms t
 #### Private Fields
 Fields in types are **inaccessible from outside code** (i.e., private).  
 Manual or auto-generated getters and setters make data access safe and explicit.
-
-### Strictly Pure Functions
-The compiler enforces purity for functions marked `pure`.
-
-#### Pure Function Sets
-Pure function sets allow pure functions to be grouped and imported similarly to a type.  
-They may contain:
-- Pure functions (compiler-enforced)
-- Constants (strictly immutable data)
 
 ### Interoperability with Other Languages
 **C interoperability** enables Neoncode to directly use existing C libraries and codebases.
