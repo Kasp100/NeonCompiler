@@ -11,7 +11,6 @@ class ASTPrinter : ASTVisitor
 public:
 	ASTPrinter();
 	void visit(const nodes::Root& node) override;
-	void visit(const nodes::Entrypoint& node) override;
 	void visit(const nodes::Type& node) override;
 	void visit(const nodes::VariableDeclaration& node) override;
     void visit(const nodes::ConstantDeclaration& node) override;
@@ -30,8 +29,8 @@ public:
 	void visit(const nodes::FunctionCall& node) override;
 	void visit(const nodes::SimpleRead& node) override;
 	void visit(const nodes::OptionalEmpty& node) override;
-	void visit(const nodes::PureFunctionSet& node) override;
-	void visit(const nodes::PureFunction& node) override;
+	void visit(const nodes::Function& node) override;
+	void visit(const nodes::FunctionOverloadList& node) override;
 	void visit(const nodes::OperatorModule& node) override;
 	void visit(const nodes::OperatorDeclaration& node) override;
 	void visit(const nodes::OperatorFunction& node) override;

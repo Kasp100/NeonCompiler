@@ -165,7 +165,7 @@ struct ObjectRead : Expression
 	}
 };
 
-/** Represents a simple call to a constructor, pure function, method (if this is inside a type), or entrypoint.
+/** Represents a simple call to a constructor, function, or method if this is inside a type.
  * Example: `fs_path("/home/user")`, here an instance of `ps_path` (a type) is made by calling the constructor,
  * which takes a single string. */
 struct FunctionCall : Expression

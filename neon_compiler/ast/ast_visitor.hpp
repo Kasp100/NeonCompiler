@@ -8,7 +8,6 @@
 namespace neon_compiler::ast::nodes
 {
 	struct Root;
-	struct Entrypoint;
 	struct Type;
 	struct VariableDeclaration;
     struct ConstantDeclaration;
@@ -27,8 +26,8 @@ namespace neon_compiler::ast::nodes
 	struct FunctionCall;
 	struct SimpleRead;
 	struct OptionalEmpty;
-	struct PureFunctionSet;
-	struct PureFunction;
+	struct Function;
+	struct FunctionOverloadList;
 	struct OperatorModule;
 	struct OperatorDeclaration;
 	struct OperatorFunction;
@@ -50,7 +49,6 @@ class ASTVisitor
 public:
 	virtual ~ASTVisitor() = default;
 	virtual void visit(const nodes::Root& node) = 0;
-	virtual void visit(const nodes::Entrypoint& node) = 0;
 	virtual void visit(const nodes::Type& node) = 0;
 	virtual void visit(const nodes::VariableDeclaration& node) = 0;
 	virtual void visit(const nodes::ConstantDeclaration& node) = 0;
@@ -69,8 +67,8 @@ public:
 	virtual void visit(const nodes::FunctionCall& node) = 0;
 	virtual void visit(const nodes::SimpleRead& node) = 0;
 	virtual void visit(const nodes::OptionalEmpty& node) = 0;
-	virtual void visit(const nodes::PureFunctionSet& node) = 0;
-	virtual void visit(const nodes::PureFunction& node) = 0;
+	virtual void visit(const nodes::Function& node) = 0;
+	virtual void visit(const nodes::FunctionOverloadList& node) = 0;
 	virtual void visit(const nodes::OperatorModule& node) = 0;
 	virtual void visit(const nodes::OperatorDeclaration& node) = 0;
 	virtual void visit(const nodes::OperatorFunction& node) = 0;

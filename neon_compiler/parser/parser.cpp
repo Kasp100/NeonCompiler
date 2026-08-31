@@ -188,7 +188,7 @@ void Parser::report_token
 
 std::string Parser::append_ast(std::unique_ptr<PackageMember> node, const std::string& identifier)
 {
-	std::string full_identifier{package.to_string() + "::" + identifier};
+	std::string full_identifier = get_full_identifier(identifier);
 
 	root_node->file_package_members[std::string{file}].push_back(full_identifier);
 	root_node->package_members[full_identifier] = std::move(node);
@@ -196,6 +196,11 @@ std::string Parser::append_ast(std::unique_ptr<PackageMember> node, const std::s
 	logger->info("Appended to AST: " + full_identifier);
 
 	return full_identifier;
+}
+
+std::string Parser::get_full_identifier(const std::string& identifier) const
+{
+	return package.to_string() + "::" + identifier;
 }
 
 std::shared_ptr<OperatorTable> Parser::parse_use_statement_after_keyword_and_create_operator_table(std::shared_ptr<OperatorTable> previous)
@@ -438,17 +443,7 @@ PackageMemberPattern Parser::parse_package_member_pattern()
 
 void Parser::parse_package_member(const Access& access, std::shared_ptr<OperatorTable> operator_table)
 {
-	if(reader.peek().get_type() == TokenType::PACKAGE_MEMBER_ENTRYPOINT)
-	{
-		report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
-		parse_and_register_entrypoint_after_keyword(access, operator_table);
-	}
-	else if(reader.peek().get_type() == TokenType::PACKAGE_MEMBER_PURE_FUNCTION_SET)
-	{
-		report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
-        parse_and_register_pure_function_set_after_keyword(access, operator_table);
-	}
-	else if(reader.peek().get_type() == TokenType::PACKAGE_MEMBER_OPERATOR_MODULE)
+	if(reader.peek().get_type() == TokenType::PACKAGE_MEMBER_OPERATOR_MODULE)
 	{
 		report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
 		parse_operator_module_b_after_keyword(operator_table);
@@ -473,10 +468,9 @@ void Parser::parse_package_member(const Access& access, std::shared_ptr<Operator
 		report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
 		parse_and_register_type_after_keyword(access, TypeAbstractionLevel::INTERFACE, operator_table);
 	}
-	else
+	else if(!parse_and_register_function_or_constant(access, operator_table))
 	{
-		report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::ERROR, reader.consume(),
-			std::string{error_messages::INVALID_FILE_LEVEL_TOKEN});
+		report_error_until_member_declaration_end(std::string{error_messages::INVALID_FILE_LEVEL_TOKEN});
 	}
 }
 
@@ -495,44 +489,6 @@ std::string Parser::parse_declaration_name(AnalysisEntryType analysis_entry_type
 
 		return std::string{error_recovery::PLACEHOLDER_NAME};
 	}
-}
-
-void Parser::parse_and_register_entrypoint_after_keyword(const Access& access, std::shared_ptr<OperatorTable> operator_table)
-{
-	const std::string name = parse_declaration_name(AnalysisEntryType::DECLARATION);
-
-	ParameterDeclarationList parameters;
-
-	if(reader.peek().get_type() == TokenType::BRACKET_ROUND_OPEN)
-	{
-		report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
-		parameters = parse_parameter_declarations_after_opening_bracket(operator_table.get());
-	}
-
-	bool io{false};
-
-	if(reader.peek().get_type() == TokenType::IO)
-	{
-		report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
-		io = true;
-	}
-
-	CodeBlock body{std::vector<std::unique_ptr<Statement>>{}};
-
-	if(reader.peek().get_type() == TokenType::BRACKET_CURLY_OPEN)
-	{
-		report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
-		body = parse_code_block_after_opening_bracket(operator_table);
-	}
-	else
-	{
-		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
-			std::string{error_messages::INVALID_ENTRYPOINT__MISSING_CODE_BLOCK});
-	}
-
-	std::unique_ptr<PackageMember> package_member = std::make_unique<Entrypoint>(access, std::move(parameters), io, std::move(body));
-
-	append_ast(std::move(package_member), name);
 }
 
 void Parser::parse_operator_module_a_and_register_after_keyword(const Access& access)
@@ -643,7 +599,7 @@ void Parser::parse_operator_module_b_after_keyword(std::shared_ptr<OperatorTable
 	// Consume `}`
 	reader.consume();
 
-	const std::string full_identifier{package.to_string() + "::" + name};
+	const std::string full_identifier = get_full_identifier(name);
 
 	std::unordered_map<std::string, std::unique_ptr<PackageMember>>::iterator it =
 		root_node->package_members.find(full_identifier);
@@ -1115,9 +1071,9 @@ std::optional<VariableDeclaration> Parser::parse_variable_declaration(Mutability
 
 std::optional<ReferenceType> Parser::parse_reference_type(MutabilityMode default_mutability_mode)
 {
-	bool opt{reader.peek().get_type() == TokenType::OPTIONAL};
+	bool optional{reader.peek().get_type() == TokenType::OPTIONAL};
 
-	if(opt)
+	if(optional)
 	{
 		report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
 	}
@@ -1140,9 +1096,9 @@ std::optional<ReferenceType> Parser::parse_reference_type(MutabilityMode default
 		report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
 	}
 
-	bool mut{reader.peek().get_type() == TokenType::MUT};
+	bool mutating_permission{reader.peek().get_type() == TokenType::EFFECT_MUTATING_OR_MUTABLE};
 
-	if(mut)
+	if(mutating_permission)
 	{
 		report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
 		if(reader.peek().get_type() == TokenType::COLON) { report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume()); }
@@ -1159,14 +1115,14 @@ std::optional<ReferenceType> Parser::parse_reference_type(MutabilityMode default
 
 		std::vector<GenericArgument> generic_args = parse_generic_arguments();
 
-		return ReferenceType{opt, mm, mut, std::move(type_id_str), std::move(inferred_name), std::move(generic_args)};
+		return ReferenceType{optional, mm, mutating_permission, std::move(type_id_str), std::move(inferred_name), std::move(generic_args)};
 	}
-	else if(opt || mut || !implicit_mutability_mode)
+	else if(optional || mutating_permission || !implicit_mutability_mode)
 	{
 		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
 			std::string{error_messages::INVALID_REFERENCE_TYPE});
 
-		return ReferenceType{opt, mm, mut, std::string{error_recovery::PLACEHOLDER_NAME}};
+		return ReferenceType{optional, mm, mutating_permission, std::string{error_recovery::PLACEHOLDER_NAME}};
 	}
 	else
 	{
@@ -1289,142 +1245,147 @@ std::unique_ptr<Statement> Parser::parse_discard_expression(OperatorTable* opera
 	return result;
 }
 
-void Parser::parse_and_register_pure_function_set_after_keyword
+bool Parser::parse_and_register_function_or_constant
 (
-    const Access& access,
-    std::shared_ptr<OperatorTable> operator_table
+	const Access& access,
+	std::shared_ptr<OperatorTable> operator_table
 )
 {
-	const std::string name = parse_declaration_name(AnalysisEntryType::DECLARATION);
-
-    std::vector<ConstantDeclaration> constants;
-	std::unordered_map<std::string, std::vector<PureFunction>> functions;
-
-	if(reader.peek().get_type() != TokenType::BRACKET_CURLY_OPEN)
+	TokenType tt = reader.peek().get_type();
+	uint peek_offset{0};
+	while
+	(
+		tt != TokenType::END_OF_FILE &&
+		tt != TokenType::BRACKET_ROUND_OPEN &&
+		tt != TokenType::END_STATEMENT
+	)
 	{
-		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
-			std::string{error_messages::INVALID_PURE_FUNCTION_SET__MISSING_CURLY_BRACKETS});
-		return;
+		++peek_offset;
+		tt = reader.peek(peek_offset).get_type();
 	}
 
+	if(tt == TokenType::BRACKET_ROUND_OPEN)
+	{
+		return parse_and_register_function(access, operator_table);
+	}
+
+	return parse_and_register_constant(access, operator_table);
+}
+
+bool Parser::parse_and_register_constant
+(
+	const Access& access,
+	std::shared_ptr<OperatorTable> operator_table
+)
+{
+	std::optional<VariableDeclaration> opt_var_decl = parse_variable_declaration(MutabilityMode::OWN, operator_table.get());
+	if(!opt_var_decl.has_value()) { return false; }
+	VariableDeclaration& var_decl = opt_var_decl.value();
+	std::string constant_name{var_decl.reference_name};
+
+	append_ast(std::make_unique<ConstantDeclaration>(access, std::move(var_decl)), constant_name);
+
+	parse_end_of_statement_after_expression();
+
+	return true;
+}
+
+bool Parser::parse_and_register_function
+(
+	const Access& access,
+	std::shared_ptr<OperatorTable> operator_table
+)
+{
+	std::optional<ReferenceType> opt_ref_type = parse_reference_type(MutabilityMode::BORROW);
+	if(!opt_ref_type.has_value()) { return false; }
+	ReferenceType ref_type = opt_ref_type.value();
+
+	if(reader.peek().get_type() != TokenType::IDENTIFIER) { return false; }
+	const Token& name_token = reader.consume();
+	const std::string function_name{name_token.get_lexeme().value()};
+	report_token(AnalysisEntryType::DECLARATION, AnalysisSeverity::INFO, name_token, function_name);
+
+	std::vector<GenericParameter> generic_parameters = parse_generic_parameters();
+
+	if(reader.peek().get_type() != TokenType::BRACKET_ROUND_OPEN) { return false; }
 	report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
 
-	while(!reader.end_of_file_reached())
+	ParameterDeclarationList params = parse_parameter_declarations_after_opening_bracket(operator_table.get());
+
+	bool effect_io{false};
+
+	TokenType tt = reader.peek().get_type();
+
+	while(tt != TokenType::END_OF_FILE && tt != TokenType::BRACKET_CURLY_OPEN)
 	{
-		if(reader.peek().get_type() == TokenType::BRACKET_CURLY_CLOSE)
+		if(reader.peek().get_type() == TokenType::EFFECT_IO)
 		{
-			break;
-		}
-
-		Access member_access = parse_access();
-
-		std::optional<ReferenceType> opt_ref_type = parse_reference_type(MutabilityMode::BORROW);
-
-		if(!opt_ref_type.has_value())
-		{
-			report_error_until_member_declaration_end(std::string{error_messages::INVALID_REFERENCE_TYPE});
-			continue;
-		}
-
-		const ReferenceType& ref_type = opt_ref_type.value();
-
-		std::string member_name;
-
-		if(reader.peek().get_type() == TokenType::IDENTIFIER)
-		{
-			member_name = reader.consume().get_lexeme().value();
-		}
-		else if(reader.peek().get_type() == TokenType::ASSIGN)
-		{
-			member_name = std::move(ref_type.inferred_name);
+			report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
+			effect_io = true;
 		}
 		else
 		{
-			report_error_until_member_declaration_end(std::string{error_messages::MISSING_IDENTIFIER});
-			continue;
+			report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::ERROR, reader.consume(),
+				std::string{error_messages::INVALID_FUNCTION_EFFECT});
 		}
 
-		if(reader.peek().get_type() == TokenType::ASSIGN)
-		{
-			report_token(AnalysisEntryType::OPERATOR, AnalysisSeverity::INFO, reader.consume());
+		tt = reader.peek().get_type();
+	}
 
-			std::unique_ptr<Expression> value = parse_expression(operator_table.get());
-
-			constants.push_back
-			(
-				ConstantDeclaration
-				{
-					std::move(member_access),
-					std::move(ref_type.type),
-					std::move(ref_type.generic_arguments),
-					std::move(member_name),
-					std::move(value)
-				}
-			);
-
-			parse_end_of_statement_after_expression();
-
-			continue;
-		}
-
-		std::vector<GenericParameter> generic_parameters = parse_generic_parameters();
-
-		if(reader.peek().get_type() == TokenType::BRACKET_ROUND_OPEN)
-		{
-			report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
-
-			ParameterDeclarationList params = parse_parameter_declarations_after_opening_bracket(operator_table.get());
-
-			if(reader.peek().get_type() != TokenType::BRACKET_CURLY_OPEN)
-			{
-				report_error_until_member_declaration_end(std::string{error_messages::INVALID_PURE_FUNCTION__MISSING_CODE_BLOCK});
-				continue;
-			}
-
-			report_token(AnalysisEntryType::OPERATOR, AnalysisSeverity::INFO, reader.consume());
-
-			CodeBlock body = parse_code_block_after_opening_bracket(operator_table);
-
-			if(!functions.contains(member_name))
-			{
-				functions[member_name] = std::vector<PureFunction>{};
-			}
-
-			functions[member_name].push_back
-			(
-				PureFunction
-				{
-					std::move(member_access),
-					ref_type,
-					std::move(generic_parameters),
-					std::move(params),
-					std::move(body)
-				}
-			);
-
-			continue;
-		}
-
-		report_error_until_member_declaration_end(std::string{error_messages::INVALID_PURE_FUNCTION_SET_MEMBER});
+	if(tt != TokenType::BRACKET_CURLY_OPEN)
+	{
+		report_error_until_member_declaration_end(std::string{error_messages::INVALID_FUNCTION__MISSING_CODE_BLOCK});
 	}
 
 	report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
 
-	std::unique_ptr<PackageMember> package_member = std::make_unique<PureFunctionSet>
+	CodeBlock body = parse_code_block_after_opening_bracket(operator_table);
+
+	std::string full_id = get_full_identifier(function_name);
+
+	FunctionOverloadList* overloads{nullptr};
+
+	std::unordered_map<std::string, std::unique_ptr<PackageMember>>::iterator it =
+		root_node->package_members.find(full_id);
+
+	if(it == root_node->package_members.end())
+	{
+		std::unique_ptr<FunctionOverloadList> new_overload_list = std::make_unique<FunctionOverloadList>(std::vector<Function>{});
+		overloads = new_overload_list.get();
+		append_ast(std::move(new_overload_list), function_name);
+	}
+	else
+	{
+		overloads = dynamic_cast<FunctionOverloadList*>(it->second.get());
+	}
+
+	if(!overloads)
+	{
+		logger->error("Could not add overload; dynamic cast returned nullptr.");
+		return true;
+	}
+
+	overloads->functions.push_back
 	(
-		std::move(access),
-		std::move(constants),
-		std::move(functions)
+		Function
+		{
+			access,
+			std::move(ref_type),
+			std::move(generic_parameters),
+			std::move(params),
+			effect_io,
+			std::move(body)
+		}
 	);
 
-	append_ast(std::move(package_member), name);
+	return true;
 }
 
 void Parser::parse_and_register_type_after_keyword
 (
-    const Access& access,
+	const Access& access,
 	TypeAbstractionLevel abstraction_level,
-    std::shared_ptr<OperatorTable> operator_table
+	std::shared_ptr<OperatorTable> operator_table
 )
 {
 	const std::string name = parse_declaration_name(AnalysisEntryType::DECLARATION);

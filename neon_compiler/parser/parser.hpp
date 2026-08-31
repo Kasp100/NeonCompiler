@@ -93,20 +93,14 @@ namespace error_messages
 	constexpr std::string_view INVALID_SUPERTYPE_LIST_IDENTIFIER =
 		"Invalid supertype list. Expected a valid type identifier.";
 
-	constexpr std::string_view INVALID_ENTRYPOINT__MISSING_CODE_BLOCK =
-		"Invalid entrypoint. Expected a code block enclosed in `{}`.";
-
 	constexpr std::string_view INVALID_OPERATOR_MODULE__MISSING_CURLY_BRACKETS =
 		"Invalid operator module. Expected `{}`.";
 
-	constexpr std::string_view INVALID_PURE_FUNCTION_SET__MISSING_CURLY_BRACKETS =
-		"Invalid pure function set. Expected `{}`.";
+	constexpr std::string_view INVALID_FUNCTION_EFFECT =
+		"Invalid function effect. Only `io` is allowed for regular functions.";
 
-	constexpr std::string_view INVALID_PURE_FUNCTION__MISSING_CODE_BLOCK =
-		"Invalid pure function. Expected a code block enclosed in `{}` and no keywords.";
-
-	constexpr std::string_view INVALID_PURE_FUNCTION_SET_MEMBER =
-		"Invalid pure function set member. Pure functions contain constants and pure functions.";
+	constexpr std::string_view INVALID_FUNCTION__MISSING_CODE_BLOCK =
+		"Invalid function. Expected a code block enclosed in `{}` and no keywords.";
 }
 
 namespace error_recovery
@@ -167,6 +161,8 @@ private:
 
 	std::string append_ast(std::unique_ptr<neon_compiler::ast::nodes::PackageMember> node, const std::string& identifier);
 
+	std::string get_full_identifier(const std::string& identifier) const;
+
 	std::shared_ptr<neon_compiler::parser::OperatorTable> parse_use_statement_after_keyword_and_create_operator_table
 	(
 		std::shared_ptr<neon_compiler::parser::OperatorTable> previous
@@ -191,11 +187,6 @@ private:
 	std::string parse_declaration_name
 	(
 		neon_compiler::analysis::AnalysisEntryType analysis_entry_type
-	);
-	void parse_and_register_entrypoint_after_keyword
-	(
-		const neon_compiler::ast::nodes::Access& access,
-		std::shared_ptr<neon_compiler::parser::OperatorTable> operator_table
 	);
 
 	void parse_operator_module_a_and_register_after_keyword(const neon_compiler::ast::nodes::Access& access);
@@ -236,18 +227,30 @@ private:
 	std::unique_ptr<neon_compiler::ast::nodes::Statement> parse_return_statement_after_keyword(neon_compiler::parser::OperatorTable* operator_table);
 	std::unique_ptr<neon_compiler::ast::nodes::Statement> parse_discard_expression(neon_compiler::parser::OperatorTable* operator_table);
 
-    void parse_and_register_pure_function_set_after_keyword
-    (
-        const neon_compiler::ast::nodes::Access& access,
-        std::shared_ptr<OperatorTable> operator_table
-    );
+	bool parse_and_register_function_or_constant
+	(
+		const neon_compiler::ast::nodes::Access& access,
+		std::shared_ptr<OperatorTable> operator_table
+	);
 
-    void parse_and_register_type_after_keyword
-    (
-        const neon_compiler::ast::nodes::Access& access,
-		neon_compiler::ast::nodes::TypeAbstractionLevel abstraction_level,
+	bool parse_and_register_constant
+	(
+		const neon_compiler::ast::nodes::Access& access,
         std::shared_ptr<OperatorTable> operator_table
-    );
+	);
+
+	bool parse_and_register_function
+	(
+		const neon_compiler::ast::nodes::Access& access,
+        std::shared_ptr<OperatorTable> operator_table
+	);
+
+	void parse_and_register_type_after_keyword
+	(
+		const neon_compiler::ast::nodes::Access& access,
+		neon_compiler::ast::nodes::TypeAbstractionLevel abstraction_level,
+		std::shared_ptr<OperatorTable> operator_table
+	);
 };
 
 }

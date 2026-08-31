@@ -167,32 +167,22 @@ struct VariableDeclaration : ASTNode
 	}
 };
 
-struct ConstantDeclaration : ASTNode
+using ParameterDeclarationList = std::vector<VariableDeclaration>;
+
+struct ConstantDeclaration : PackageMember
 {
 	/** The access which determines who can use this constant */
 	Access access;
-	/** The name of the type */
-	std::string type;
-	/** Generic arguments */
-	std::vector<GenericArgument> generic_arguments;
-	/** The reference name */
-	std::string reference_name;
-	/** Value */
-	std::unique_ptr<Expression> value;
+	/** Constant */
+	VariableDeclaration constant;
 
     explicit ConstantDeclaration
     (
 		Access init_access,
-        std::string init_type,
-        std::vector<GenericArgument> init_generic_arguments,
-        std::string init_reference_name,
-        std::unique_ptr<Expression> init_value
+        VariableDeclaration init_constant
     ) :
 		access{std::move(init_access)},
-        type{std::move(init_type)},
-        generic_arguments{std::move(init_generic_arguments)},
-        reference_name{std::move(init_reference_name)},
-        value{std::move(init_value)}
+        constant{std::move(init_constant)}
     {}
 
 	void accept(ASTVisitor& visitor) const override
@@ -200,8 +190,6 @@ struct ConstantDeclaration : ASTNode
 		visitor.visit(*this);
 	}
 };
-
-using ParameterDeclarationList = std::vector<VariableDeclaration>;
 
 struct CodeBlock : ASTNode
 {
@@ -212,37 +200,6 @@ struct CodeBlock : ASTNode
 		std::vector<std::unique_ptr<Statement>> init_statements
 	) :
 		statements{std::move(init_statements)}
-	{}
-
-	void accept(ASTVisitor& visitor) const override
-	{
-		visitor.visit(*this);
-	}
-};
-
-struct Entrypoint : PackageMember
-{
-	/** The access which determines who can use this entrypoint.
-	 * However, it can always be used as application entrypoint by the compiler, hence the name. */
-	Access access;
-	/** Parameters */
-	ParameterDeclarationList parameters;
-	/** Whether this entrypoint may perform IO */
-	bool io;
-	/** Code to run when called */
-	CodeBlock body;
-
-	explicit Entrypoint
-	(
-		Access init_access,
-		ParameterDeclarationList init_parameters,
-		bool init_io,
-		CodeBlock init_body
-	) :
-		access{std::move(init_access)},
-		parameters{std::move(init_parameters)},
-		io{init_io},
-		body{std::move(init_body)}
 	{}
 
 	void accept(ASTVisitor& visitor) const override
@@ -352,31 +309,35 @@ struct Type : PackageMember
 	}
 };
 
-struct PureFunction : ASTNode
+struct Function : ASTNode
 {
-	/** The access which determines who can use this pure function */
+	/** The access which determines who can use this function */
 	Access access;
-	/** The immutable type this pure function returns. */
+	/** The type this function returns. */
 	ReferenceType return_type;
 	/** Generic parameters */
 	std::vector<GenericParameter> generic_parameters;
-	/** Parameters (should be immutable values) */
+	/** Parameters */
 	ParameterDeclarationList parameters;
-	/** Pure function body */
+	/** Whether this function may perform I/O */
+	bool effect_io;
+	/** Function body */
 	CodeBlock body;
 
-	explicit PureFunction
+	explicit Function
 	(
 		Access init_access,
 		ReferenceType init_return_type,
 		std::vector<GenericParameter> init_generic_parameters,
 		ParameterDeclarationList init_parameters,
+		bool init_effect_io,
 		CodeBlock init_body
 	) :
 		access{std::move(init_access)},
 		return_type{std::move(init_return_type)},
 		generic_parameters{std::move(init_generic_parameters)},
 		parameters{std::move(init_parameters)},
+		effect_io{init_effect_io},
 		body{std::move(init_body)}
 	{}
 
@@ -386,23 +347,15 @@ struct PureFunction : ASTNode
 	}
 };
 
-struct PureFunctionSet : PackageMember
+/** Functions with the same name, but different parameter types */
+struct FunctionOverloadList : PackageMember
 {
-	/** The access which determines who can use this pure function set */
-	Access access;
-    /** Constants */
-    std::vector<ConstantDeclaration> constants;
-	/** Mapping from function name to functions with the same name, but different parameters (overloads). */
-	std::unordered_map<std::string, std::vector<PureFunction>> functions;
+	std::vector<Function> functions;
 
-	explicit PureFunctionSet
+	explicit FunctionOverloadList
 	(
-		Access init_access,
-		std::vector<ConstantDeclaration> init_constants,
-		std::unordered_map<std::string, std::vector<PureFunction>> init_functions
+		std::vector<Function> init_functions
 	) :
-		access{std::move(init_access)},
-		constants{std::move(init_constants)},
 		functions{std::move(init_functions)}
 	{}
 
@@ -497,7 +450,7 @@ struct OperatorDeclaration : ASTNode
 
 struct OperatorFunction : ASTNode
 {
-	/** The reference type this pure function returns. */
+	/** The reference type this function returns. */
 	ReferenceType return_type;
 	/** Generic parameters */
 	std::vector<GenericParameter> generic_parameters;
@@ -555,7 +508,6 @@ enum class CompileFunctionScope
 {
 	PACKAGE,
 	TYPE_DEFINITION,
-	PURE_FUNCTION_SET,
 	CODE_BLOCK
 };
 

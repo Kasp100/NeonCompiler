@@ -23,36 +23,6 @@ void ASTPrinter::visit(const nodes::Root& node)
 	}
 }
 
-void ASTPrinter::visit(const nodes::Entrypoint& node)
-{
-	print_prefix();
-	print_access(node.access);
-	print(" entrypoint");
-	if(node.io) { print(" io"); }
-	print_line();
-
-	incr_depth();
-
-	print_prefix();
-	print("parameters:");
-	print_line();
-
-	incr_depth();
-	for(const VariableDeclaration& var_decl : node.parameters)
-	{
-		var_decl.accept(*this);
-	}
-	decr_depth();
-
-	print_prefix();
-	print("body:");
-	print_line();
-
-	incr_depth();
-	node.body.accept(*this);
-	decr_depth();
-}
-
 void ASTPrinter::visit(const nodes::Type& node)
 {
 
@@ -92,18 +62,11 @@ void ASTPrinter::visit(const nodes::ConstantDeclaration& node)
 {
 	print_prefix();
 	print_access(node.access);
-	print(" const ");
-	print(node.type);
-	print_generic_arguments(node.generic_arguments);
-
-	print(" ");
-	print(node.reference_name);
-
-	print(" =");
+	print(" constant");
 	print_line();
 
 	incr_depth();
-	node.value->accept(*this);
+	node.constant.accept(*this);
 	decr_depth();
 }
 
@@ -309,43 +272,12 @@ void ASTPrinter::visit(const nodes::OptionalEmpty& node)
 	print_line();
 }
 
-void ASTPrinter::visit(const nodes::PureFunctionSet& node)
+void ASTPrinter::visit(const nodes::Function& node)
 {
 	print_prefix();
 	print_access(node.access);
-	print(" pure_function_set");
-	print_line();
-
-	incr_depth();
-
-	for(const nodes::ConstantDeclaration& constant : node.constants)
-	{
-		constant.accept(*this);
-	}
-
-	for(const std::pair<const std::string, std::vector<PureFunction>>& pair : node.functions)
-	{
-		print_prefix();
-		print("overloads named ");
-		print(pair.first);
-		print_line();
-
-		incr_depth();
-		for(const nodes::PureFunction& pure_function : pair.second)
-		{
-			pure_function.accept(*this);
-		}
-		decr_depth();
-	}
-
-	decr_depth();
-}
-
-void ASTPrinter::visit(const nodes::PureFunction& node)
-{
-	print_prefix();
-	print_access(node.access);
-	print(" pure function:");
+	print(" function");
+	if(node.effect_io) { print(" io"); }
 	print_line();
 
 	incr_depth();
@@ -381,6 +313,22 @@ void ASTPrinter::visit(const nodes::PureFunction& node)
 	incr_depth();
 	node.body.accept(*this);
 	decr_depth();
+
+	decr_depth();
+}
+
+void ASTPrinter::visit(const nodes::FunctionOverloadList& node)
+{
+	print_prefix();
+	print("overloads");
+	print_line();
+
+	incr_depth();
+
+	for(const nodes::Function& function : node.functions)
+	{
+		function.accept(*this);
+	}
 
 	decr_depth();
 }

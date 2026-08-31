@@ -68,10 +68,10 @@ std::optional<TokenType> Token::keyword_to_token_type(std::string_view word)
 	else if (word == "exclusive")             return TokenType::ACCESS_EXCLUSIVE;
 	else if (word == "shallow")               return TokenType::SHALLOW;
 	else if (word == "deep")                  return TokenType::DEEP;
-	else if (word == "pure")                  return TokenType::MEMBER_PURE;
 	else if (word == "const")                 return TokenType::MEMBER_CONST;
-	else if (word == "mut")                   return TokenType::MUT;
-	else if (word == "io")                    return TokenType::IO;
+	else if (word == "mut")                   return TokenType::EFFECT_MUTATING_OR_MUTABLE;
+	else if (word == "share_mut")             return TokenType::EFFECT_SHARE_MUT;
+	else if (word == "io")                    return TokenType::EFFECT_IO;
 	else if (word == "var")                   return TokenType::VAR;
 	else if (word == "opt")                   return TokenType::OPTIONAL;
 	else if (word == "empty")                 return TokenType::EMPTY;
@@ -79,8 +79,6 @@ std::optional<TokenType> Token::keyword_to_token_type(std::string_view word)
 	else if (word == "own")                   return TokenType::REF_TYPE_OWN;
 	else if (word == "shared")                return TokenType::REF_TYPE_SHARED;
 	else if (word == "borrow")                return TokenType::REF_TYPE_BORROW;
-	else if (word == "entrypoint")            return TokenType::PACKAGE_MEMBER_ENTRYPOINT;
-	else if (word == "pure_function_set")     return TokenType::PACKAGE_MEMBER_PURE_FUNCTION_SET;
 	else if (word == "operator_module")       return TokenType::PACKAGE_MEMBER_OPERATOR_MODULE;
 	else if (word == "compile_function")      return TokenType::PACKAGE_MEMBER_COMPILE_FUNCTION;
 	else if (word == "class")                 return TokenType::PACKAGE_MEMBER_CLASS;

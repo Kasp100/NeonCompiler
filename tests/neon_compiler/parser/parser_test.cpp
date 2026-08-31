@@ -6,14 +6,14 @@
 
 using namespace neon_compiler;
 
-TEST_CASE("Entrypoints are parsed correctly")
+TEST_CASE("Fyunctions are parsed correctly")
 {
 	// Arrange
 	std::vector<Token> tokens
 	{
 		Token{TokenType::PACKAGE, reading::SourcePosition{0,0,0}, 0},
 		Token{TokenType::IDENTIFIER, reading::SourcePosition{0,0,0}, 0, ""},
-		Token{TokenType::PACKAGE_MEMBER_ENTRYPOINT, reading::SourcePosition{0,0,0}, 0},
+		Token{TokenType::RETURN_TYPE_VOID, reading::SourcePosition{0,0,0}, 0},
 		Token{TokenType::IDENTIFIER, reading::SourcePosition{0,0,0}, 0, "main"}
 	};
 
