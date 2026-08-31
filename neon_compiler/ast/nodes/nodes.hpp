@@ -315,8 +315,8 @@ struct Function : ASTNode
 	Access access;
 	/** Whether this is a compile-time function */
 	bool compile_time;
-	/** The type this function returns. */
-	ReferenceType return_type;
+	/** The reference type this function returns. Empty means it's a `void` method. */
+	std::optional<ReferenceType> return_type;
 	/** Generic parameters */
 	std::vector<GenericParameter> generic_parameters;
 	/** Parameters */
@@ -330,7 +330,7 @@ struct Function : ASTNode
 	(
 		Access init_access,
 		bool init_compile_time,
-		ReferenceType init_return_type,
+		std::optional<ReferenceType> init_return_type,
 		std::vector<GenericParameter> init_generic_parameters,
 		ParameterDeclarationList init_parameters,
 		bool init_effect_io,

@@ -1300,9 +1300,16 @@ bool Parser::parse_and_register_function
 		compile_time = true;
 	}
 
-	std::optional<ReferenceType> opt_ref_type = parse_reference_type(MutabilityMode::BORROW);
-	if(!opt_ref_type.has_value()) { return false; }
-	ReferenceType ref_type = opt_ref_type.value();
+	std::optional<ReferenceType> return_type;
+	if(reader.peek().get_type() == TokenType::RETURN_TYPE_VOID)
+	{
+		report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
+	}
+	else
+	{
+		return_type = parse_reference_type(MutabilityMode::BORROW);
+		if(!return_type.has_value()) { return false; }
+	}
 
 	if(reader.peek().get_type() != TokenType::IDENTIFIER) { return false; }
 	const Token& name_token = reader.consume();
@@ -1375,7 +1382,7 @@ bool Parser::parse_and_register_function
 		{
 			access,
 			compile_time,
-			std::move(ref_type),
+			std::move(return_type),
 			std::move(generic_parameters),
 			std::move(params),
 			effect_io,

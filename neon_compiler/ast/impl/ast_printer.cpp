@@ -284,7 +284,16 @@ void ASTPrinter::visit(const nodes::Function& node)
 
 	print_prefix();
 	print("return type: ");
-	node.return_type.accept(*this);
+
+	if(node.return_type.has_value())
+	{
+		node.return_type.value().accept(*this);
+	}
+	else
+	{
+		print("void");
+	}
+
 	print_line();
 
 	if(node.generic_parameters.size() > 0)
