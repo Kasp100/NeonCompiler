@@ -313,6 +313,8 @@ struct Function : ASTNode
 {
 	/** The access which determines who can use this function */
 	Access access;
+	/** Whether this is a compile-time function */
+	bool compile_time;
 	/** The type this function returns. */
 	ReferenceType return_type;
 	/** Generic parameters */
@@ -327,6 +329,7 @@ struct Function : ASTNode
 	explicit Function
 	(
 		Access init_access,
+		bool init_compile_time,
 		ReferenceType init_return_type,
 		std::vector<GenericParameter> init_generic_parameters,
 		ParameterDeclarationList init_parameters,
@@ -334,6 +337,7 @@ struct Function : ASTNode
 		CodeBlock init_body
 	) :
 		access{std::move(init_access)},
+		compile_time{init_compile_time},
 		return_type{std::move(init_return_type)},
 		generic_parameters{std::move(init_generic_parameters)},
 		parameters{std::move(init_parameters)},
@@ -497,28 +501,6 @@ struct OperatorModule : PackageMember
 		operators{std::move(init_operators)},
 		functions{std::move(init_functions)}
 	{}
-
-	void accept(ASTVisitor& visitor) const override
-	{
-		visitor.visit(*this);
-	}
-};
-
-enum class CompileFunctionScope
-{
-	PACKAGE,
-	TYPE_DEFINITION,
-	CODE_BLOCK
-};
-
-struct CompileFunction : PackageMember
-{
-	/** The access which determines who can use this compile function */
-	Access access;
-	/** Where the compile function can be called from. Defines what a compile function can create and view. */
-	CompileFunctionScope scope;
-	/** Compile function body */
-	CodeBlock body;
 
 	void accept(ASTVisitor& visitor) const override
 	{

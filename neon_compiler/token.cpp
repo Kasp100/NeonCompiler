@@ -76,11 +76,11 @@ std::optional<TokenType> Token::keyword_to_token_type(std::string_view word)
 	else if (word == "opt")                   return TokenType::OPTIONAL;
 	else if (word == "empty")                 return TokenType::EMPTY;
 	else if (word == "auto")                  return TokenType::AUTO;
+	else if (word == "compile_time")          return TokenType::COMPILE_TIME;
 	else if (word == "own")                   return TokenType::REF_TYPE_OWN;
 	else if (word == "shared")                return TokenType::REF_TYPE_SHARED;
 	else if (word == "borrow")                return TokenType::REF_TYPE_BORROW;
 	else if (word == "operator_module")       return TokenType::PACKAGE_MEMBER_OPERATOR_MODULE;
-	else if (word == "compile_function")      return TokenType::PACKAGE_MEMBER_COMPILE_FUNCTION;
 	else if (word == "class")                 return TokenType::PACKAGE_MEMBER_CLASS;
 	else if (word == "interface")             return TokenType::PACKAGE_MEMBER_INTERFACE;
 	else if (word == "abstract")              return TokenType::MEMBER_ABSTRACT;

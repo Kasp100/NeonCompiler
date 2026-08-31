@@ -34,7 +34,6 @@ public:
 	void visit(const nodes::OperatorModule& node) override;
 	void visit(const nodes::OperatorDeclaration& node) override;
 	void visit(const nodes::OperatorFunction& node) override;
-	void visit(const nodes::CompileFunction& node) override;
 	void visit(const nodes::LiteralNumberExpression& node) override;
 	void visit(const nodes::LiteralStringExpression& node) override;
 	void visit(const nodes::LiteralBooleanExpression& node) override;

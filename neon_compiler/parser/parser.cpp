@@ -448,10 +448,6 @@ void Parser::parse_package_member(const Access& access, std::shared_ptr<Operator
 		report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
 		parse_operator_module_b_after_keyword(operator_table);
 	}
-	else if(reader.peek().get_type() == TokenType::PACKAGE_MEMBER_COMPILE_FUNCTION)
-	{
-		report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
-	}
 	else if(reader.peek().get_type() == TokenType::PACKAGE_MEMBER_CLASS)
 	{
 		report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
@@ -1296,6 +1292,14 @@ bool Parser::parse_and_register_function
 	std::shared_ptr<OperatorTable> operator_table
 )
 {
+	bool compile_time{false};
+
+	if(reader.peek().get_type() == TokenType::COMPILE_TIME)
+	{
+		report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
+		compile_time = true;
+	}
+
 	std::optional<ReferenceType> opt_ref_type = parse_reference_type(MutabilityMode::BORROW);
 	if(!opt_ref_type.has_value()) { return false; }
 	ReferenceType ref_type = opt_ref_type.value();
@@ -1370,6 +1374,7 @@ bool Parser::parse_and_register_function
 		Function
 		{
 			access,
+			compile_time,
 			std::move(ref_type),
 			std::move(generic_parameters),
 			std::move(params),

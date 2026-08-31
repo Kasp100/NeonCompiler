@@ -474,11 +474,6 @@ void ASTPrinter::visit(const nodes::OperatorFunction& node)
 	decr_depth();
 }
 
-void ASTPrinter::visit(const nodes::CompileFunction& node)
-{
-
-}
-
 void ASTPrinter::visit(const nodes::LiteralNumberExpression& node)
 {
 	print_prefix();
