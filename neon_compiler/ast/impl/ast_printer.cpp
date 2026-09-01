@@ -137,14 +137,14 @@ void ASTPrinter::visit(const nodes::DiscardExpression& node)
 	decr_depth();
 }
 
-void ASTPrinter::visit(const nodes::LocalDeclaration& node)
+void ASTPrinter::visit(const nodes::LocalDeclarationOrAssignment& node)
 {
 	print_prefix();
-	print("local declaration:");
+	print("local declaration or assignment");
 	print_line();
 
 	incr_depth();
-	node.variable_declaration.accept(*this);
+	node.declaration_or_assignment.accept(*this);
 	decr_depth();
 }
 

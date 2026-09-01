@@ -1226,7 +1226,14 @@ std::unique_ptr<Statement> Parser::parse_return_statement_after_keyword(Operator
 
 std::unique_ptr<Statement> Parser::parse_discard_expression(OperatorTable* operator_table)
 {
-	// TODO: parse local variable declaration
+	std::optional<VariableDeclaration> opt_var_decl = parse_variable_declaration(MutabilityMode::OWN, operator_table);
+
+	if(opt_var_decl.has_value())
+	{
+		parse_end_of_statement_after_expression();
+		return std::make_unique<LocalDeclarationOrAssignment>(std::move(opt_var_decl.value()));
+	}
+
 	std::unique_ptr<Expression> expression = parse_expression(operator_table);
 
 	std::unique_ptr<DiscardExpression> result;

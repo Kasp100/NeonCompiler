@@ -19,7 +19,7 @@ public:
 	void visit(const nodes::ReferenceType& node) override;
 	void visit(const nodes::CodeBlock& node) override;
 	void visit(const nodes::DiscardExpression& node) override;
-	void visit(const nodes::LocalDeclaration& node) override;
+	void visit(const nodes::LocalDeclarationOrAssignment& node) override;
 	void visit(const nodes::AutoCall& node) override;
 	void visit(const nodes::Return& node) override;
 	void visit(const nodes::Assignment& node) override;

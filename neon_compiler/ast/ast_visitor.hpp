@@ -16,7 +16,7 @@ namespace neon_compiler::ast::nodes
 	struct ReferenceType;
 	struct CodeBlock;
 	struct DiscardExpression;
-	struct LocalDeclaration;
+	struct LocalDeclarationOrAssignment;
 	struct AutoCall;
 	struct Return;
 	struct Assignment;
@@ -57,7 +57,7 @@ public:
 	virtual void visit(const nodes::ReferenceType& node) = 0;
 	virtual void visit(const nodes::CodeBlock& node) = 0;
 	virtual void visit(const nodes::DiscardExpression& node) = 0;
-	virtual void visit(const nodes::LocalDeclaration& node) = 0;
+	virtual void visit(const nodes::LocalDeclarationOrAssignment& node) = 0;
 	virtual void visit(const nodes::AutoCall& node) = 0;
 	virtual void visit(const nodes::Return& node) = 0;
 	virtual void visit(const nodes::Assignment& node) = 0;

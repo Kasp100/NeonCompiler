@@ -30,16 +30,16 @@ struct DiscardExpression : Statement
 	}
 };
 
-struct LocalDeclaration : Statement
+struct LocalDeclarationOrAssignment : Statement
 {
 	/** The variable declaration within this statement */
-	VariableDeclaration variable_declaration;
+	VariableDeclaration declaration_or_assignment;
 
-	explicit LocalDeclaration
+	explicit LocalDeclarationOrAssignment
 	(
-		VariableDeclaration init_variable_declaration
+		VariableDeclaration init_declaration_or_assignment
 	) :
-		variable_declaration{std::move(init_variable_declaration)}
+		declaration_or_assignment{std::move(init_declaration_or_assignment)}
 	{}
 
 	void accept(ASTVisitor& visitor) const override
