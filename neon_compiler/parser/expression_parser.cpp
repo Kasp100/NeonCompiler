@@ -58,7 +58,7 @@ const neon_compiler::Token& ExpressionParser::consume_w_peek_cursor_and_report
 	}
 }
 
-std::optional<neon_compiler::ast::Identifier> ExpressionParser::parse_identifier(AnalysisEntryType type, AnalysisSeverity severity, PeekCursor peek_cursor)
+std::optional<neon_compiler::ast::PackageMemberID> ExpressionParser::parse_identifier(AnalysisEntryType type, AnalysisSeverity severity, PeekCursor peek_cursor)
 {
 	std::vector<std::string> parts;
 	std::vector<Token> tokens;
@@ -83,7 +83,7 @@ std::optional<neon_compiler::ast::Identifier> ExpressionParser::parse_identifier
 	}
 	while(continue_reading);
 
-	neon_compiler::ast::Identifier id{parts};
+	neon_compiler::ast::PackageMemberID id{parts};
 	std::string id_string = id.to_string();
 
 	if(!peek_cursor)
@@ -129,7 +129,7 @@ std::vector<GenericArgument> ExpressionParser::parse_generic_arguments(PeekCurso
 		}
 		else if(tt == TokenType::IDENTIFIER)
 		{
-			const neon_compiler::ast::Identifier reference =
+			const neon_compiler::ast::PackageMemberID reference =
 				parse_identifier(AnalysisEntryType::REFERENCE, AnalysisSeverity::INFO, peek_cursor).value();
 
 			args.emplace_back(reference.to_string(), true, parse_generic_arguments(peek_cursor));
@@ -303,7 +303,7 @@ std::unique_ptr<Expression> ExpressionParser::parse_parenthesised_expression(Pee
 std::unique_ptr<Expression> ExpressionParser::parse_named_expression(PeekCursor peek_cursor)
 {
 	// At this point, an identifier should be guaranteed.
-	neon_compiler::ast::Identifier id{parse_identifier(AnalysisEntryType::REFERENCE, AnalysisSeverity::INFO, peek_cursor).value()};
+	neon_compiler::ast::PackageMemberID id{parse_identifier(AnalysisEntryType::REFERENCE, AnalysisSeverity::INFO, peek_cursor).value()};
 
 	TokenType token_type = peek_w_peek_cursor(peek_cursor).get_type();
 

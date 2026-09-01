@@ -39,9 +39,11 @@ void ASTPrinter::visit(const nodes::VariableDeclaration& node)
 
 	node.reference_type.accept(*this);
 
-	print(" ");
-
-	print(node.reference_name);
+	if(node.explicit_ref_name.has_value())
+	{
+		print(" ");
+		print(node.explicit_ref_name.value());
+	}
 
 	if(node.initialisation)
 	{
@@ -87,20 +89,23 @@ void ASTPrinter::visit(const nodes::ReferenceType& node)
 		print("opt ");
 	}
 
-	switch (node.mutability)
+	if(node.explicit_mutability_mode.has_value())
 	{
-	case MutabilityMode::OWN:
-		print("own ");
-		break;
-	case MutabilityMode::SHARED:
-		print("shared ");
-		break;
-	case MutabilityMode::BORROW:
-		print("borrow ");
-		break;
-	default:
-		print("err_mutability_mode ");
-		break;
+		switch (node.explicit_mutability_mode.value())
+		{
+		case MutabilityMode::OWN:
+			print("own ");
+			break;
+		case MutabilityMode::SHARED:
+			print("shared ");
+			break;
+		case MutabilityMode::BORROW:
+			print("borrow ");
+			break;
+		default:
+			print("err_mutability_mode ");
+			break;
+		}
 	}
 
 	if(node.mut)
@@ -108,7 +113,7 @@ void ASTPrinter::visit(const nodes::ReferenceType& node)
 		print("mut:");
 	}
 
-	print(node.type);
+	print(node.type_id.to_string());
 
 }
 

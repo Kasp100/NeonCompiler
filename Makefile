@@ -16,7 +16,16 @@ CXXFLAGS = \
 -fmax-errors=1
 
 # List of package directories
-DEFAULT_PACKAGE_DIRS := . logging file_reading reading neon_compiler neon_compiler/lexer neon_compiler/parser neon_compiler/analysis/impl neon_compiler/ast/impl
+DEFAULT_PACKAGE_DIRS := . \
+logging \
+file_reading \
+reading \
+neon_compiler \
+neon_compiler/lexer \
+neon_compiler/parser \
+neon_compiler/analysis/impl \
+neon_compiler/ast \
+neon_compiler/ast/impl
 
 IS_TEST := $(if $(MAKECMDGOALS),true,false)
 

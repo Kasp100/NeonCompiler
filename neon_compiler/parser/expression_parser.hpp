@@ -48,7 +48,7 @@ public:
 		neon_compiler::parser::OperatorTable* init_operator_table
 	);
 
-	std::optional<neon_compiler::ast::Identifier> parse_identifier
+	std::optional<neon_compiler::ast::PackageMemberID> parse_identifier
 	(
 		neon_compiler::analysis::AnalysisEntryType type,
 		neon_compiler::analysis::AnalysisSeverity severity,

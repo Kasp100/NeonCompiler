@@ -13,7 +13,7 @@
 #include "../token_reader.hpp"
 #include "../analysis/analysis_entry.hpp"
 #include "../analysis/analysis_reporter.hpp"
-#include "../ast/identifiers.hpp"
+#include "../ast/package_member_id.hpp"
 #include "../../logging/logger.hpp"
 
 namespace neon_compiler::parser
@@ -105,10 +105,9 @@ namespace error_messages
 
 namespace error_recovery
 {
-	constexpr std::string_view PLACEHOLDER_NAME =
-		"err_name";
-	constexpr std::string_view PLACEHOLDER_TYPE =
-		"err_type";
+	constexpr std::string_view PLACEHOLDER_NAME = "err_name";
+	constexpr std::string_view PLACEHOLDER_TYPE_NAME = "err_type";
+	const neon_compiler::ast::PackageMemberID PLACEHOLDER_TYPE_ID{std::vector<std::string>{std::string{PLACEHOLDER_TYPE_NAME}}};
 }
 
 using OperatorMap = std::unordered_map<std::string, std::vector<std::shared_ptr<const neon_compiler::parser::Operator>>>;
@@ -139,10 +138,10 @@ private:
 	std::shared_ptr<neon_compiler::analysis::AnalysisReporter> analysis_reporter;
 	std::shared_ptr<neon_compiler::ast::nodes::Root> root_node;
 	std::string_view file;
-	neon_compiler::ast::Identifier package;
+	neon_compiler::ast::PackageMemberID package;
 
 	/** Mapping from reference name to declaration path */
-	std::unordered_map<std::string, std::string> imports;
+	std::unordered_map<std::string, neon_compiler::ast::PackageMemberID> imports;
 	/** Mapping from package member identifier to operator lists */
 	std::shared_ptr<OperatorMap> operator_map;
 
@@ -169,7 +168,7 @@ private:
 	);
 	const std::vector<std::shared_ptr<const neon_compiler::parser::Operator>>* parse_use_statement_after_keyword();
 
-	std::optional<neon_compiler::ast::Identifier> parse_identifier
+	std::optional<neon_compiler::ast::PackageMemberID> parse_identifier
 	(
 		neon_compiler::analysis::AnalysisEntryType id_type,
 		neon_compiler::analysis::AnalysisSeverity id_severity
@@ -210,13 +209,9 @@ private:
 	);
 	std::optional<neon_compiler::ast::nodes::VariableDeclaration> parse_variable_declaration
 	(
-		neon_compiler::ast::nodes::MutabilityMode default_mutability_mode,
 		neon_compiler::parser::OperatorTable* operator_table
 	);
-	std::optional<neon_compiler::ast::nodes::ReferenceType> parse_reference_type
-	(
-		neon_compiler::ast::nodes::MutabilityMode default_mutability_mode
-	);
+	std::optional<neon_compiler::ast::nodes::ReferenceType> parse_reference_type();
 
 	std::vector<neon_compiler::ast::nodes::GenericArgument> parse_generic_arguments();
 	neon_compiler::ast::nodes::CodeBlock parse_code_block_after_opening_bracket(std::shared_ptr<OperatorTable> operator_table);

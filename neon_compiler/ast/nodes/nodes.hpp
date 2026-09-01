@@ -8,7 +8,7 @@
 #include <vector>
 #include <variant>
 #include "../ast_node.hpp"
-#include "../identifiers.hpp"
+#include "../package_member_id.hpp"
 #include "../../token.hpp"
 #include <iostream>
 
@@ -54,8 +54,8 @@ enum class PackageMemberPatternType
 struct PackageMemberPattern
 {
 	PackageMemberPatternType type;
-	std::optional<Identifier> package_member_identifier; // Empty if type is INHERITANCE_ONLY.
-	std::optional<Identifier> supertype = std::nullopt; // Present if matching by inheritance
+	std::optional<PackageMemberID> package_member_identifier; // Empty if type is INHERITANCE_ONLY.
+	std::optional<PackageMemberID> supertype = std::nullopt; // Present if matching by inheritance
 };
 
 enum class AccessType
@@ -103,31 +103,27 @@ struct ReferenceType : ASTNode
 {
 	/** Whether the reference is optional */
 	bool opt;
-	/** Whether this reference is `own`, `shared`, or `borrow` */
-	MutabilityMode mutability;
+	/** Whether this reference is `own`, `shared`, or `borrow`, empty means it will be inferred */
+	std::optional<MutabilityMode> explicit_mutability_mode;
 	/** Whether mutations are allowed through this reference */
 	bool mut;
 	/** The name of the type */
-	std::string type;
-	/** Inferred name */
-	std::string inferred_name;
+	PackageMemberID type_id;
 	/** Generic arguments */
 	std::vector<GenericArgument> generic_arguments;
 
 	explicit ReferenceType
 	(
 		bool init_opt,
-		MutabilityMode init_mutability,
+		std::optional<MutabilityMode> init_explicit_mutability_mode,
 		bool init_mut,
-		std::string init_type,
-		std::string init_inferred_name = std::string{},
+		PackageMemberID init_type_id,
 		std::vector<GenericArgument> init_generic_arguments = std::vector<GenericArgument>{}
 	) :
 		opt{init_opt},
-		mutability{init_mutability},
+		explicit_mutability_mode{init_explicit_mutability_mode},
 		mut{init_mut},
-		type{std::move(init_type)},
-		inferred_name{std::move(init_inferred_name)},
+		type_id{std::move(init_type_id)},
 		generic_arguments{std::move(init_generic_arguments)}
 	{}
 
@@ -143,8 +139,8 @@ struct VariableDeclaration : ASTNode
 	bool var;
 	/** The reference type */
 	ReferenceType reference_type;
-	/** The reference name */
-	std::string reference_name;
+	/** Optional explicit reference name, empty means it is automatically inferred */
+	std::optional<std::string> explicit_ref_name;
 	/** Optional initialisation */
 	std::unique_ptr<Expression> initialisation;
 
@@ -152,12 +148,12 @@ struct VariableDeclaration : ASTNode
 	(
 		bool init_var,
 		ReferenceType init_reference_type,
-		std::string init_reference_name,
+		std::optional<std::string> init_explicit_ref_name,
 		std::unique_ptr<Expression> init_initialisation = nullptr
 	) :
 		var{init_var},
 		reference_type{std::move(init_reference_type)},
-		reference_name{std::move(init_reference_name)},
+		explicit_ref_name{std::move(init_explicit_ref_name)},
 		initialisation{std::move(init_initialisation)}
 	{}
 

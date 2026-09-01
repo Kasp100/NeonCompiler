@@ -223,7 +223,7 @@ std::shared_ptr<OperatorTable> Parser::parse_use_statement_after_keyword_and_cre
 
 const std::vector<std::shared_ptr<const Operator>>* Parser::parse_use_statement_after_keyword()
 {
-	std::optional<neon_compiler::ast::Identifier> opt_id = parse_identifier(AnalysisEntryType::REFERENCE, AnalysisSeverity::INFO);
+	std::optional<neon_compiler::ast::PackageMemberID> opt_id = parse_identifier(AnalysisEntryType::REFERENCE, AnalysisSeverity::INFO);
 
 	if(!opt_id.has_value())
 	{
@@ -243,21 +243,21 @@ const std::vector<std::shared_ptr<const Operator>>* Parser::parse_use_statement_
 
 	if(!opt_id.has_value()) { return nullptr; }
 
-	const neon_compiler::ast::Identifier& id = opt_id.value();
+	neon_compiler::ast::PackageMemberID& id = opt_id.value();
 
-	std::string id_str = id.to_string();
-
-	if(id.parts.size() == 1)
+	if(id.get_length() == 1)
 	{
-		if(imports.contains(id_str))
+		if(imports.contains(id.get_last_part()))
 		{
-			id_str = imports[id_str];
+			id = imports[id.get_last_part()];
 		}
 		else
 		{
-			id_str = package.to_string() + "::" + id_str;
+			id = package.append(id.get_last_part());
 		}
 	}
+
+	const std::string id_str = id.to_string();
 
 	if(!operator_map->contains(id_str))
 	{
@@ -268,7 +268,7 @@ const std::vector<std::shared_ptr<const Operator>>* Parser::parse_use_statement_
 	return &(*operator_map)[id_str];
 }
 
-std::optional<neon_compiler::ast::Identifier> Parser::parse_identifier(AnalysisEntryType id_type, AnalysisSeverity id_severity)
+std::optional<neon_compiler::ast::PackageMemberID> Parser::parse_identifier(AnalysisEntryType id_type, AnalysisSeverity id_severity)
 {
 	FuncReportToken func_report_token = [this] (AnalysisEntryType type, AnalysisSeverity severity, const Token& token, std::optional<std::string> info)
 	{
@@ -292,7 +292,7 @@ void Parser::parse_and_register_package_declaration()
 			std::string{error_messages::MISSING_PACKAGE_DECLARATION});
 	}
 
-	std::optional<neon_compiler::ast::Identifier> package_id = parse_identifier(AnalysisEntryType::PACKAGE, AnalysisSeverity::INFO);
+	std::optional<neon_compiler::ast::PackageMemberID> package_id = parse_identifier(AnalysisEntryType::PACKAGE, AnalysisSeverity::INFO);
 	if(!package_id.has_value())
 	{
 		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.peek(),
@@ -309,12 +309,12 @@ void Parser::parse_and_register_package_declaration()
 			std::string{error_messages::MISSING_SEMICOLON});
 	}
 
-	package = package_id.value_or(neon_compiler::ast::Identifier{});
+	package = package_id.value_or(neon_compiler::ast::PackageMemberID{});
 }
 
 void Parser::parse_and_register_import_statement_after_keyword()
 {
-	std::optional<neon_compiler::ast::Identifier> opt_id = parse_identifier(AnalysisEntryType::REFERENCE, AnalysisSeverity::INFO);
+	std::optional<neon_compiler::ast::PackageMemberID> opt_id = parse_identifier(AnalysisEntryType::REFERENCE, AnalysisSeverity::INFO);
 
 	if(!opt_id.has_value())
 	{
@@ -334,9 +334,9 @@ void Parser::parse_and_register_import_statement_after_keyword()
 
 	if(!opt_id.has_value()) { return; }
 
-	const neon_compiler::ast::Identifier& id = opt_id.value();
+	const neon_compiler::ast::PackageMemberID& id = opt_id.value();
 
-	imports[id.parts[id.parts.size() - 1]] = id.to_string();
+	imports[id.get_last_part()] = std::move(id);
 }
 
 Access Parser::parse_access()
@@ -421,12 +421,12 @@ PackageMemberPattern Parser::parse_package_member_pattern()
 		}
 	}
 
-	std::optional<ast::Identifier> package_member_identifier = parse_identifier(AnalysisEntryType::REFERENCE, AnalysisSeverity::INFO);
+	std::optional<ast::PackageMemberID> package_member_identifier = parse_identifier(AnalysisEntryType::REFERENCE, AnalysisSeverity::INFO);
 
 	if(reader.peek().get_type() != TokenType::INHERITANCE_EXTENDS) { return PackageMemberPattern{type, package_member_identifier}; }
 	report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
 
-	std::optional<ast::Identifier> supertype = parse_identifier(AnalysisEntryType::REFERENCE, AnalysisSeverity::INFO);
+	std::optional<ast::PackageMemberID> supertype = parse_identifier(AnalysisEntryType::REFERENCE, AnalysisSeverity::INFO);
 	if(supertype.has_value())
 	{
 		return PackageMemberPattern{package_member_identifier.has_value() ? PackageMemberPatternType::INHERITANCE_ONLY : type,
@@ -734,7 +734,7 @@ OperatorDeclaration Parser::parse_operator_declaration_after_keyword()
 
 OperatorFunction Parser::parse_operator_function(std::shared_ptr<OperatorTable> operator_table)
 {
-	std::optional<ReferenceType> opt_return_value = parse_reference_type(MutabilityMode::BORROW);
+	std::optional<ReferenceType> opt_return_value = parse_reference_type();
 
 	if(!opt_return_value.has_value())
 	{
@@ -744,7 +744,7 @@ OperatorFunction Parser::parse_operator_function(std::shared_ptr<OperatorTable> 
 
 	ReferenceType return_value = opt_return_value.value_or
 	(
-		ReferenceType{false, MutabilityMode::BORROW, false, std::string{error_recovery::PLACEHOLDER_TYPE}}
+		ReferenceType{false, MutabilityMode::BORROW, false, error_recovery::PLACEHOLDER_TYPE_ID}
 	);
 
 	std::vector<OperatorFunctionPatternElement> pattern = parse_operator_function_pattern(operator_table.get());
@@ -780,12 +780,12 @@ std::vector<OperatorFunctionPatternElement> Parser::parse_operator_function_patt
 		{
 			report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
 
-			VariableDeclaration parameter = parse_variable_declaration(MutabilityMode::BORROW, operator_table).value_or
+			VariableDeclaration parameter = parse_variable_declaration(operator_table).value_or
 			(
 				VariableDeclaration
 				{
 					false,
-					ReferenceType{false, MutabilityMode::BORROW, false, std::string{error_recovery::PLACEHOLDER_TYPE}},
+					ReferenceType{false, MutabilityMode::BORROW, false, error_recovery::PLACEHOLDER_TYPE_ID},
 					std::string{error_recovery::PLACEHOLDER_NAME}
 				}
 			);
@@ -854,7 +854,7 @@ std::vector<GenericParameter> Parser::parse_generic_parameters()
 
 	while(!reader.end_of_file_reached())
 	{
-		std::string generic_param_type{error_recovery::PLACEHOLDER_TYPE};
+		std::string generic_param_type{error_recovery::PLACEHOLDER_TYPE_NAME};
 		std::string generic_param_name{error_recovery::PLACEHOLDER_NAME};
 
 		TokenType tt = reader.peek().get_type();
@@ -937,7 +937,7 @@ std::vector<std::string> Parser::parse_supertype_list()
 			break;
 		}
 
-		std::optional<neon_compiler::ast::Identifier> opt_id = parse_identifier(AnalysisEntryType::REFERENCE, AnalysisSeverity::INFO);
+		std::optional<neon_compiler::ast::PackageMemberID> opt_id = parse_identifier(AnalysisEntryType::REFERENCE, AnalysisSeverity::INFO);
 
 		if(opt_id.has_value())
 		{
@@ -999,7 +999,7 @@ ParameterDeclarationList Parser::parse_parameter_declarations_after_opening_brac
 
 		first = false;
 
-		std::optional<VariableDeclaration> var_decl = parse_variable_declaration(MutabilityMode::BORROW, operator_table);
+		std::optional<VariableDeclaration> var_decl = parse_variable_declaration(operator_table);
 
 		if(!var_decl.has_value())
 		{
@@ -1014,7 +1014,7 @@ ParameterDeclarationList Parser::parse_parameter_declarations_after_opening_brac
 	return param_decl_list;
 }
 
-std::optional<VariableDeclaration> Parser::parse_variable_declaration(MutabilityMode default_mutability_mode, OperatorTable* operator_table)
+std::optional<VariableDeclaration> Parser::parse_variable_declaration(OperatorTable* operator_table)
 {
 	bool var{reader.peek().get_type() == TokenType::VAR};
 
@@ -1023,9 +1023,9 @@ std::optional<VariableDeclaration> Parser::parse_variable_declaration(Mutability
 		report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
 	}
 
-	std::optional<ReferenceType> ref_type = parse_reference_type(default_mutability_mode);
+	std::optional<ReferenceType> ref_type = parse_reference_type();
 
-	std::string ref_name{error_recovery::PLACEHOLDER_NAME};
+	std::optional<std::string> ref_name{error_recovery::PLACEHOLDER_NAME};
 
 	if(reader.peek().get_type() == TokenType::IDENTIFIER)
 	{
@@ -1034,7 +1034,7 @@ std::optional<VariableDeclaration> Parser::parse_variable_declaration(Mutability
 	}
 	else if(ref_type.has_value())
 	{
-		ref_name = std::move(ref_type->inferred_name);
+		ref_name = std::nullopt;
 	}
 
 	if(ref_type.has_value())
@@ -1054,8 +1054,7 @@ std::optional<VariableDeclaration> Parser::parse_variable_declaration(Mutability
 		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
 			std::string{error_messages::INVALID_VARIABLE_DECLARATION});
 
-		const std::string name{error_recovery::PLACEHOLDER_NAME};
-		const ReferenceType valid_ref_type{false, default_mutability_mode, false, name, name};
+		const ReferenceType valid_ref_type{false, std::nullopt, false, error_recovery::PLACEHOLDER_TYPE_ID};
 
 		return VariableDeclaration{var, std::move(valid_ref_type), std::move(ref_name)};
 	}
@@ -1065,7 +1064,7 @@ std::optional<VariableDeclaration> Parser::parse_variable_declaration(Mutability
 	}
 }
 
-std::optional<ReferenceType> Parser::parse_reference_type(MutabilityMode default_mutability_mode)
+std::optional<ReferenceType> Parser::parse_reference_type()
 {
 	bool optional{reader.peek().get_type() == TokenType::OPTIONAL};
 
@@ -1076,18 +1075,17 @@ std::optional<ReferenceType> Parser::parse_reference_type(MutabilityMode default
 
 	TokenType tt{reader.peek().get_type()};
 
-	MutabilityMode mm{default_mutability_mode};
-	bool implicit_mutability_mode{false};
+	std::optional<MutabilityMode> mm;
 
 	switch (tt)
 	{
-		case TokenType::REF_TYPE_OWN:     mm = MutabilityMode::OWN;         break;
-		case TokenType::REF_TYPE_SHARED:  mm = MutabilityMode::SHARED;      break;
-		case TokenType::REF_TYPE_BORROW:  mm = MutabilityMode::BORROW;      break;
-		default:                          implicit_mutability_mode = true;  break;
+		case TokenType::REF_TYPE_OWN:     mm = MutabilityMode::OWN;     break;
+		case TokenType::REF_TYPE_SHARED:  mm = MutabilityMode::SHARED;  break;
+		case TokenType::REF_TYPE_BORROW:  mm = MutabilityMode::BORROW;  break;
+		default:                          mm = std::nullopt;            break;
 	}
 
-	if(!implicit_mutability_mode)
+	if(mm.has_value())
 	{
 		report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
 	}
@@ -1100,25 +1098,23 @@ std::optional<ReferenceType> Parser::parse_reference_type(MutabilityMode default
 		if(reader.peek().get_type() == TokenType::COLON) { report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume()); }
 	}
 
-	const std::optional<neon_compiler::ast::Identifier> opt_type_id =
+	const std::optional<neon_compiler::ast::PackageMemberID> opt_type_id =
 		parse_identifier(AnalysisEntryType::REFERENCE, AnalysisSeverity::INFO);
 
 	if(opt_type_id.has_value())
 	{
-		const neon_compiler::ast::Identifier& type_id = opt_type_id.value();
-		const std::string type_id_str = type_id.to_string();
-		const std::string inferred_name = type_id.parts[type_id.parts.size() - 1];
+		const neon_compiler::ast::PackageMemberID& type_id = opt_type_id.value();
 
 		std::vector<GenericArgument> generic_args = parse_generic_arguments();
 
-		return ReferenceType{optional, mm, mutating_permission, std::move(type_id_str), std::move(inferred_name), std::move(generic_args)};
+		return ReferenceType{optional, mm, mutating_permission, type_id, std::move(generic_args)};
 	}
-	else if(optional || mutating_permission || !implicit_mutability_mode)
+	else if(optional || mutating_permission || mm.has_value())
 	{
 		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
 			std::string{error_messages::INVALID_REFERENCE_TYPE});
 
-		return ReferenceType{optional, mm, mutating_permission, std::string{error_recovery::PLACEHOLDER_NAME}};
+		return ReferenceType{optional, mm, mutating_permission, error_recovery::PLACEHOLDER_TYPE_ID};
 	}
 	else
 	{
@@ -1226,7 +1222,7 @@ std::unique_ptr<Statement> Parser::parse_return_statement_after_keyword(Operator
 
 std::unique_ptr<Statement> Parser::parse_discard_expression(OperatorTable* operator_table)
 {
-	std::optional<VariableDeclaration> opt_var_decl = parse_variable_declaration(MutabilityMode::OWN, operator_table);
+	std::optional<VariableDeclaration> opt_var_decl = parse_variable_declaration(operator_table);
 
 	if(opt_var_decl.has_value())
 	{
@@ -1281,10 +1277,10 @@ bool Parser::parse_and_register_constant
 	std::shared_ptr<OperatorTable> operator_table
 )
 {
-	std::optional<VariableDeclaration> opt_var_decl = parse_variable_declaration(MutabilityMode::OWN, operator_table.get());
+	std::optional<VariableDeclaration> opt_var_decl = parse_variable_declaration(operator_table.get());
 	if(!opt_var_decl.has_value()) { return false; }
 	VariableDeclaration& var_decl = opt_var_decl.value();
-	std::string constant_name{var_decl.reference_name};
+	std::string constant_name{var_decl.explicit_ref_name.value_or(var_decl.reference_type.type_id.get_last_part())};
 
 	append_ast(std::make_unique<ConstantDeclaration>(access, std::move(var_decl)), constant_name);
 
@@ -1314,7 +1310,7 @@ bool Parser::parse_and_register_function
 	}
 	else
 	{
-		return_type = parse_reference_type(MutabilityMode::BORROW);
+		return_type = parse_reference_type();
 		if(!return_type.has_value()) { return false; }
 	}
 
