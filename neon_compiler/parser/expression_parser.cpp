@@ -167,7 +167,7 @@ std::unique_ptr<Expression> ExpressionParser::parse_expression(PeekCursor peek_c
 		return peek_offset;
 	};
 
-	std::unique_ptr<Expression> left = parse_prefix_expression(peek_cursor, func_parse_expression_w_cursor);
+	std::unique_ptr<Expression> left = parse_prefix_expression(peek_cursor, func_parse_expression_w_cursor, max_subordination);
 
 	if(!left)
 	{
@@ -177,13 +177,17 @@ std::unique_ptr<Expression> ExpressionParser::parse_expression(PeekCursor peek_c
 
 	while(true)
 	{
-		std::shared_ptr<const Operator> op = operator_table->match_infix(*reader, peek_cursor, func_parse_expression_w_cursor);
+		std::shared_ptr<const Operator> op = operator_table->match_infix(*reader, peek_cursor, func_parse_expression_w_cursor, max_subordination);
 
-		if(!op) { op = operator_table->match_postfix(*reader, peek_cursor, func_parse_expression_w_cursor); }
+		if(!op)
+		{
+			op = operator_table->match_postfix(*reader, peek_cursor, func_parse_expression_w_cursor, max_subordination);
+		}
 
-		if(!op) { break; }
-
-		if(op->get_declaration()->subordination > max_subordination) { break; }
+		if(!op)
+		{
+			break;
+		}
 
 		left = parse_operator_call_expression(peek_cursor, op, std::move(left));
 
@@ -197,7 +201,12 @@ std::unique_ptr<Expression> ExpressionParser::parse_expression(PeekCursor peek_c
 	return left;
 }
 
-std::unique_ptr<Expression> ExpressionParser::parse_prefix_expression(PeekCursor peek_cursor, FuncParseExpressionWCursor func_parse_expression_w_cursor)
+std::unique_ptr<Expression> ExpressionParser::parse_prefix_expression
+(
+	PeekCursor peek_cursor,
+	FuncParseExpressionWCursor func_parse_expression_w_cursor,
+	uint max_subordination
+)
 {
 	{
 		std::unique_ptr<Expression> expr = parse_parenthesised_expression(peek_cursor);
@@ -206,7 +215,7 @@ std::unique_ptr<Expression> ExpressionParser::parse_prefix_expression(PeekCursor
 
 	{
 		// Handle prefix operators
-		std::shared_ptr<const Operator> op = operator_table->match_prefix(*reader, peek_cursor, func_parse_expression_w_cursor);
+		std::shared_ptr<const Operator> op = operator_table->match_prefix(*reader, peek_cursor, func_parse_expression_w_cursor, max_subordination);
 		if(op) { return parse_operator_call_expression(peek_cursor, op); }
 	}
 
@@ -417,6 +426,12 @@ std::unique_ptr<Expression> ExpressionParser::parse_operator_call_expression
 	{
 		// The `give` operator must be declared so arguments[0] always has a value here.
 		return std::make_unique<Give>(std::move(arguments[0]));
+	}
+
+	if(declaration->builtin_operator_kind == BuiltinOperatorKind::GIVE_AND_ASSIGN)
+	{
+		// The "give and assign" operator must be declared so arguments[0] and arguments[1] always has a value here.
+		return std::make_unique<GiveAndAssign>(std::move(arguments[0]), std::move(arguments[1]));
 	}
 
 	if(declaration->builtin_operator_kind == BuiltinOperatorKind::CHECK_PRESENCE)

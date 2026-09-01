@@ -52,54 +52,57 @@ std::shared_ptr<const Operator> OperatorTable::match_prefix
 (
 	const TokenReader& reader,
 	PeekCursor peek_cursor,
-	const FuncParseExpressionWCursor& func_parse_expression_w_cursor
+	const FuncParseExpressionWCursor& func_parse_expression_w_cursor,
+	uint max_subordination
 )
 {
 	std::shared_ptr<const Operator> builtin_operator_match =
-		match(builtin_operators::PREFIX, reader, peek_cursor, func_parse_expression_w_cursor, false);
+		match(builtin_operators::PREFIX, reader, peek_cursor, func_parse_expression_w_cursor, max_subordination, false);
 
 	if(builtin_operator_match)
 	{
 		return builtin_operator_match;
 	}
 
-	return match(prefix_operators, reader, peek_cursor, func_parse_expression_w_cursor, false);
+	return match(prefix_operators, reader, peek_cursor, func_parse_expression_w_cursor, max_subordination, false);
 }
 
 std::shared_ptr<const Operator> OperatorTable::match_infix
 (
 	const TokenReader& reader,
 	PeekCursor peek_cursor,
-	const FuncParseExpressionWCursor& func_parse_expression_w_cursor
+	const FuncParseExpressionWCursor& func_parse_expression_w_cursor,
+	uint max_subordination
 )
 {
 	std::shared_ptr<const Operator> builtin_operator_match =
-		match(builtin_operators::INFIX, reader, peek_cursor, func_parse_expression_w_cursor, true);
+		match(builtin_operators::INFIX, reader, peek_cursor, func_parse_expression_w_cursor, max_subordination, true);
 
 	if(builtin_operator_match)
 	{
 		return builtin_operator_match;
 	}
 
-	return match(infix_operators, reader, peek_cursor, func_parse_expression_w_cursor, true);
+	return match(infix_operators, reader, peek_cursor, func_parse_expression_w_cursor, max_subordination, true);
 }
 
 std::shared_ptr<const Operator> OperatorTable::match_postfix
 (
 	const TokenReader& reader,
 	PeekCursor peek_cursor,
-	const FuncParseExpressionWCursor& func_parse_expression_w_cursor
+	const FuncParseExpressionWCursor& func_parse_expression_w_cursor,
+	uint max_subordination
 )
 {
 	std::shared_ptr<const Operator> builtin_operator_match =
-		match(builtin_operators::POSTFIX, reader, peek_cursor, func_parse_expression_w_cursor, true);
+		match(builtin_operators::POSTFIX, reader, peek_cursor, func_parse_expression_w_cursor, max_subordination, true);
 
 	if(builtin_operator_match)
 	{
 		return builtin_operator_match;
 	}
 
-	return match(postfix_operators, reader, peek_cursor, func_parse_expression_w_cursor, true);
+	return match(postfix_operators, reader, peek_cursor, func_parse_expression_w_cursor, max_subordination, true);
 }
 
 void OperatorTable::finalise()
@@ -130,6 +133,7 @@ std::shared_ptr<const Operator> OperatorTable::match
 	const TokenReader& reader,
 	PeekCursor peek_cursor,
 	const FuncParseExpressionWCursor& func_parse_expression_w_cursor,
+	uint max_subordination,
 	bool skip_first
 )
 {
@@ -140,6 +144,11 @@ std::shared_ptr<const Operator> OperatorTable::match
 
 	for(std::size_t i = 0; i < operators.size(); ++i)
 	{
+		if(operators[i]->get_declaration()->subordination > max_subordination)
+		{
+			continue;
+		}
+
 		if(operators[i]->matches(reader, peek_cursor, func_parse_expression_w_cursor, skip_first))
 		{
 			return operators[i];

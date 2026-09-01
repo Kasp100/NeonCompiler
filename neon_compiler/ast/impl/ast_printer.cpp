@@ -198,6 +198,18 @@ void ASTPrinter::visit(const nodes::Give& node)
 	decr_depth();
 }
 
+void ASTPrinter::visit(const nodes::GiveAndAssign& node)
+{
+	print_prefix();
+	print("give and assign");
+	print_line();
+
+	incr_depth();
+	node.value->accept(*this);
+	node.replacement->accept(*this);
+	decr_depth();
+}
+
 void ASTPrinter::visit(const nodes::ObjectFunctionCall& node)
 {
 	print_prefix();

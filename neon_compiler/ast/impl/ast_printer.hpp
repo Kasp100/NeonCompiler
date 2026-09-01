@@ -24,6 +24,7 @@ public:
 	void visit(const nodes::Return& node) override;
 	void visit(const nodes::Assignment& node) override;
 	void visit(const nodes::Give& node) override;
+	void visit(const nodes::GiveAndAssign& node) override;
 	void visit(const nodes::ObjectFunctionCall& node) override;
 	void visit(const nodes::ObjectRead& node) override;
 	void visit(const nodes::FunctionCall& node) override;

@@ -117,6 +117,26 @@ struct Give : Expression
 	}
 };
 
+struct GiveAndAssign : Expression
+{
+	std::unique_ptr<Expression> value;
+	std::unique_ptr<Expression> replacement;
+
+	explicit GiveAndAssign
+	(
+		std::unique_ptr<Expression> init_value,
+		std::unique_ptr<Expression> init_replacement
+	) :
+		value{std::move(init_value)},
+		replacement{std::move(init_replacement)}
+	{}
+
+	void accept(ASTVisitor& visitor) const override
+	{
+		visitor.visit(*this);
+	}
+};
+
 /** Represents an function call on a value from an expression.
  * Example: `background_colour.darker()`, here `background_colour` is a simple read expression */
 struct ObjectFunctionCall : Expression

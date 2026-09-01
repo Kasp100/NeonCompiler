@@ -80,7 +80,12 @@ private:
 		PeekCursor peek_cursor = nullptr,
 		std::optional<std::string> info = std::nullopt
 	);
-	std::unique_ptr<neon_compiler::ast::nodes::Expression> parse_prefix_expression(PeekCursor peek_cursor, FuncParseExpressionWCursor func_parse_expression_w_cursor);
+	std::unique_ptr<neon_compiler::ast::nodes::Expression> parse_prefix_expression
+	(
+		PeekCursor peek_cursor,
+		FuncParseExpressionWCursor func_parse_expression_w_cursor,
+		uint max_subordination
+	);
 	std::unique_ptr<neon_compiler::ast::nodes::Expression> parse_terminating_expression(PeekCursor peek_cursor);
 	std::unique_ptr<neon_compiler::ast::nodes::Expression> parse_parenthesised_expression(PeekCursor peek_cursor);
 	std::unique_ptr<neon_compiler::ast::nodes::Expression> parse_named_expression(PeekCursor peek_cursor);

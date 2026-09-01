@@ -45,7 +45,7 @@ namespace builtin_operators
 	inline const neon_compiler::ast::nodes::OperatorDeclaration ASSIGNMENT_DECLARATION
 	{
 		ASSIGNMENT_PATTERN,
-		0,
+		1,
 		neon_compiler::ast::nodes::OperatorAssociativity::RIGHT,
 		neon_compiler::ast::nodes::BuiltinOperatorKind::ASSIGNMENT
 	};
@@ -71,6 +71,27 @@ namespace builtin_operators
 
     inline const std::shared_ptr<const parser::Operator> GIVE =
 		std::make_shared<const parser::Operator>(&GIVE_DECLARATION);
+
+	// "give and assign" operator
+
+	inline const std::vector<neon_compiler::ast::nodes::OperatorSyntaxPatternElement> GIVE_AND_ASSIGN_PATTERN
+	{
+		neon_compiler::ast::nodes::TokenPattern{neon_compiler::TokenType::GIVE},
+		neon_compiler::ast::nodes::OperatorSyntaxParameter{},
+		neon_compiler::ast::nodes::TokenPattern{neon_compiler::TokenType::ASSIGN},
+		neon_compiler::ast::nodes::OperatorSyntaxParameter{}
+	};
+
+	inline const neon_compiler::ast::nodes::OperatorDeclaration GIVE_AND_ASSIGN_DECLARATION
+	{
+		GIVE_AND_ASSIGN_PATTERN,
+		1,
+		neon_compiler::ast::nodes::OperatorAssociativity::RIGHT,
+		neon_compiler::ast::nodes::BuiltinOperatorKind::GIVE_AND_ASSIGN
+	};
+
+    inline const std::shared_ptr<const parser::Operator> GIVE_AND_ASSIGN =
+		std::make_shared<const parser::Operator>(&GIVE_AND_ASSIGN_DECLARATION);
 
 	// `present` operator
 
@@ -130,7 +151,7 @@ namespace builtin_operators
     inline const std::shared_ptr<const parser::Operator> FALLBACK_OR =
 		std::make_shared<const parser::Operator>(&FALLBACK_OR_DECLARATION);
 
-	inline const std::vector<std::shared_ptr<const neon_compiler::parser::Operator>> PREFIX{GIVE};
+	inline const std::vector<std::shared_ptr<const neon_compiler::parser::Operator>> PREFIX{GIVE_AND_ASSIGN, GIVE};
 	inline const std::vector<std::shared_ptr<const neon_compiler::parser::Operator>> INFIX{MEMBER_ACCESS_DOT, ASSIGNMENT, FALLBACK_OR};
 	inline const std::vector<std::shared_ptr<const neon_compiler::parser::Operator>> POSTFIX{CHECK_PRESENCE, CHECK_ABSENCE};
 }
@@ -153,19 +174,22 @@ public:
 	(
 		const neon_compiler::TokenReader& reader,
 		neon_compiler::parser::PeekCursor peek_cursor,
-		const FuncParseExpressionWCursor& func_parse_expression_w_cursor
+		const FuncParseExpressionWCursor& func_parse_expression_w_cursor,
+		uint max_subordination
 	);
 	std::shared_ptr<const neon_compiler::parser::Operator> match_infix
 	(
 		const neon_compiler::TokenReader& reader,
 		neon_compiler::parser::PeekCursor peek_cursor,
-		const FuncParseExpressionWCursor& func_parse_expression_w_cursor
+		const FuncParseExpressionWCursor& func_parse_expression_w_cursor,
+		uint max_subordination
 	);
 	std::shared_ptr<const neon_compiler::parser::Operator> match_postfix
 	(
 		const neon_compiler::TokenReader& reader,
 		neon_compiler::parser::PeekCursor peek_cursor,
-		const FuncParseExpressionWCursor& func_parse_expression_w_cursor
+		const FuncParseExpressionWCursor& func_parse_expression_w_cursor,
+		uint max_subordination
 	);
 private:
 	std::vector<std::shared_ptr<const neon_compiler::parser::Operator>> prefix_operators;
@@ -183,6 +207,7 @@ private:
 		const neon_compiler::TokenReader& reader,
 		PeekCursor peek_cursor,
 		const FuncParseExpressionWCursor& func_parse_expression_w_cursor,
+		uint max_subordination,
 		bool skip_fist
 	);
 };

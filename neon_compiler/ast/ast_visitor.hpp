@@ -21,6 +21,7 @@ namespace neon_compiler::ast::nodes
 	struct Return;
 	struct Assignment;
 	struct Give;
+	struct GiveAndAssign;
 	struct ObjectFunctionCall;
 	struct ObjectRead;
 	struct FunctionCall;
@@ -61,6 +62,7 @@ public:
 	virtual void visit(const nodes::Return& node) = 0;
 	virtual void visit(const nodes::Assignment& node) = 0;
 	virtual void visit(const nodes::Give& node) = 0;
+	virtual void visit(const nodes::GiveAndAssign& node) = 0;
 	virtual void visit(const nodes::ObjectFunctionCall& node) = 0;
 	virtual void visit(const nodes::ObjectRead& node) = 0;
 	virtual void visit(const nodes::FunctionCall& node) = 0;
