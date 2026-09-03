@@ -25,7 +25,8 @@ neon_compiler/lexer \
 neon_compiler/parser \
 neon_compiler/analysis/impl \
 neon_compiler/ast \
-neon_compiler/ast/impl
+neon_compiler/ast/impl \
+neon_compiler/semantic_analyser
 
 IS_TEST := $(if $(MAKECMDGOALS),true,false)
 
