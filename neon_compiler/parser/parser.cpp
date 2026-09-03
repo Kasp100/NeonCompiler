@@ -620,15 +620,11 @@ OperatorDeclaration Parser::parse_operator_declaration_after_keyword(bool no_rep
 	uint subordination{0};
 	OperatorAssociativity associativity{OperatorAssociativity::NONE};
 
-	TokenType token_type = reader.peek().get_type();
+	TokenType tt = reader.peek().get_type();
 
-	while(!reader.end_of_file_reached())
+	while(!reader.end_of_file_reached() && tt != TokenType::BRACKET_CURLY_OPEN)
 	{
-		if(token_type == TokenType::BRACKET_CURLY_OPEN)
-		{
-			break;
-		}
-		else if(token_type == TokenType::EMPTY_PARAMETER)
+		if(tt == TokenType::EMPTY_PARAMETER)
 		{
 			if(no_report) { reader.consume(); } else
 			{ report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume()); }
@@ -637,6 +633,8 @@ OperatorDeclaration Parser::parse_operator_declaration_after_keyword(bool no_rep
 		else
 		{
 			const Token& token = reader.consume();
+			if(!no_report) { report_token(AnalysisEntryType::OPERATOR, AnalysisSeverity::INFO, token); }
+
 			const std::optional<std::string_view>& lexeme = token.get_lexeme();
 
 			if(lexeme.has_value())
@@ -649,18 +647,18 @@ OperatorDeclaration Parser::parse_operator_declaration_after_keyword(bool no_rep
 			}
 		}
 
-		token_type = reader.peek().get_type();
+		tt = reader.peek().get_type();
 	}
 
 	// Consume `{`
 	if(no_report) { reader.consume(); } else
 	{ report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume()); }
 
-	token_type = reader.peek().get_type();
+	tt = reader.peek().get_type();
 
-	while(!reader.end_of_file_reached() && token_type != TokenType::BRACKET_CURLY_CLOSE)
+	while(!reader.end_of_file_reached() && tt != TokenType::BRACKET_CURLY_CLOSE)
 	{
-		if(token_type == TokenType::SUBORDINATION)
+		if(tt == TokenType::SUBORDINATION)
 		{
 			if(no_report) { reader.consume(); } else
 			{ report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume()); }
@@ -693,20 +691,20 @@ OperatorDeclaration Parser::parse_operator_declaration_after_keyword(bool no_rep
 				{ report_token(AnalysisEntryType::LITERAL_NUMBER, AnalysisSeverity::INFO, reader.consume()); }
 			}
 		}
-		else if(token_type == TokenType::ASSOCIATIVITY)
+		else if(tt == TokenType::ASSOCIATIVITY)
 		{
 			if(no_report) { reader.consume(); } else
 			{ report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume()); }
 
-			token_type = reader.peek().get_type();
+			tt = reader.peek().get_type();
 
-			if(token_type == TokenType::LEFT)
+			if(tt == TokenType::LEFT)
 			{
 				if(no_report) { reader.consume(); } else
 				{ report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume()); }
 				associativity = OperatorAssociativity::LEFT;
 			}
-			else if(token_type == TokenType::RIGHT)
+			else if(tt == TokenType::RIGHT)
 			{
 				if(no_report) { reader.consume(); } else
 				{ report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume()); }
@@ -742,7 +740,7 @@ OperatorDeclaration Parser::parse_operator_declaration_after_keyword(bool no_rep
 		if(no_report) { reader.consume(); } else
 		{ report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume()); }
 
-		token_type = reader.peek().get_type();
+		tt = reader.peek().get_type();
 	}
 
 	// Consume `}`
