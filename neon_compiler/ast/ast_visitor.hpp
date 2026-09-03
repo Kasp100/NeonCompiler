@@ -8,11 +8,11 @@
 namespace neon_compiler::ast::nodes
 {
 	struct Root;
-	struct Type;
+	struct TypeDeclaration;
 	struct VariableDeclaration;
     struct ConstantDeclaration;
-	struct Field;
-	struct Method;
+	struct FieldDeclaration;
+	struct MethodDeclaration;
 	struct ReferenceType;
 	struct CodeBlock;
 	struct DiscardExpression;
@@ -27,11 +27,10 @@ namespace neon_compiler::ast::nodes
 	struct FunctionCall;
 	struct SimpleRead;
 	struct OptionalEmpty;
-	struct PackageFunction;
-	struct PackageFunctionOverloadList;
+	struct PackageFunctionDeclaration;
 	struct OperatorModule;
 	struct OperatorDeclaration;
-	struct OperatorFunction;
+	struct OperatorFunctionDeclaration;
 	struct LiteralNumberExpression;
 	struct LiteralStringExpression;
 	struct LiteralBooleanExpression;
@@ -49,11 +48,11 @@ class ASTVisitor
 public:
 	virtual ~ASTVisitor() = default;
 	virtual void visit(const nodes::Root& node) = 0;
-	virtual void visit(const nodes::Type& node) = 0;
+	virtual void visit(const nodes::TypeDeclaration& node) = 0;
 	virtual void visit(const nodes::VariableDeclaration& node) = 0;
 	virtual void visit(const nodes::ConstantDeclaration& node) = 0;
-	virtual void visit(const nodes::Field& node) = 0;
-	virtual void visit(const nodes::Method& node) = 0;
+	virtual void visit(const nodes::FieldDeclaration& node) = 0;
+	virtual void visit(const nodes::MethodDeclaration& node) = 0;
 	virtual void visit(const nodes::ReferenceType& node) = 0;
 	virtual void visit(const nodes::CodeBlock& node) = 0;
 	virtual void visit(const nodes::DiscardExpression& node) = 0;
@@ -68,11 +67,10 @@ public:
 	virtual void visit(const nodes::FunctionCall& node) = 0;
 	virtual void visit(const nodes::SimpleRead& node) = 0;
 	virtual void visit(const nodes::OptionalEmpty& node) = 0;
-	virtual void visit(const nodes::PackageFunction& node) = 0;
-	virtual void visit(const nodes::PackageFunctionOverloadList& node) = 0;
+	virtual void visit(const nodes::PackageFunctionDeclaration& node) = 0;
 	virtual void visit(const nodes::OperatorModule& node) = 0;
 	virtual void visit(const nodes::OperatorDeclaration& node) = 0;
-	virtual void visit(const nodes::OperatorFunction& node) = 0;
+	virtual void visit(const nodes::OperatorFunctionDeclaration& node) = 0;
 	virtual void visit(const nodes::LiteralNumberExpression& node) = 0;
 	virtual void visit(const nodes::LiteralStringExpression& node) = 0;
 	virtual void visit(const nodes::LiteralBooleanExpression& node) = 0;

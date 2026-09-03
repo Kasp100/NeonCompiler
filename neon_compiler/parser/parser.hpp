@@ -158,9 +158,7 @@ private:
 		std::optional<std::string> info = std::nullopt
 	);
 
-	std::string append_ast(std::unique_ptr<neon_compiler::ast::nodes::PackageMember> node, const std::string& identifier);
-
-	std::string get_full_identifier(const std::string& identifier) const;
+	void append_ast(std::unique_ptr<neon_compiler::ast::nodes::PackageMember> node);
 
 	std::shared_ptr<neon_compiler::parser::OperatorTable> parse_use_statement_after_keyword_and_create_operator_table
 	(
@@ -191,7 +189,7 @@ private:
 	void parse_operator_module_a_and_register_after_keyword(const neon_compiler::ast::nodes::Access& access);
 	neon_compiler::ast::nodes::OperatorDeclaration parse_operator_declaration_after_keyword();
 	void parse_operator_module_b_after_keyword(std::shared_ptr<OperatorTable> operator_table);
-	neon_compiler::ast::nodes::OperatorFunction parse_operator_function
+	neon_compiler::ast::nodes::OperatorFunctionDeclaration parse_operator_function
 	(
 		std::shared_ptr<neon_compiler::parser::OperatorTable> operator_table
 	);

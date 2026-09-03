@@ -10,20 +10,13 @@ ASTPrinter::ASTPrinter() {}
 
 void ASTPrinter::visit(const nodes::Root& node)
 {
-	for(const std::pair<const std::string, std::unique_ptr<nodes::PackageMember>>& pm : node.package_members)
+	for(const std::unique_ptr<nodes::PackageMember>& pm : node.package_members)
 	{
-		print_prefix();
-		print("package member ");
-		print(pm.first);
-		print_line();
-
-		incr_depth();
-		pm.second->accept(*this);
-		decr_depth();
+		pm->accept(*this);
 	}
 }
 
-void ASTPrinter::visit(const nodes::Type& node)
+void ASTPrinter::visit(const nodes::TypeDeclaration& node)
 {
 
 }
@@ -64,7 +57,8 @@ void ASTPrinter::visit(const nodes::ConstantDeclaration& node)
 {
 	print_prefix();
 	print_access(node.access);
-	print(" constant");
+	print(" constant declaration ");
+	print(node.id.to_string());
 	print_line();
 
 	incr_depth();
@@ -72,12 +66,12 @@ void ASTPrinter::visit(const nodes::ConstantDeclaration& node)
 	decr_depth();
 }
 
-void ASTPrinter::visit(const nodes::Field& node)
+void ASTPrinter::visit(const nodes::FieldDeclaration& node)
 {
 
 }
 
-void ASTPrinter::visit(const nodes::Method& node)
+void ASTPrinter::visit(const nodes::MethodDeclaration& node)
 {
 
 }
@@ -289,11 +283,12 @@ void ASTPrinter::visit(const nodes::OptionalEmpty& node)
 	print_line();
 }
 
-void ASTPrinter::visit(const nodes::PackageFunction& node)
+void ASTPrinter::visit(const nodes::PackageFunctionDeclaration& node)
 {
 	print_prefix();
 	print_access(node.access);
-	print(" function");
+	print(" function declaration ");
+	print(node.id.to_string());
 	if(node.effect_io) { print(" io"); }
 	print_line();
 
@@ -343,27 +338,12 @@ void ASTPrinter::visit(const nodes::PackageFunction& node)
 	decr_depth();
 }
 
-void ASTPrinter::visit(const nodes::PackageFunctionOverloadList& node)
-{
-	print_prefix();
-	print("overloads");
-	print_line();
-
-	incr_depth();
-
-	for(const nodes::PackageFunction& function : node.functions)
-	{
-		function.accept(*this);
-	}
-
-	decr_depth();
-}
-
 void ASTPrinter::visit(const nodes::OperatorModule& node)
 {
 	print_prefix();
 	print_access(node.access);
-	print(" operator module");
+	print(" operator module ");
+	print(node.id.to_string());
 	print_line();
 
 	incr_depth();
@@ -371,7 +351,7 @@ void ASTPrinter::visit(const nodes::OperatorModule& node)
 	{
 		od.accept(*this);
 	}
-	for(const OperatorFunction& of : node.functions)
+	for(const OperatorFunctionDeclaration& of : node.functions)
 	{
 		of.accept(*this);
 	}
@@ -431,7 +411,7 @@ void ASTPrinter::visit(const nodes::OperatorDeclaration& node)
 	decr_depth();
 }
 
-void ASTPrinter::visit(const nodes::OperatorFunction& node)
+void ASTPrinter::visit(const nodes::OperatorFunctionDeclaration& node)
 {
 	print_prefix();
 	print("operator function:");

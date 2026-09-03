@@ -4,7 +4,6 @@
 #include <memory>
 #include <optional>
 #include <string>
-#include <unordered_map>
 #include <vector>
 #include <variant>
 #include "../ast_node.hpp"
@@ -21,7 +20,17 @@ namespace neon_compiler::parser
 namespace neon_compiler::ast::nodes
 {
 
-struct PackageMember : ASTNode {};
+struct PackageMember : ASTNode
+{
+	PackageMemberID id;
+
+	explicit PackageMember
+	(
+		PackageMemberID init_id
+	) :
+		id{std::move(init_id)}
+	{}
+};
 
 struct Statement : ASTNode {};
 
@@ -29,10 +38,7 @@ struct Expression : ASTNode {};
 
 struct Root : ASTNode
 {
-	/** Mapping from package member identifier to package member */
-	std::unordered_map<std::string, std::unique_ptr<PackageMember>> package_members;
-	/** Mapping from file path to package member identifiers */
-	std::unordered_map<std::string, std::vector<std::string>> file_package_members;
+	std::vector<std::unique_ptr<PackageMember>> package_members;
 
 	Root() = default;
 
@@ -174,8 +180,13 @@ struct ConstantDeclaration : PackageMember
     explicit ConstantDeclaration
     (
 		Access init_access,
+		PackageMemberID init_id,
         VariableDeclaration init_constant
     ) :
+		PackageMember
+		{
+			std::move(init_id)
+		},
 		access{std::move(init_access)},
         constant{std::move(init_constant)}
     {}
@@ -210,20 +221,24 @@ enum class TypeAbstractionLevel
 	CLASS
 };
 
-struct Field : ASTNode
+struct FieldDeclaration : ASTNode
 {
 	/** Whether it is reassignable after construction */
 	bool var;
-	/** The reference type of this field. */
+	/** The reference type of this field */
 	ReferenceType reference_type;
+	/** Field name */
+	std::string name;
 
-	explicit Field
+	explicit FieldDeclaration
 	(
 		bool init_var,
-		ReferenceType init_reference_type
+		ReferenceType init_reference_type,
+		std::string init_name
 	) :
 		var{init_var},
-		reference_type{init_reference_type}
+		reference_type{std::move(init_reference_type)},
+		name{std::move(init_name)}
 	{}
 
 	void accept(ASTVisitor& visitor) const override
@@ -232,7 +247,7 @@ struct Field : ASTNode
 	}
 };
 
-struct Function : ASTNode
+struct FunctionDeclaration : ASTNode
 {
 	/** The access which determines who can use this function */
 	Access access;
@@ -245,7 +260,7 @@ struct Function : ASTNode
 	/** Whether this function may perform I/O */
 	bool effect_io;
 
-	explicit Function
+	explicit FunctionDeclaration
 	(
 		Access init_access,
 		std::optional<ReferenceType> init_return_type,
@@ -261,30 +276,35 @@ struct Function : ASTNode
 	{}
 };
 
-struct PackageFunction : Function
+struct PackageFunctionDeclaration : FunctionDeclaration, PackageMember
 {
 	/** Whether this is a compile-time function */
 	bool compile_time;
-	/** PackageFunction body */
+	/** Function body */
 	CodeBlock body;
 
-	explicit PackageFunction
+	explicit PackageFunctionDeclaration
 	(
 		Access init_access,
 		bool init_compile_time,
 		std::optional<ReferenceType> init_return_type,
+		PackageMemberID init_id,
 		std::vector<GenericParameter> init_generic_parameters,
 		ParameterDeclarationList init_parameters,
 		bool init_effect_io,
 		CodeBlock init_body
 	) :
-		Function
+		FunctionDeclaration
 		{
 			std::move(init_access),
 			std::move(init_return_type),
 			std::move(init_generic_parameters),
 			std::move(init_parameters),
 			init_effect_io
+		},
+		PackageMember
+		{
+			std::move(init_id)
 		},
 		compile_time{std::move(init_compile_time)},
 		body{std::move(init_body)}
@@ -296,37 +316,22 @@ struct PackageFunction : Function
 	}
 };
 
-/** Functions with the same name, but different parameter types */
-struct PackageFunctionOverloadList : PackageMember
+struct MethodDeclaration : FunctionDeclaration
 {
-	std::vector<PackageFunction> functions;
-
-	explicit PackageFunctionOverloadList
-	(
-		std::vector<PackageFunction> init_functions
-	) :
-		functions{std::move(init_functions)}
-	{}
-
-	void accept(ASTVisitor& visitor) const override
-	{
-		visitor.visit(*this);
-	}
-};
-
-struct Method : Function
-{
-	/** Whether this method may mutate the object. */
+	/** The name of the method */
+	std::string name;
+	/** Whether this method may mutate the object */
 	bool mut;
-	/** Whether this method may mutate the object. */
+	/** Whether this method may mutate the object */
 	bool share_mut;
 	/** Method body. Empty means it's not implemented (an abstract method). */
 	std::optional<CodeBlock> implementation;
 
-	explicit Method
+	explicit MethodDeclaration
 	(
 		Access init_access,
 		std::optional<ReferenceType> init_return_type,
+		std::string init_name,
 		std::vector<GenericParameter> init_generic_parameters,
 		ParameterDeclarationList init_parameters,
 		bool init_mut,
@@ -334,7 +339,7 @@ struct Method : Function
 		bool init_io,
 		std::optional<CodeBlock> init_implementation
 	) :
-		Function
+		FunctionDeclaration
 		{
 			std::move(init_access),
 			std::move(init_return_type),
@@ -342,6 +347,7 @@ struct Method : Function
 			std::move(init_parameters),
 			init_io
 		},
+		name{std::move(init_name)},
 		mut{init_mut},
 		share_mut{init_share_mut},
 		implementation{std::move(init_implementation)}
@@ -353,27 +359,32 @@ struct Method : Function
 	}
 };
 
-struct Type : PackageMember
+struct TypeDeclaration : PackageMember
 {
 	/** The access which determines who can use this package member */
 	Access access;
 	/** The type's abstraction level */
 	TypeAbstractionLevel abstraction_level;
-	/** Mapping from reference name to constant declaration. */
-	std::unordered_map<std::string, ConstantDeclaration> constants;
-	/** Mapping from reference name to field declaration. */
-	std::unordered_map<std::string, Field> fields;
-	/** Mapping from method name to methods with the same name, but different parameters (overloads). */
-	std::unordered_map<std::string, std::vector<Method>> methods;
+	/** Constant declarations */
+	std::vector<ConstantDeclaration> constants;
+	/** Field declarations */
+	std::vector<FieldDeclaration> fields;
+	/** Method declarations */
+	std::vector<MethodDeclaration> methods;
 
-	explicit Type
+	explicit TypeDeclaration
 	(
 		Access init_access,
 		TypeAbstractionLevel init_abstraction_level,
-		std::unordered_map<std::string, ConstantDeclaration> init_constants,
-		std::unordered_map<std::string, Field> init_fields,
-		std::unordered_map<std::string, std::vector<Method>> init_methods
+		PackageMemberID init_id,
+		std::vector<ConstantDeclaration> init_constants,
+		std::vector<FieldDeclaration> init_fields,
+		std::vector<MethodDeclaration> init_methods
 	) :
+		PackageMember
+		{
+			std::move(init_id)
+		},
 		access{std::move(init_access)},
 		abstraction_level{init_abstraction_level},
 		constants{std::move(init_constants)},
@@ -471,7 +482,7 @@ struct OperatorDeclaration : ASTNode
 	}
 };
 
-struct OperatorFunction : ASTNode
+struct OperatorFunctionDeclaration : ASTNode
 {
 	/** The reference type this function returns. */
 	ReferenceType return_type;
@@ -482,7 +493,7 @@ struct OperatorFunction : ASTNode
 	/** Function body */
 	CodeBlock body;
 
-	explicit OperatorFunction
+	explicit OperatorFunctionDeclaration
 	(
 		ReferenceType init_return_type,
 		std::vector<GenericParameter> init_generic_parameters,
@@ -508,14 +519,19 @@ struct OperatorModule : PackageMember
 	/** Operator declarations */
 	std::vector<OperatorDeclaration> operators;
 	/** Operator functions */
-	std::vector<OperatorFunction> functions;
+	std::vector<OperatorFunctionDeclaration> functions;
 
 	explicit OperatorModule
 	(
 		Access init_access,
+		PackageMemberID init_id,
 		std::vector<OperatorDeclaration> init_operators,
-		std::vector<OperatorFunction> init_functions
+		std::vector<OperatorFunctionDeclaration> init_functions
 	) :
+		PackageMember
+		{
+			std::move(init_id)
+		},
 		access{std::move(init_access)},
 		operators{std::move(init_operators)},
 		functions{std::move(init_functions)}

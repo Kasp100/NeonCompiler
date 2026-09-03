@@ -3,6 +3,7 @@
 using namespace neon_compiler;
 using namespace neon_compiler::parser;
 using namespace neon_compiler::analysis;
+using namespace neon_compiler::ast;
 using namespace neon_compiler::ast::nodes;
 
 Parser::Parser
@@ -186,21 +187,11 @@ void Parser::report_token
 	analysis_reporter->report(AnalysisEntry{file, type, severity, token.get_source_position(), token.get_length(), info});
 }
 
-std::string Parser::append_ast(std::unique_ptr<PackageMember> node, const std::string& identifier)
+void Parser::append_ast(std::unique_ptr<PackageMember> node)
 {
-	std::string full_identifier = get_full_identifier(identifier);
-
-	root_node->file_package_members[std::string{file}].push_back(full_identifier);
-	root_node->package_members[full_identifier] = std::move(node);
-
-	logger->info("Appended to AST: " + full_identifier);
-
-	return full_identifier;
-}
-
-std::string Parser::get_full_identifier(const std::string& identifier) const
-{
-	return package.to_string() + "::" + identifier;
+	const std::string path = node->id.to_string();
+	root_node->package_members.push_back(std::move(node));
+	logger->info("Appended to AST: " + path);
 }
 
 std::shared_ptr<OperatorTable> Parser::parse_use_statement_after_keyword_and_create_operator_table(std::shared_ptr<OperatorTable> previous)
@@ -488,7 +479,7 @@ std::string Parser::parse_declaration_name(AnalysisEntryType analysis_entry_type
 }
 
 void Parser::parse_operator_module_a_and_register_after_keyword(const Access& access)
-{
+{/*
 	const std::string name = parse_declaration_name(AnalysisEntryType::DECLARATION);
 
 	if(reader.peek().get_type() == TokenType::BRACKET_CURLY_OPEN)
@@ -534,7 +525,7 @@ void Parser::parse_operator_module_a_and_register_after_keyword(const Access& ac
 
 	std::string full_id = append_ast
 	(
-		std::make_unique<OperatorModule>(access, std::move(operators), std::vector<OperatorFunction>{}),
+		std::make_unique<OperatorModule>(access, std::move(operators), std::vector<OperatorFunctionDeclaration>{}),
 		name
 	);
 
@@ -557,11 +548,11 @@ void Parser::parse_operator_module_a_and_register_after_keyword(const Access& ac
 		}
 	}
 
-	(*operator_map)[full_id] = std::move(operator_list);
+	(*operator_map)[full_id] = std::move(operator_list);*/
 }
 
 void Parser::parse_operator_module_b_after_keyword(std::shared_ptr<OperatorTable> operator_table)
-{
+{/*
 	if(reader.peek(0).get_type() != TokenType::IDENTIFIER || reader.peek(1).get_type() != TokenType::BRACKET_CURLY_OPEN)
 	{
 		logger->info("Skipped invalid operator module.");
@@ -575,7 +566,7 @@ void Parser::parse_operator_module_b_after_keyword(std::shared_ptr<OperatorTable
 
 	reader.consume(); // Consume `{`
 
-	std::vector<OperatorFunction> functions;
+	std::vector<OperatorFunctionDeclaration> functions;
 
 	TokenType token_type = reader.peek().get_type();
 	while(!reader.end_of_file_reached() && token_type != TokenType::BRACKET_CURLY_CLOSE)
@@ -614,7 +605,7 @@ void Parser::parse_operator_module_b_after_keyword(std::shared_ptr<OperatorTable
 		return;
 	}
 
-	operator_module->functions = std::move(functions);
+	operator_module->functions = std::move(functions);*/
 }
 
 OperatorDeclaration Parser::parse_operator_declaration_after_keyword()
@@ -732,7 +723,7 @@ OperatorDeclaration Parser::parse_operator_declaration_after_keyword()
 	return OperatorDeclaration{std::move(pattern), subordination, associativity, BuiltinOperatorKind::NOT_BUILT_IN};
 }
 
-OperatorFunction Parser::parse_operator_function(std::shared_ptr<OperatorTable> operator_table)
+OperatorFunctionDeclaration Parser::parse_operator_function(std::shared_ptr<OperatorTable> operator_table)
 {
 	std::optional<ReferenceType> opt_return_value = parse_reference_type();
 
@@ -755,7 +746,7 @@ OperatorFunction Parser::parse_operator_function(std::shared_ptr<OperatorTable> 
 
 	CodeBlock body = parse_code_block_after_opening_bracket(operator_table);
 
-	return OperatorFunction
+	return OperatorFunctionDeclaration
 	{
 		std::move(return_value),
 		std::move(generic_parameters),
@@ -1280,9 +1271,16 @@ bool Parser::parse_and_register_constant
 	std::optional<VariableDeclaration> opt_var_decl = parse_variable_declaration(operator_table.get());
 	if(!opt_var_decl.has_value()) { return false; }
 	VariableDeclaration& var_decl = opt_var_decl.value();
-	std::string constant_name{var_decl.explicit_ref_name.value_or(var_decl.reference_type.type_id.get_last_part())};
 
-	append_ast(std::make_unique<ConstantDeclaration>(access, std::move(var_decl)), constant_name);
+	PackageMemberID id = package.append
+	(
+		var_decl.explicit_ref_name.value_or
+		(
+			var_decl.reference_type.type_id.get_last_part()
+		)
+	);
+
+	append_ast(std::make_unique<ConstantDeclaration>(access, std::move(id), std::move(var_decl)));
 
 	parse_end_of_statement_after_expression();
 
@@ -1318,6 +1316,8 @@ bool Parser::parse_and_register_function
 	const Token& name_token = reader.consume();
 	const std::string function_name{name_token.get_lexeme().value()};
 	report_token(AnalysisEntryType::DECLARATION, AnalysisSeverity::INFO, name_token, function_name);
+
+	PackageMemberID id = package.append(function_name);
 
 	std::vector<GenericParameter> generic_parameters = parse_generic_parameters();
 
@@ -1355,42 +1355,19 @@ bool Parser::parse_and_register_function
 
 	CodeBlock body = parse_code_block_after_opening_bracket(operator_table);
 
-	std::string full_id = get_full_identifier(function_name);
-
-	PackageFunctionOverloadList* overloads{nullptr};
-
-	std::unordered_map<std::string, std::unique_ptr<PackageMember>>::iterator it =
-		root_node->package_members.find(full_id);
-
-	if(it == root_node->package_members.end())
-	{
-		std::unique_ptr<PackageFunctionOverloadList> new_overload_list = std::make_unique<PackageFunctionOverloadList>(std::vector<PackageFunction>{});
-		overloads = new_overload_list.get();
-		append_ast(std::move(new_overload_list), function_name);
-	}
-	else
-	{
-		overloads = dynamic_cast<PackageFunctionOverloadList*>(it->second.get());
-	}
-
-	if(!overloads)
-	{
-		logger->error("Could not add overload; dynamic cast returned nullptr.");
-		return true;
-	}
-
-	overloads->functions.push_back
+	append_ast
 	(
-		PackageFunction
-		{
+		std::make_unique<PackageFunctionDeclaration>
+		(
 			access,
 			compile_time,
 			std::move(return_type),
+			std::move(id),
 			std::move(generic_parameters),
 			std::move(params),
 			effect_io,
 			std::move(body)
-		}
+		)
 	);
 
 	return true;
