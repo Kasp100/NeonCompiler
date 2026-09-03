@@ -27,8 +27,8 @@ namespace neon_compiler::ast::nodes
 	struct FunctionCall;
 	struct SimpleRead;
 	struct OptionalEmpty;
-	struct Function;
-	struct FunctionOverloadList;
+	struct PackageFunction;
+	struct PackageFunctionOverloadList;
 	struct OperatorModule;
 	struct OperatorDeclaration;
 	struct OperatorFunction;
@@ -68,8 +68,8 @@ public:
 	virtual void visit(const nodes::FunctionCall& node) = 0;
 	virtual void visit(const nodes::SimpleRead& node) = 0;
 	virtual void visit(const nodes::OptionalEmpty& node) = 0;
-	virtual void visit(const nodes::Function& node) = 0;
-	virtual void visit(const nodes::FunctionOverloadList& node) = 0;
+	virtual void visit(const nodes::PackageFunction& node) = 0;
+	virtual void visit(const nodes::PackageFunctionOverloadList& node) = 0;
 	virtual void visit(const nodes::OperatorModule& node) = 0;
 	virtual void visit(const nodes::OperatorDeclaration& node) = 0;
 	virtual void visit(const nodes::OperatorFunction& node) = 0;

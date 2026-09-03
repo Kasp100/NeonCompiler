@@ -289,7 +289,7 @@ void ASTPrinter::visit(const nodes::OptionalEmpty& node)
 	print_line();
 }
 
-void ASTPrinter::visit(const nodes::Function& node)
+void ASTPrinter::visit(const nodes::PackageFunction& node)
 {
 	print_prefix();
 	print_access(node.access);
@@ -343,7 +343,7 @@ void ASTPrinter::visit(const nodes::Function& node)
 	decr_depth();
 }
 
-void ASTPrinter::visit(const nodes::FunctionOverloadList& node)
+void ASTPrinter::visit(const nodes::PackageFunctionOverloadList& node)
 {
 	print_prefix();
 	print("overloads");
@@ -351,7 +351,7 @@ void ASTPrinter::visit(const nodes::FunctionOverloadList& node)
 
 	incr_depth();
 
-	for(const nodes::Function& function : node.functions)
+	for(const nodes::PackageFunction& function : node.functions)
 	{
 		function.accept(*this);
 	}

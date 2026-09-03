@@ -30,8 +30,8 @@ public:
 	void visit(const nodes::FunctionCall& node) override;
 	void visit(const nodes::SimpleRead& node) override;
 	void visit(const nodes::OptionalEmpty& node) override;
-	void visit(const nodes::Function& node) override;
-	void visit(const nodes::FunctionOverloadList& node) override;
+	void visit(const nodes::PackageFunction& node) override;
+	void visit(const nodes::PackageFunctionOverloadList& node) override;
 	void visit(const nodes::OperatorModule& node) override;
 	void visit(const nodes::OperatorDeclaration& node) override;
 	void visit(const nodes::OperatorFunction& node) override;

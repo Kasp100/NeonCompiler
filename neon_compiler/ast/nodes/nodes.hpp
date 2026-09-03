@@ -233,18 +233,94 @@ struct Field : ASTNode
 	}
 };
 
-struct Method : ASTNode
+struct Function : ASTNode
 {
-	/** The access which determines who can use this method */
+	/** The access which determines who can use this function */
 	Access access;
-	/** The reference type this method returns. Empty means it's a `void` method. */
+	/** The reference type this function returns. Empty means it's a `void` method. */
 	std::optional<ReferenceType> return_type;
-	/** Whether this method may mutate the object. */
-	bool mutating;
-	/** Whether this method may perform IO. */
-	bool io;
+	/** Generic parameters */
+	std::vector<GenericParameter> generic_parameters;
 	/** Parameters */
 	ParameterDeclarationList parameters;
+	/** Whether this function may perform I/O */
+	bool effect_io;
+
+	explicit Function
+	(
+		Access init_access,
+		std::optional<ReferenceType> init_return_type,
+		std::vector<GenericParameter> init_generic_parameters,
+		ParameterDeclarationList init_parameters,
+		bool init_effect_io
+	) :
+		access{std::move(init_access)},
+		return_type{std::move(init_return_type)},
+		generic_parameters{std::move(init_generic_parameters)},
+		parameters{std::move(init_parameters)},
+		effect_io{init_effect_io}
+	{}
+};
+
+struct PackageFunction : Function
+{
+	/** Whether this is a compile-time function */
+	bool compile_time;
+	/** PackageFunction body */
+	CodeBlock body;
+
+	explicit PackageFunction
+	(
+		Access init_access,
+		bool init_compile_time,
+		std::optional<ReferenceType> init_return_type,
+		std::vector<GenericParameter> init_generic_parameters,
+		ParameterDeclarationList init_parameters,
+		bool init_effect_io,
+		CodeBlock init_body
+	) :
+		Function
+		{
+			std::move(init_access),
+			std::move(init_return_type),
+			std::move(init_generic_parameters),
+			std::move(init_parameters),
+			init_effect_io
+		},
+		compile_time{std::move(init_compile_time)},
+		body{std::move(init_body)}
+	{}
+
+	void accept(ASTVisitor& visitor) const override
+	{
+		visitor.visit(*this);
+	}
+};
+
+/** Functions with the same name, but different parameter types */
+struct PackageFunctionOverloadList : PackageMember
+{
+	std::vector<PackageFunction> functions;
+
+	explicit PackageFunctionOverloadList
+	(
+		std::vector<PackageFunction> init_functions
+	) :
+		functions{std::move(init_functions)}
+	{}
+
+	void accept(ASTVisitor& visitor) const override
+	{
+		visitor.visit(*this);
+	}
+};
+
+struct Method : Function
+{
+	/** Whether this method may mutate the object. */
+	bool mut;
+	/** Whether this method may mutate the object. */
+	bool share_mut;
 	/** Method body. Empty means it's not implemented (an abstract method). */
 	std::optional<CodeBlock> implementation;
 
@@ -252,16 +328,23 @@ struct Method : ASTNode
 	(
 		Access init_access,
 		std::optional<ReferenceType> init_return_type,
-		bool init_mutating,
-		bool init_io,
+		std::vector<GenericParameter> init_generic_parameters,
 		ParameterDeclarationList init_parameters,
+		bool init_mut,
+		bool init_share_mut,
+		bool init_io,
 		std::optional<CodeBlock> init_implementation
 	) :
-		access{std::move(init_access)},
-		return_type{std::move(init_return_type)},
-		mutating{init_mutating},
-		io{init_io},
-		parameters{std::move(init_parameters)},
+		Function
+		{
+			std::move(init_access),
+			std::move(init_return_type),
+			std::move(init_generic_parameters),
+			std::move(init_parameters),
+			init_io
+		},
+		mut{init_mut},
+		share_mut{init_share_mut},
 		implementation{std::move(init_implementation)}
 	{}
 
@@ -297,66 +380,6 @@ struct Type : PackageMember
 		constants{std::move(init_constants)},
 		fields{std::move(init_fields)},
 		methods{std::move(init_methods)}
-	{}
-
-	void accept(ASTVisitor& visitor) const override
-	{
-		visitor.visit(*this);
-	}
-};
-
-struct Function : ASTNode
-{
-	/** The access which determines who can use this function */
-	Access access;
-	/** Whether this is a compile-time function */
-	bool compile_time;
-	/** The reference type this function returns. Empty means it's a `void` method. */
-	std::optional<ReferenceType> return_type;
-	/** Generic parameters */
-	std::vector<GenericParameter> generic_parameters;
-	/** Parameters */
-	ParameterDeclarationList parameters;
-	/** Whether this function may perform I/O */
-	bool effect_io;
-	/** Function body */
-	CodeBlock body;
-
-	explicit Function
-	(
-		Access init_access,
-		bool init_compile_time,
-		std::optional<ReferenceType> init_return_type,
-		std::vector<GenericParameter> init_generic_parameters,
-		ParameterDeclarationList init_parameters,
-		bool init_effect_io,
-		CodeBlock init_body
-	) :
-		access{std::move(init_access)},
-		compile_time{init_compile_time},
-		return_type{std::move(init_return_type)},
-		generic_parameters{std::move(init_generic_parameters)},
-		parameters{std::move(init_parameters)},
-		effect_io{init_effect_io},
-		body{std::move(init_body)}
-	{}
-
-	void accept(ASTVisitor& visitor) const override
-	{
-		visitor.visit(*this);
-	}
-};
-
-/** Functions with the same name, but different parameter types */
-struct FunctionOverloadList : PackageMember
-{
-	std::vector<Function> functions;
-
-	explicit FunctionOverloadList
-	(
-		std::vector<Function> init_functions
-	) :
-		functions{std::move(init_functions)}
 	{}
 
 	void accept(ASTVisitor& visitor) const override

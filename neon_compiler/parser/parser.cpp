@@ -1357,20 +1357,20 @@ bool Parser::parse_and_register_function
 
 	std::string full_id = get_full_identifier(function_name);
 
-	FunctionOverloadList* overloads{nullptr};
+	PackageFunctionOverloadList* overloads{nullptr};
 
 	std::unordered_map<std::string, std::unique_ptr<PackageMember>>::iterator it =
 		root_node->package_members.find(full_id);
 
 	if(it == root_node->package_members.end())
 	{
-		std::unique_ptr<FunctionOverloadList> new_overload_list = std::make_unique<FunctionOverloadList>(std::vector<Function>{});
+		std::unique_ptr<PackageFunctionOverloadList> new_overload_list = std::make_unique<PackageFunctionOverloadList>(std::vector<PackageFunction>{});
 		overloads = new_overload_list.get();
 		append_ast(std::move(new_overload_list), function_name);
 	}
 	else
 	{
-		overloads = dynamic_cast<FunctionOverloadList*>(it->second.get());
+		overloads = dynamic_cast<PackageFunctionOverloadList*>(it->second.get());
 	}
 
 	if(!overloads)
@@ -1381,7 +1381,7 @@ bool Parser::parse_and_register_function
 
 	overloads->functions.push_back
 	(
-		Function
+		PackageFunction
 		{
 			access,
 			compile_time,
