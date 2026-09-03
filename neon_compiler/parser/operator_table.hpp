@@ -31,7 +31,7 @@ namespace builtin_operators
 	};
 
     inline const std::shared_ptr<const parser::Operator> MEMBER_ACCESS_DOT =
-		std::make_shared<const parser::Operator>(&MEMBER_ACCESS_DOT_DECLARATION);
+		std::make_shared<const parser::Operator>(std::move(MEMBER_ACCESS_DOT_DECLARATION));
 
 	// `=` operator
 
@@ -51,7 +51,7 @@ namespace builtin_operators
 	};
 
     inline const std::shared_ptr<const parser::Operator> ASSIGNMENT =
-		std::make_shared<const parser::Operator>(&ASSIGNMENT_DECLARATION);
+		std::make_shared<const parser::Operator>(std::move(ASSIGNMENT_DECLARATION));
 
 	// `give` operator
 
@@ -70,7 +70,7 @@ namespace builtin_operators
 	};
 
     inline const std::shared_ptr<const parser::Operator> GIVE =
-		std::make_shared<const parser::Operator>(&GIVE_DECLARATION);
+		std::make_shared<const parser::Operator>(std::move(GIVE_DECLARATION));
 
 	// "give and assign" operator
 
@@ -91,7 +91,7 @@ namespace builtin_operators
 	};
 
     inline const std::shared_ptr<const parser::Operator> GIVE_AND_ASSIGN =
-		std::make_shared<const parser::Operator>(&GIVE_AND_ASSIGN_DECLARATION);
+		std::make_shared<const parser::Operator>(std::move(GIVE_AND_ASSIGN_DECLARATION));
 
 	// `present` operator
 
@@ -110,7 +110,7 @@ namespace builtin_operators
 	};
 
     inline const std::shared_ptr<const parser::Operator> CHECK_PRESENCE =
-		std::make_shared<const parser::Operator>(&CHECK_PRESENCE_DECLARATION);
+		std::make_shared<const parser::Operator>(std::move(CHECK_PRESENCE_DECLARATION));
 
 	// `absent` operator
 
@@ -129,7 +129,7 @@ namespace builtin_operators
 	};
 
     inline const std::shared_ptr<const parser::Operator> CHECK_ABSENCE =
-		std::make_shared<const parser::Operator>(&CHECK_ABSENCE_DECLARATION);
+		std::make_shared<const parser::Operator>(std::move(CHECK_ABSENCE_DECLARATION));
 
 	// `or` operator
 
@@ -149,7 +149,7 @@ namespace builtin_operators
 	};
 
     inline const std::shared_ptr<const parser::Operator> FALLBACK_OR =
-		std::make_shared<const parser::Operator>(&FALLBACK_OR_DECLARATION);
+		std::make_shared<const parser::Operator>(std::move(FALLBACK_OR_DECLARATION));
 
 	inline const std::vector<std::shared_ptr<const neon_compiler::parser::Operator>> PREFIX{GIVE_AND_ASSIGN, GIVE};
 	inline const std::vector<std::shared_ptr<const neon_compiler::parser::Operator>> INFIX{MEMBER_ACCESS_DOT, ASSIGNMENT, FALLBACK_OR};

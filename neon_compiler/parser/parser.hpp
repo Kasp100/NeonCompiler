@@ -126,10 +126,10 @@ public:
 	);
 
 	/** Should be run first in the parsing phase to register package declaration and parse operator modules. */
-	void run_a();
+	void parse_operators_and_register_package_declaration();
 
 	/** Should be run second in the parsing phase to parse other package member types. */
-	void run_b(std::shared_ptr<neon_compiler::parser::OperatorTable> operator_table);
+	void parse_and_build_ast(std::shared_ptr<neon_compiler::parser::OperatorTable> operator_table);
 
 	std::shared_ptr<neon_compiler::ast::nodes::Root> get_root_node() const;
 private:
@@ -169,12 +169,13 @@ private:
 	std::optional<neon_compiler::ast::PackageMemberID> parse_identifier
 	(
 		neon_compiler::analysis::AnalysisEntryType id_type,
-		neon_compiler::analysis::AnalysisSeverity id_severity
+		neon_compiler::analysis::AnalysisSeverity id_severity,
+		bool no_report = false
 	);
 	void parse_and_register_package_declaration();
 	void parse_and_register_import_statement_after_keyword();
-	neon_compiler::ast::nodes::Access parse_access();
-	neon_compiler::ast::nodes::PackageMemberPattern parse_package_member_pattern();
+	neon_compiler::ast::nodes::Access parse_access(bool no_report = false);
+	neon_compiler::ast::nodes::PackageMemberPattern parse_package_member_pattern(bool no_report);
 
 	void parse_package_member
 	(
@@ -186,9 +187,13 @@ private:
 		neon_compiler::analysis::AnalysisEntryType analysis_entry_type
 	);
 
-	void parse_operator_module_a_and_register_after_keyword(const neon_compiler::ast::nodes::Access& access);
-	neon_compiler::ast::nodes::OperatorDeclaration parse_operator_declaration_after_keyword();
-	void parse_operator_module_b_after_keyword(std::shared_ptr<OperatorTable> operator_table);
+	void parse_operators();
+	neon_compiler::ast::nodes::OperatorDeclaration parse_operator_declaration_after_keyword(bool no_report = false);
+	void parse_operator_module_and_register_after_keyword
+	(
+		const neon_compiler::ast::nodes::Access& access,
+		std::shared_ptr<OperatorTable> operator_table
+	);
 	neon_compiler::ast::nodes::OperatorFunctionDeclaration parse_operator_function
 	(
 		std::shared_ptr<neon_compiler::parser::OperatorTable> operator_table

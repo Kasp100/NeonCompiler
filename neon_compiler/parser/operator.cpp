@@ -10,9 +10,9 @@ using namespace neon_compiler::ast::nodes;
 
 Operator::Operator
 (
-	const neon_compiler::ast::nodes::OperatorDeclaration* init_declaration
+	neon_compiler::ast::nodes::OperatorDeclaration init_declaration
 ) :
-	declaration{init_declaration},
+	declaration{std::move(init_declaration)},
 	fixity{Fixity::INVALID}
 {
 	validate();
@@ -20,7 +20,7 @@ Operator::Operator
 
 void Operator::validate()
 {
-	const std::vector<OperatorSyntaxPatternElement>& pattern = declaration->pattern;
+	const std::vector<OperatorSyntaxPatternElement>& pattern = declaration.pattern;
 
 	if(pattern.size() < PATTERN_MIN_SIZE)
 	{
@@ -54,11 +54,6 @@ void Operator::validate()
 	}
 }
 
-const neon_compiler::ast::nodes::OperatorDeclaration* Operator::get_declaration() const
-{
-	return declaration;
-}
-
 Fixity Operator::get_fixity() const
 {
 	return fixity;
@@ -71,13 +66,16 @@ bool Operator::operator<(const Operator& other) const
 
 bool Operator::is_less_specific_from(const Operator& other, std::size_t check_index) const
 {
-	if(check_index >= declaration->pattern.size())
+	const std::vector<OperatorSyntaxPatternElement>& pattern = declaration.pattern;
+	const std::vector<OperatorSyntaxPatternElement>& other_pattern = other.declaration.pattern;
+
+	if(check_index >= pattern.size())
 	{
-		return other.declaration->pattern.size() > declaration->pattern.size();
+		return other_pattern.size() > pattern.size();
 	}
 
-	std::size_t consecutive_tokens_count_this = count_consecutive_tokens(declaration->pattern, check_index);
-	std::size_t consecutive_tokens_count_other = count_consecutive_tokens(other.declaration->pattern, check_index);
+	std::size_t consecutive_tokens_count_this = count_consecutive_tokens(pattern, check_index);
+	std::size_t consecutive_tokens_count_other = count_consecutive_tokens(other_pattern, check_index);
 
 	if(consecutive_tokens_count_other == consecutive_tokens_count_this)
 	{
@@ -115,7 +113,7 @@ bool Operator::matches
 {
 	uint peek_offset{peek_cursor ? *peek_cursor : 0}; 
 
-	const std::vector<OperatorSyntaxPatternElement>& pattern = get_declaration()->pattern;
+	const std::vector<OperatorSyntaxPatternElement>& pattern = declaration.pattern;
 
 	for(std::size_t i = (skip_first ? 1 : 0); i < pattern.size(); ++i)
 	{
@@ -123,8 +121,8 @@ bool Operator::matches
 
 		if(std::holds_alternative<OperatorSyntaxParameter>(elem))
 		{
-			uint max_subordination = declaration->subordination - 1;
-			if(i == pattern.size() - 1 && declaration->associativity == OperatorAssociativity::RIGHT) { ++max_subordination; }
+			uint max_subordination = declaration.subordination - 1;
+			if(i == pattern.size() - 1 && declaration.associativity == OperatorAssociativity::RIGHT) { ++max_subordination; }
 			peek_offset = func_parse_expression_w_cursor(peek_offset, max_subordination);
 			continue;
 		}
@@ -140,4 +138,9 @@ bool Operator::matches
 	}
 
 	return true;
+}
+
+const OperatorDeclaration* Operator::get_declaration() const
+{
+	return &declaration;
 }

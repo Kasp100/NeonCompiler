@@ -83,14 +83,14 @@ void Compiler::generate_analysis() const
 
 	for(Parser& parser : parsers)
 	{
-		parser.run_a();
+		parser.parse_operators_and_register_package_declaration();
 	}
 
 	std::shared_ptr<OperatorTable> operator_table = std::make_shared<OperatorTable>();
 
 	for(Parser& parser : parsers)
 	{
-		parser.run_b(operator_table);
+		parser.parse_and_build_ast(operator_table);
 	}
 
 	ASTPrinter printer{};

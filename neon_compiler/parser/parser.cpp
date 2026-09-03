@@ -23,7 +23,7 @@ Parser::Parser
 	operator_map{init_operator_map}
 {}
 
-void Parser::run_a()
+void Parser::parse_operators_and_register_package_declaration()
 {
 	parse_and_register_package_declaration();
 
@@ -43,14 +43,14 @@ void Parser::run_a()
 			continue;
 		}
 
-		const Access access = parse_access();
+		parse_access(true);
 
 		token_type = reader.consume().get_type();
 
 		if(token_type == TokenType::PACKAGE_MEMBER_OPERATOR_MODULE)
 		{
 			// Token reported in `run_b`
-			parse_operator_module_a_and_register_after_keyword(access);
+			parse_operators();
 		}
 		else
 		{
@@ -62,7 +62,7 @@ void Parser::run_a()
 	reader.reset();
 }
 
-void Parser::run_b(std::shared_ptr<OperatorTable> operator_table)
+void Parser::parse_and_build_ast(std::shared_ptr<OperatorTable> operator_table)
 {
 	skip_until_statement_end();
 
@@ -259,12 +259,21 @@ const std::vector<std::shared_ptr<const Operator>>* Parser::parse_use_statement_
 	return &(*operator_map)[id_str];
 }
 
-std::optional<neon_compiler::ast::PackageMemberID> Parser::parse_identifier(AnalysisEntryType id_type, AnalysisSeverity id_severity)
+std::optional<neon_compiler::ast::PackageMemberID> Parser::parse_identifier(AnalysisEntryType id_type, AnalysisSeverity id_severity, bool no_report)
 {
-	FuncReportToken func_report_token = [this] (AnalysisEntryType type, AnalysisSeverity severity, const Token& token, std::optional<std::string> info)
+	FuncReportToken func_report_token;
+
+	if(no_report)
 	{
-		report_token(type, severity, token, info);
-	};
+		func_report_token = [this] (AnalysisEntryType type, AnalysisSeverity severity, const Token& token, std::optional<std::string> info) {};
+	}
+	else
+	{
+		func_report_token = [this] (AnalysisEntryType type, AnalysisSeverity severity, const Token& token, std::optional<std::string> info)
+		{
+			report_token(type, severity, token, info);
+		};
+	}
 
 	ExpressionParser expression_parser{logger, &reader, &func_report_token, nullptr};
 
@@ -330,94 +339,118 @@ void Parser::parse_and_register_import_statement_after_keyword()
 	imports[id.get_last_part()] = std::move(id);
 }
 
-Access Parser::parse_access()
+Access Parser::parse_access(bool no_report)
 {
 	Access access{AccessType::PRIVATE};
+
 	if(reader.peek().get_type() == TokenType::ACCESS_PRIVATE)
 	{
-		report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
+		if(no_report) { reader.consume(); } else
+		{ report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume()); }
 	}
 	else if(reader.peek().get_type() == TokenType::ACCESS_PROTECTED)
 	{
-		report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::ERROR, reader.consume(),
-			std::string{error_messages::PROTECTED_PACKAGE_MEMBER});
+		access = Access{AccessType::PROTECTED};
+		if(no_report) { reader.consume(); } else
+		{
+			report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::ERROR, reader.consume(),
+				std::string{error_messages::PROTECTED_PACKAGE_MEMBER});
+		}
 	}
 	else if(reader.peek().get_type() == TokenType::ACCESS_PUBLIC)
 	{
 		access = Access{AccessType::PUBLIC};
-		report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
+		if(no_report) { reader.consume(); } else
+		{ report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume()); }
 	}
 	else if(reader.peek().get_type() == TokenType::ACCESS_EXCLUSIVE)
 	{
-		report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
+		if(no_report) { reader.consume(); } else
+		{ report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume()); }
 
-		if(reader.peek().get_type() == TokenType::BRACKET_CURLY_OPEN)
+		if(no_report) { reader.consume(); } else
 		{
-			report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
-		}
-		else
-		{
-			report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
-				std::string{error_messages::MISSING_PACKAGE_MEMBER_PATTERNS});
+			if(reader.peek().get_type() == TokenType::BRACKET_CURLY_OPEN)
+			{
+				report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
+			}
+			else
+			{
+				report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
+					std::string{error_messages::MISSING_PACKAGE_MEMBER_PATTERNS});
+			}
 		}
 
 		std::vector<PackageMemberPattern> patterns;
 
-		patterns.push_back(parse_package_member_pattern());
+		patterns.push_back(parse_package_member_pattern(no_report));
 		while(reader.peek().get_type() == TokenType::COMMA)
 		{
-			report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
-			patterns.push_back(parse_package_member_pattern());
+			if(no_report) { reader.consume(); } else
+			{ report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume()); }
+			patterns.push_back(parse_package_member_pattern(no_report));
 		}
 
 		access = Access{AccessType::EXCLUSIVE, patterns};
 
-		if(reader.peek().get_type() == TokenType::BRACKET_CURLY_CLOSE)
+		if(no_report) { reader.consume(); } else
 		{
-			report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
-		}
-		else
-		{
-			report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
-				std::string{error_messages::INVALID_PACKAGE_MEMBER_PATTERN__EXPECTED_CLOSING_BRACKET});
+			if(reader.peek().get_type() == TokenType::BRACKET_CURLY_CLOSE)
+			{
+				report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
+			}
+			else
+			{
+				report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
+					std::string{error_messages::INVALID_PACKAGE_MEMBER_PATTERN__EXPECTED_CLOSING_BRACKET});
+			}
 		}
 	}
+
 	return access;
 }
 
-PackageMemberPattern Parser::parse_package_member_pattern()
+PackageMemberPattern Parser::parse_package_member_pattern(bool no_report)
 {
 	PackageMemberPatternType type = PackageMemberPatternType::PACKAGE_MEMBER;
+
 	if(reader.peek().get_type() == TokenType::SHALLOW)
 	{
-		report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
+		if(no_report) { reader.consume(); } else
+		{ report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume()); }
 		type = PackageMemberPatternType::PACKAGE_WITHOUT_SUBPACKAGES;
 	}
 	else if(reader.peek().get_type() == TokenType::DEEP)
 	{
-		report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
+		if(no_report) { reader.consume(); } else
+		{ report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume()); }
 		type = PackageMemberPatternType::PACKAGE_WITH_SUBPACKAGES;
 	}
 
 	if(type != PackageMemberPatternType::PACKAGE_MEMBER)
 	{
-		if(reader.peek().get_type() == TokenType::PACKAGE)
+		if(no_report) { reader.consume(); } else
 		{
-			report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
-		}
-		else
-		{
-			report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
-				std::string{error_messages::INVALID_PACKAGE_MEMBER_PATTERN__EXPECTED_PKG});
+			if(reader.peek().get_type() == TokenType::PACKAGE)
+			{
+				report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
+			}
+			else
+			{
+				report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
+					std::string{error_messages::INVALID_PACKAGE_MEMBER_PATTERN__EXPECTED_PKG});
+			}
 		}
 	}
 
-	std::optional<ast::PackageMemberID> package_member_identifier = parse_identifier(AnalysisEntryType::REFERENCE, AnalysisSeverity::INFO);
+	std::optional<ast::PackageMemberID> package_member_identifier = parse_identifier(AnalysisEntryType::REFERENCE, AnalysisSeverity::INFO, no_report);
 
 	if(reader.peek().get_type() != TokenType::INHERITANCE_EXTENDS) { return PackageMemberPattern{type, package_member_identifier}; }
-	report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
 
-	std::optional<ast::PackageMemberID> supertype = parse_identifier(AnalysisEntryType::REFERENCE, AnalysisSeverity::INFO);
+	if(no_report) { reader.consume(); } else
+	{ report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume()); }
+
+	std::optional<ast::PackageMemberID> supertype = parse_identifier(AnalysisEntryType::REFERENCE, AnalysisSeverity::INFO, no_report);
 	if(supertype.has_value())
 	{
 		return PackageMemberPattern{package_member_identifier.has_value() ? PackageMemberPatternType::INHERITANCE_ONLY : type,
@@ -425,8 +458,11 @@ PackageMemberPattern Parser::parse_package_member_pattern()
 	}
 	else
 	{
-		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
-			std::string{error_messages::MISSING_SECOND_PACKAGE_MEMBER_PATTERN});
+		if(no_report) { reader.consume(); } else
+		{
+			report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
+				std::string{error_messages::MISSING_SECOND_PACKAGE_MEMBER_PATTERN});
+		}
 
 		return PackageMemberPattern{type, std::move(package_member_identifier)};
 	}
@@ -437,7 +473,7 @@ void Parser::parse_package_member(const Access& access, std::shared_ptr<Operator
 	if(reader.peek().get_type() == TokenType::PACKAGE_MEMBER_OPERATOR_MODULE)
 	{
 		report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
-		parse_operator_module_b_after_keyword(operator_table);
+		parse_operator_module_and_register_after_keyword(access, operator_table);
 	}
 	else if(reader.peek().get_type() == TokenType::PACKAGE_MEMBER_CLASS)
 	{
@@ -478,9 +514,71 @@ std::string Parser::parse_declaration_name(AnalysisEntryType analysis_entry_type
 	}
 }
 
-void Parser::parse_operator_module_a_and_register_after_keyword(const Access& access)
-{/*
-	const std::string name = parse_declaration_name(AnalysisEntryType::DECLARATION);
+void Parser::parse_operators()
+{
+	if(reader.peek(0).get_type() != TokenType::IDENTIFIER || reader.peek(1).get_type() != TokenType::BRACKET_CURLY_OPEN)
+	{
+		logger->info("Operator parsing: skipped invalid operator module.");
+		skip_until_block_start();
+		skip_until_block_end();
+		return;
+	}
+
+	std::string module_name = std::string{reader.consume().get_lexeme().value()};
+	std::string module_id_str = package.append(std::move(module_name)).to_string();
+
+	// Consume `{`
+	reader.consume();
+
+	std::vector<OperatorDeclaration> operator_decls;
+
+	while(!reader.end_of_file_reached())
+	{
+		TokenType tt = reader.consume().get_type();
+
+		if(tt == TokenType::OPERATOR)
+		{
+			operator_decls.push_back(parse_operator_declaration_after_keyword(true));
+		}
+		else if(tt == TokenType::BRACKET_CURLY_CLOSE)
+		{
+			break;
+		}
+		else
+		{
+			skip_until_block_start();
+			skip_until_block_end();
+		}
+
+	}
+
+	std::vector<std::shared_ptr<const Operator>> operator_list;
+
+	for(const OperatorDeclaration& op_decl : operator_decls)
+	{
+		try
+		{
+			operator_list.push_back(std::make_shared<Operator>(std::move(op_decl)));
+		}
+		catch(const std::invalid_argument& e)
+		{
+			logger->info("Invalid operator: " + std::string{e.what()});
+		}
+	}
+
+	if((*operator_map).contains(module_id_str))
+	{
+		logger->info("Duplicate operator module");
+	}
+	else
+	{
+		(*operator_map)[module_id_str] = std::move(operator_list);
+	}
+}
+
+void Parser::parse_operator_module_and_register_after_keyword(const Access& access, std::shared_ptr<OperatorTable> operator_table)
+{
+	PackageMemberID id = package.append(parse_declaration_name(AnalysisEntryType::DECLARATION));
 
 	if(reader.peek().get_type() == TokenType::BRACKET_CURLY_OPEN)
 	{
@@ -493,79 +591,6 @@ void Parser::parse_operator_module_a_and_register_after_keyword(const Access& ac
 	}
 
 	std::vector<OperatorDeclaration> operators;
-
-	while(!reader.end_of_file_reached())
-	{
-		TokenType token_type = reader.peek().get_type();
-
-		if(token_type == TokenType::OPERATOR)
-		{
-			report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
-			operators.push_back(parse_operator_declaration_after_keyword());
-		}
-		else if(token_type == TokenType::BRACKET_CURLY_CLOSE)
-		{
-			report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
-			break;
-		}
-		else
-		{
-			reader.consume();
-			skip_until_block_start();
-			skip_until_block_end();
-		}
-	}
-
-	std::vector<OperatorDeclaration*> operator_declaration_ptrs;
-
-	for(OperatorDeclaration& op : operators)
-	{
-		operator_declaration_ptrs.push_back(&op);
-	}
-
-	std::string full_id = append_ast
-	(
-		std::make_unique<OperatorModule>(access, std::move(operators), std::vector<OperatorFunctionDeclaration>{}),
-		name
-	);
-
-	std::vector<std::shared_ptr<const Operator>> operator_list;
-
-	if(operator_map->contains(full_id))
-	{
-		operator_list = (*operator_map)[full_id];
-	}
-
-	for(OperatorDeclaration* op_decl : operator_declaration_ptrs)
-	{
-		try
-		{
-			operator_list.push_back(std::make_shared<Operator>(op_decl));
-		}
-		catch(const std::invalid_argument& e)
-		{
-			logger->info("Invalid operator: " + std::string{e.what()});
-		}
-	}
-
-	(*operator_map)[full_id] = std::move(operator_list);*/
-}
-
-void Parser::parse_operator_module_b_after_keyword(std::shared_ptr<OperatorTable> operator_table)
-{/*
-	if(reader.peek(0).get_type() != TokenType::IDENTIFIER || reader.peek(1).get_type() != TokenType::BRACKET_CURLY_OPEN)
-	{
-		logger->info("Skipped invalid operator module.");
-		skip_until_block_start();
-		skip_until_block_end();
-		return;
-	}
-
-	// Read and consume the IDENTIFIER token
-	const std::string name{reader.consume().get_lexeme().value()};
-
-	reader.consume(); // Consume `{`
-
 	std::vector<OperatorFunctionDeclaration> functions;
 
 	TokenType token_type = reader.peek().get_type();
@@ -573,8 +598,8 @@ void Parser::parse_operator_module_b_after_keyword(std::shared_ptr<OperatorTable
 	{
 		if(token_type == TokenType::OPERATOR)
 		{
-			skip_until_block_start();
-			skip_until_block_end();
+			report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
+			operators.push_back(parse_operator_declaration_after_keyword());
 		}
 		else
 		{
@@ -584,31 +609,12 @@ void Parser::parse_operator_module_b_after_keyword(std::shared_ptr<OperatorTable
 	}
 
 	// Consume `}`
-	reader.consume();
-
-	const std::string full_identifier = get_full_identifier(name);
-
-	std::unordered_map<std::string, std::unique_ptr<PackageMember>>::iterator it =
-		root_node->package_members.find(full_identifier);
-
-	if(it == root_node->package_members.end())
-	{
-		logger->error("Could not complete operator module \"" + full_identifier + "\"; could not find by identifier.");
-		return;
-	}
-
-	OperatorModule* operator_module = dynamic_cast<OperatorModule*>(it->second.get());
-
-	if(!operator_module)
-	{
-		logger->error("Could not complete operator module; dynamic cast returned nullptr.");
-		return;
-	}
-
-	operator_module->functions = std::move(functions);*/
+	report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
+	
+	append_ast(std::make_unique<OperatorModule>(access, std::move(id), std::move(operators), std::move(functions)));
 }
 
-OperatorDeclaration Parser::parse_operator_declaration_after_keyword()
+OperatorDeclaration Parser::parse_operator_declaration_after_keyword(bool no_report)
 {
 	std::vector<OperatorSyntaxPatternElement> pattern;
 	uint subordination{0};
@@ -624,7 +630,8 @@ OperatorDeclaration Parser::parse_operator_declaration_after_keyword()
 		}
 		else if(token_type == TokenType::EMPTY_PARAMETER)
 		{
-			report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
+			if(no_report) { reader.consume(); } else
+			{ report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume()); }
 			pattern.push_back(OperatorSyntaxParameter{});
 		}
 		else
@@ -646,19 +653,17 @@ OperatorDeclaration Parser::parse_operator_declaration_after_keyword()
 	}
 
 	// Consume `{`
-	report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
+	if(no_report) { reader.consume(); } else
+	{ report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume()); }
 
 	token_type = reader.peek().get_type();
 
-	while(!reader.end_of_file_reached())
+	while(!reader.end_of_file_reached() && token_type != TokenType::BRACKET_CURLY_CLOSE)
 	{
-		if(token_type == TokenType::BRACKET_CURLY_CLOSE)
+		if(token_type == TokenType::SUBORDINATION)
 		{
-			break;
-		}
-		else if(token_type == TokenType::SUBORDINATION)
-		{
-			report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
+			if(no_report) { reader.consume(); } else
+			{ report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume()); }
 
 			bool invalid_subord{false};
 
@@ -676,49 +681,73 @@ OperatorDeclaration Parser::parse_operator_declaration_after_keyword()
 
 			if(invalid_subord)
 			{
-				report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(), std::string{error_messages::INVALID_SUBORDINATION});
+				if(no_report) { reader.consume(); } else
+				{
+					report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
+					std::string{error_messages::INVALID_SUBORDINATION});
+				}
 			}
 			else
 			{
-				report_token(AnalysisEntryType::LITERAL_NUMBER, AnalysisSeverity::INFO, reader.consume());
+				if(no_report) { reader.consume(); } else
+				{ report_token(AnalysisEntryType::LITERAL_NUMBER, AnalysisSeverity::INFO, reader.consume()); }
 			}
 		}
 		else if(token_type == TokenType::ASSOCIATIVITY)
 		{
-			report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
+			if(no_report) { reader.consume(); } else
+			{ report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume()); }
 
 			token_type = reader.peek().get_type();
 
 			if(token_type == TokenType::LEFT)
 			{
-				report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
+				if(no_report) { reader.consume(); } else
+				{ report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume()); }
 				associativity = OperatorAssociativity::LEFT;
 			}
 			else if(token_type == TokenType::RIGHT)
 			{
-				report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
+				if(no_report) { reader.consume(); } else
+				{ report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume()); }
 				associativity = OperatorAssociativity::RIGHT;
 			}
 			else
 			{
-				report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(), std::string{error_messages::INVALID_ASSOCIATIVITY});
+				if(no_report) { reader.consume(); } else
+				{
+					report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
+						std::string{error_messages::INVALID_ASSOCIATIVITY});
+				}
 			}
 		}
 		else
 		{
-			report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(), std::string{error_messages::INVALID_OPERATOR_PROPERTY});
+			if(no_report) { reader.consume(); } else
+			{
+				report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
+					std::string{error_messages::INVALID_OPERATOR_PROPERTY});
+			}
 		}
 
 		if(reader.peek().get_type() != TokenType::END_STATEMENT)
 		{
-			report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(), std::string{error_messages::MISSING_SEMICOLON});
+			if(no_report) { reader.consume(); } else
+			{
+				report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
+					std::string{error_messages::MISSING_SEMICOLON});
+			}
 		}
-		report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
+
+		if(no_report) { reader.consume(); } else
+		{ report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume()); }
 
 		token_type = reader.peek().get_type();
 	}
 
-	report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume()); // Consume `}`
+	// Consume `}`
+	if(no_report) { reader.consume(); } else
+	{ report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume()); }
 
 	return OperatorDeclaration{std::move(pattern), subordination, associativity, BuiltinOperatorKind::NOT_BUILT_IN};
 }

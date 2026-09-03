@@ -34,9 +34,8 @@ using PeekCursor = uint*;
 class Operator
 {
 public:
-	explicit Operator(const neon_compiler::ast::nodes::OperatorDeclaration* init_declaration);
+	explicit Operator(neon_compiler::ast::nodes::OperatorDeclaration init_declaration);
 
-	const neon_compiler::ast::nodes::OperatorDeclaration* get_declaration() const;
 	Fixity get_fixity() const;
 	bool operator<(const Operator& other) const;
 	bool matches
@@ -46,9 +45,10 @@ public:
 		const FuncParseExpressionWCursor& func_parse_expression_w_cursor,
 		bool skip_first
 	) const;
+	const neon_compiler::ast::nodes::OperatorDeclaration* get_declaration() const;
 private:
-	/** Declaration of this operator, non-owning */
-	const neon_compiler::ast::nodes::OperatorDeclaration* declaration;
+	/** Declaration of this operator, not part of the AST */
+	const neon_compiler::ast::nodes::OperatorDeclaration declaration;
 	/** Fixity of the operator: prefix, infix, or postfix */
 	Fixity fixity;
 
