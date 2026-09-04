@@ -49,7 +49,6 @@ void Parser::parse_operators_and_register_package_declaration()
 
 		if(token_type == TokenType::PACKAGE_MEMBER_OPERATOR_MODULE)
 		{
-			// Token reported in `run_b`
 			parse_operators();
 		}
 		else
