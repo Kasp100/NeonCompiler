@@ -157,7 +157,7 @@ private:
 
 	void append_ast(std::unique_ptr<neon_compiler::ast::nodes::PackageMember> node);
 
-	std::unique_ptr<neon_compiler::ast::nodes::UseStatement> parse_use_statement_after_keyword();
+	std::optional<neon_compiler::ast::nodes::UseStatement> parse_use_statement_after_keyword();
 
 	void run_use_statement
 	(

@@ -77,8 +77,15 @@ void Parser::parse_and_build_ast(std::shared_ptr<OperatorTable> operator_table)
 		if(token_type == TokenType::STMT_USE)
 		{
 			report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
-			std::unique_ptr<UseStatement> use_stmt = parse_use_statement_after_keyword();
-			run_use_statement(operator_table, use_stmt.get());
+			std::optional<UseStatement> opt_use_stmt = parse_use_statement_after_keyword();
+
+			if(opt_use_stmt.has_value())
+			{
+				const UseStatement& use_stmt = opt_use_stmt.value();
+				run_use_statement(operator_table, &use_stmt);
+				file_node->use_statements.push_back(std::move(use_stmt));
+			}
+
 			continue;
 		}
 
@@ -187,7 +194,7 @@ void Parser::append_ast(std::unique_ptr<PackageMember> node)
 	logger->info("Appended to AST: " + path);
 }
 
-std::unique_ptr<UseStatement> Parser::parse_use_statement_after_keyword()
+std::optional<UseStatement> Parser::parse_use_statement_after_keyword()
 {
 	std::optional<neon_compiler::ast::PackageMemberID> opt_id = parse_identifier(AnalysisEntryType::REFERENCE, AnalysisSeverity::INFO);
 
@@ -207,9 +214,9 @@ std::unique_ptr<UseStatement> Parser::parse_use_statement_after_keyword()
 			std::string{error_messages::MISSING_SEMICOLON});
 	}
 
-	if(!opt_id.has_value()) { return nullptr; }
+	if(!opt_id.has_value()) { return std::nullopt; }
 
-	return std::make_unique<UseStatement>(std::move(opt_id.value()));
+	return UseStatement{std::move(opt_id.value())};
 }
 
 void Parser::run_use_statement(std::shared_ptr<OperatorTable>& previous, const UseStatement* stmt)
@@ -1193,9 +1200,15 @@ CodeBlock Parser::parse_code_block_after_opening_bracket(std::shared_ptr<Operato
 				case TokenType::STMT_USE:
 				{
 					report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
-					std::unique_ptr<UseStatement> use_stmt = parse_use_statement_after_keyword();
-					run_use_statement(operator_table, use_stmt.get());
-					stmt = std::move(use_stmt);
+					std::optional<UseStatement> opt_use_stmt = parse_use_statement_after_keyword();
+
+					if(opt_use_stmt.has_value())
+					{
+						const UseStatement& use_stmt = opt_use_stmt.value();
+						run_use_statement(operator_table, &use_stmt);
+						stmt = std::make_unique<UseStatement>(std::move(use_stmt));
+					}
+
 					break;
 				}
 				default:
