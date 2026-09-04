@@ -18,10 +18,40 @@ void ASTPrinter::visit(const nodes::Root& node)
 
 void ASTPrinter::visit(const nodes::FileNode& node)
 {
+	print_prefix();
+	print("file: ");
+	print(node.file);
+	print_line();
+
+	incr_depth();
+
+	print_prefix();
+	print("pkg ");
+	print(node.package.to_string());
+	print_line();
+
+	for(const neon_compiler::ast::PackageMemberID& import : node.imports)
+	{
+		print_prefix();
+		print("import ");
+		print(import.to_string());
+		print_line();
+	}
+
+	for(const nodes::UseStatement& use_stmt : node.use_statements)
+	{
+		print_prefix();
+		print("use ");
+		print(use_stmt.operator_module_id.to_string());
+		print_line();
+	}
+
 	for(const std::unique_ptr<nodes::PackageMember>& pm : node.package_members)
 	{
 		pm->accept(*this);
 	}
+
+	decr_depth();
 }
 
 void ASTPrinter::visit(const nodes::TypeDeclaration& node)
