@@ -23,7 +23,7 @@ Parser::Parser
 
 void Parser::parse_operators_and_register_package_declaration()
 {
-	parse_and_register_package_declaration();
+	register_package_declaration();
 
 	while(!reader.end_of_file_reached())
 	{
@@ -61,7 +61,7 @@ void Parser::parse_operators_and_register_package_declaration()
 
 void Parser::parse_and_build_ast(std::shared_ptr<OperatorTable> operator_table)
 {
-	skip_until_statement_end();
+	report_package_declaration();
 
 	while(!reader.end_of_file_reached())
 	{
@@ -276,36 +276,45 @@ std::optional<neon_compiler::ast::PackageMemberID> Parser::parse_identifier(Anal
 	return expression_parser.parse_identifier(id_type, id_severity);
 }
 
-void Parser::parse_and_register_package_declaration()
+void Parser::register_package_declaration()
 {
-	if(reader.peek().get_type() == TokenType::PACKAGE)
-	{
-		report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
-	}
-	else
-	{
-		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.peek(),
-			std::string{error_messages::MISSING_PACKAGE_DECLARATION});
-	}
+	if(reader.peek().get_type() != TokenType::PACKAGE) { return; }
 
-	std::optional<neon_compiler::ast::PackageMemberID> package_id = parse_identifier(AnalysisEntryType::PACKAGE, AnalysisSeverity::INFO);
+	/** Consume `pkg` */
+	reader.consume();
+
+	file_node->package =
+		parse_identifier(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, true)
+		.value_or(neon_compiler::ast::PackageMemberID{});
+
+	if(reader.peek().get_type() != TokenType::END_STATEMENT) { return; }
+
+	reader.consume();
+}
+
+void Parser::report_package_declaration()
+{
+	if(reader.peek().get_type() != TokenType::PACKAGE) { return; }
+
+	report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
+
+	std::optional<neon_compiler::ast::PackageMemberID> package_id =
+		parse_identifier(AnalysisEntryType::PACKAGE, AnalysisSeverity::INFO);
+
 	if(!package_id.has_value())
 	{
-		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.peek(),
-			std::string{error_messages::MISSING_PACKAGE_DECLARATION});
+		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
+			std::string{error_messages::INVALID_PACKAGE_DECLARATION});
 	}
 
-	if(reader.peek().get_type() == TokenType::END_STATEMENT)
+	if(reader.peek().get_type() != TokenType::END_STATEMENT)
 	{
-		report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
-	}
-	else
-	{
-		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.peek(),
+		report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
 			std::string{error_messages::MISSING_SEMICOLON});
+		return;
 	}
 
-	file_node->package = package_id.value_or(neon_compiler::ast::PackageMemberID{});
+	report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
 }
 
 void Parser::parse_and_register_import_statement_after_keyword()

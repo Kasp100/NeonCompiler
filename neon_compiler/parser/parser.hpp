@@ -24,8 +24,9 @@ namespace error_messages
 	constexpr std::string_view UNEXPECTED_END_OF_FILE =
 		"Unexpected end of file. A terminating token is missing. Statements end with `;`, and blocks end with `}`.";
 
-	constexpr std::string_view MISSING_PACKAGE_DECLARATION =
-		"Expected a package declaration (e.g., `pkg main::example;`).";
+	constexpr std::string_view INVALID_PACKAGE_DECLARATION =
+		"Invalid package declaration. Package declarations use valid identifiers. "
+		"`::` separates subpackages, e.g., `pkg my_project::my_package::my_subpackage`.";
 
 	constexpr std::string_view MISSING_IDENTIFIER =
 		"Expected an identifier. Keywords and other tokens are not valid identifiers.";
@@ -174,7 +175,8 @@ private:
 		neon_compiler::analysis::AnalysisSeverity id_severity,
 		bool no_report = false
 	);
-	void parse_and_register_package_declaration();
+	void register_package_declaration();
+	void report_package_declaration();
 	void parse_and_register_import_statement_after_keyword();
 	neon_compiler::ast::nodes::Access parse_access(bool no_report = false);
 	neon_compiler::ast::nodes::PackageMemberPattern parse_package_member_pattern(bool no_report);
