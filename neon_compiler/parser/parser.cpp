@@ -11,15 +11,13 @@ Parser::Parser
 	std::shared_ptr<logging::Logger> init_logger,
 	std::span<const Token> init_tokens,
 	std::shared_ptr<AnalysisReporter> init_analysis_reporter,
-	std::shared_ptr<Root> init_root_node,
-	std::string_view init_file,
+	FileNode* init_file_node,
 	std::shared_ptr<OperatorMap> init_operator_map
 ) :
 	logger{init_logger},
 	reader{init_tokens},
 	analysis_reporter{init_analysis_reporter},
-	root_node{init_root_node},
-	file{init_file},
+	file_node{init_file_node},
 	operator_map{init_operator_map}
 {}
 
@@ -79,7 +77,8 @@ void Parser::parse_and_build_ast(std::shared_ptr<OperatorTable> operator_table)
 		if(token_type == TokenType::STMT_USE)
 		{
 			report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
-			operator_table = parse_use_statement_after_keyword_and_create_operator_table(operator_table);
+			std::unique_ptr<UseStatement> use_stmt = parse_use_statement_after_keyword();
+			run_use_statement(operator_table, use_stmt.get());
 			continue;
 		}
 
@@ -87,11 +86,6 @@ void Parser::parse_and_build_ast(std::shared_ptr<OperatorTable> operator_table)
 
 		parse_package_member(access, operator_table);
 	}
-}
-
-std::shared_ptr<neon_compiler::ast::nodes::Root> Parser::get_root_node() const
-{
-	return root_node;
 }
 
 void Parser::skip_until_statement_end()
@@ -183,35 +177,17 @@ void Parser::report_token
 	std::optional<std::string> info
 )
 {
-	analysis_reporter->report(AnalysisEntry{file, type, severity, token.get_source_position(), token.get_length(), info});
+	analysis_reporter->report(AnalysisEntry{file_node->file, type, severity, token.get_source_position(), token.get_length(), info});
 }
 
 void Parser::append_ast(std::unique_ptr<PackageMember> node)
 {
 	const std::string path = node->id.to_string();
-	root_node->package_members.push_back(std::move(node));
+	file_node->package_members.push_back(std::move(node));
 	logger->info("Appended to AST: " + path);
 }
 
-std::shared_ptr<OperatorTable> Parser::parse_use_statement_after_keyword_and_create_operator_table(std::shared_ptr<OperatorTable> previous)
-{
-	std::shared_ptr<OperatorTable> new_operator_table = std::make_shared<OperatorTable>();
-
-	const std::vector<std::shared_ptr<const Operator>>* found_operators = parse_use_statement_after_keyword();
-
-	if(!found_operators) { return new_operator_table; }
-
-	for(std::shared_ptr<const Operator> op : *found_operators)
-	{
-		new_operator_table->add(op);
-	}
-
-	new_operator_table->add_all(previous);
-
-	return new_operator_table;
-}
-
-const std::vector<std::shared_ptr<const Operator>>* Parser::parse_use_statement_after_keyword()
+std::unique_ptr<UseStatement> Parser::parse_use_statement_after_keyword()
 {
 	std::optional<neon_compiler::ast::PackageMemberID> opt_id = parse_identifier(AnalysisEntryType::REFERENCE, AnalysisSeverity::INFO);
 
@@ -233,21 +209,42 @@ const std::vector<std::shared_ptr<const Operator>>* Parser::parse_use_statement_
 
 	if(!opt_id.has_value()) { return nullptr; }
 
-	neon_compiler::ast::PackageMemberID& id = opt_id.value();
+	return std::make_unique<UseStatement>(std::move(opt_id.value()));
+}
 
-	if(id.get_length() == 1)
+void Parser::run_use_statement(std::shared_ptr<OperatorTable>& previous, const UseStatement* stmt)
+{
+	std::shared_ptr<OperatorTable> new_operator_table = std::make_shared<OperatorTable>();
+
+	const std::vector<std::shared_ptr<const Operator>>* found_operators = find_operators(stmt->operator_module_id);
+
+	if(!found_operators) { return; }
+
+	for(std::shared_ptr<const Operator> op : *found_operators)
 	{
-		if(imports.contains(id.get_last_part()))
+		new_operator_table->add(op);
+	}
+
+	new_operator_table->add_all(previous);
+
+	previous = new_operator_table;
+}
+
+const std::vector<std::shared_ptr<const Operator>>* Parser::find_operators(PackageMemberID operator_module_id)
+{
+	if(operator_module_id.get_length() == 1)
+	{
+		if(imports.contains(operator_module_id.get_last_part()))
 		{
-			id = imports[id.get_last_part()];
+			operator_module_id = imports[operator_module_id.get_last_part()];
 		}
 		else
 		{
-			id = package.append(id.get_last_part());
+			operator_module_id = file_node->package.append(operator_module_id.get_last_part());
 		}
 	}
 
-	const std::string id_str = id.to_string();
+	const std::string id_str = operator_module_id.to_string();
 
 	if(!operator_map->contains(id_str))
 	{
@@ -308,7 +305,7 @@ void Parser::parse_and_register_package_declaration()
 			std::string{error_messages::MISSING_SEMICOLON});
 	}
 
-	package = package_id.value_or(neon_compiler::ast::PackageMemberID{});
+	file_node->package = package_id.value_or(neon_compiler::ast::PackageMemberID{});
 }
 
 void Parser::parse_and_register_import_statement_after_keyword()
@@ -524,7 +521,7 @@ void Parser::parse_operators()
 	}
 
 	std::string module_name = std::string{reader.consume().get_lexeme().value()};
-	std::string module_id_str = package.append(std::move(module_name)).to_string();
+	std::string module_id_str = file_node->package.append(std::move(module_name)).to_string();
 
 	// Consume `{`
 	reader.consume();
@@ -577,7 +574,7 @@ void Parser::parse_operators()
 
 void Parser::parse_operator_module_and_register_after_keyword(const Access& access, std::shared_ptr<OperatorTable> operator_table)
 {
-	PackageMemberID id = package.append(parse_declaration_name(AnalysisEntryType::DECLARATION));
+	PackageMemberID id = file_node->package.append(parse_declaration_name(AnalysisEntryType::DECLARATION));
 
 	if(reader.peek().get_type() == TokenType::BRACKET_CURLY_OPEN)
 	{
@@ -1187,7 +1184,9 @@ CodeBlock Parser::parse_code_block_after_opening_bracket(std::shared_ptr<Operato
 				case TokenType::STMT_USE:
 				{
 					report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
-					operator_table = parse_use_statement_after_keyword_and_create_operator_table(operator_table);
+					std::unique_ptr<UseStatement> use_stmt = parse_use_statement_after_keyword();
+					run_use_statement(operator_table, use_stmt.get());
+					stmt = std::move(use_stmt);
 					break;
 				}
 				default:
@@ -1300,7 +1299,7 @@ bool Parser::parse_and_register_constant
 	if(!opt_var_decl.has_value()) { return false; }
 	VariableDeclaration& var_decl = opt_var_decl.value();
 
-	PackageMemberID id = package.append
+	PackageMemberID id = file_node->package.append
 	(
 		var_decl.explicit_ref_name.value_or
 		(
@@ -1345,7 +1344,7 @@ bool Parser::parse_and_register_function
 	const std::string function_name{name_token.get_lexeme().value()};
 	report_token(AnalysisEntryType::DECLARATION, AnalysisSeverity::INFO, name_token, function_name);
 
-	PackageMemberID id = package.append(function_name);
+	PackageMemberID id = file_node->package.append(function_name);
 
 	std::vector<GenericParameter> generic_parameters = parse_generic_parameters();
 

@@ -10,7 +10,6 @@
 #include "../package_member_id.hpp"
 #include "../../token.hpp"
 
-
 // forward declaration
 namespace neon_compiler::parser
 {
@@ -34,11 +33,55 @@ struct PackageMember : ASTNode
 
 struct Statement : ASTNode {};
 
+/** Use statement to enable an operator module. */
+struct UseStatement : Statement
+{
+	neon_compiler::ast::PackageMemberID operator_module_id;
+
+	explicit UseStatement
+	(
+		neon_compiler::ast::PackageMemberID init_operator_module_id
+	) :
+		operator_module_id{std::move(init_operator_module_id)}
+	{}
+
+	void accept(ASTVisitor& visitor) const override
+	{
+		visitor.visit(*this);
+	}
+};
+
 struct Expression : ASTNode {};
+
+struct FileNode : ASTNode
+{
+	/** File path */
+	std::string file;
+	/** File package declaration */
+	neon_compiler::ast::PackageMemberID package{};
+	/** Imports */
+	std::vector<neon_compiler::ast::PackageMemberID> imports;
+	/** File-level use statements activating operator modules */
+	std::vector<neon_compiler::ast::nodes::UseStatement> use_statements;
+	/** Package members declared in this file */
+	std::vector<std::unique_ptr<PackageMember>> package_members;
+
+	explicit FileNode
+	(
+		std::string init_file
+	) :
+		file{std::move(init_file)}
+	{}
+
+	void accept(ASTVisitor& visitor) const override
+	{
+		visitor.visit(*this);
+	}
+};
 
 struct Root : ASTNode
 {
-	std::vector<std::unique_ptr<PackageMember>> package_members;
+	std::vector<std::unique_ptr<FileNode>> file_nodes;
 
 	Root() = default;
 

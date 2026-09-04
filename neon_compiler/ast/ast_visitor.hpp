@@ -8,6 +8,7 @@
 namespace neon_compiler::ast::nodes
 {
 	struct Root;
+	struct FileNode;
 	struct TypeDeclaration;
 	struct VariableDeclaration;
     struct ConstantDeclaration;
@@ -17,6 +18,7 @@ namespace neon_compiler::ast::nodes
 	struct CodeBlock;
 	struct DiscardExpression;
 	struct LocalDeclarationOrAssignment;
+	struct UseStatement;
 	struct AutoCall;
 	struct Return;
 	struct Assignment;
@@ -48,6 +50,7 @@ class ASTVisitor
 public:
 	virtual ~ASTVisitor() = default;
 	virtual void visit(const nodes::Root& node) = 0;
+	virtual void visit(const nodes::FileNode& node) = 0;
 	virtual void visit(const nodes::TypeDeclaration& node) = 0;
 	virtual void visit(const nodes::VariableDeclaration& node) = 0;
 	virtual void visit(const nodes::ConstantDeclaration& node) = 0;
@@ -57,6 +60,7 @@ public:
 	virtual void visit(const nodes::CodeBlock& node) = 0;
 	virtual void visit(const nodes::DiscardExpression& node) = 0;
 	virtual void visit(const nodes::LocalDeclarationOrAssignment& node) = 0;
+	virtual void visit(const nodes::UseStatement& node) = 0;
 	virtual void visit(const nodes::AutoCall& node) = 0;
 	virtual void visit(const nodes::Return& node) = 0;
 	virtual void visit(const nodes::Assignment& node) = 0;

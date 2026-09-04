@@ -10,6 +10,14 @@ ASTPrinter::ASTPrinter() {}
 
 void ASTPrinter::visit(const nodes::Root& node)
 {
+	for(const std::unique_ptr<nodes::FileNode>& fn : node.file_nodes)
+	{
+		fn->accept(*this);
+	}
+}
+
+void ASTPrinter::visit(const nodes::FileNode& node)
+{
 	for(const std::unique_ptr<nodes::PackageMember>& pm : node.package_members)
 	{
 		pm->accept(*this);
@@ -145,6 +153,14 @@ void ASTPrinter::visit(const nodes::LocalDeclarationOrAssignment& node)
 	incr_depth();
 	node.declaration_or_assignment.accept(*this);
 	decr_depth();
+}
+
+void ASTPrinter::visit(const nodes::UseStatement& node)
+{
+	print_prefix();
+	print("use statement: ");
+	print(node.operator_module_id.to_string());
+	print_line();
 }
 
 void ASTPrinter::visit(const nodes::AutoCall& node)

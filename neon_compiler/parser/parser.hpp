@@ -120,8 +120,7 @@ public:
 		std::shared_ptr<logging::Logger> init_logger,
 		std::span<const neon_compiler::Token> init_tokens,
 		std::shared_ptr<neon_compiler::analysis::AnalysisReporter> init_analysis_reporter,
-		std::shared_ptr<neon_compiler::ast::nodes::Root> init_root_node,
-		std::string_view init_file,
+		neon_compiler::ast::nodes::FileNode* init_file_node,
 		std::shared_ptr<OperatorMap> init_operator_map
 	);
 
@@ -130,15 +129,12 @@ public:
 
 	/** Should be run second in the parsing phase to parse other package member types. */
 	void parse_and_build_ast(std::shared_ptr<neon_compiler::parser::OperatorTable> operator_table);
-
-	std::shared_ptr<neon_compiler::ast::nodes::Root> get_root_node() const;
 private:
 	std::shared_ptr<logging::Logger> logger;
 	neon_compiler::TokenReader reader;
 	std::shared_ptr<neon_compiler::analysis::AnalysisReporter> analysis_reporter;
-	std::shared_ptr<neon_compiler::ast::nodes::Root> root_node;
-	std::string_view file;
-	neon_compiler::ast::PackageMemberID package;
+
+	neon_compiler::ast::nodes::FileNode* file_node;
 
 	/** Mapping from reference name to declaration path */
 	std::unordered_map<std::string, neon_compiler::ast::PackageMemberID> imports;
@@ -160,11 +156,17 @@ private:
 
 	void append_ast(std::unique_ptr<neon_compiler::ast::nodes::PackageMember> node);
 
-	std::shared_ptr<neon_compiler::parser::OperatorTable> parse_use_statement_after_keyword_and_create_operator_table
+	std::unique_ptr<neon_compiler::ast::nodes::UseStatement> parse_use_statement_after_keyword();
+
+	void run_use_statement
 	(
-		std::shared_ptr<neon_compiler::parser::OperatorTable> previous
+		std::shared_ptr<neon_compiler::parser::OperatorTable>& previous,
+		const neon_compiler::ast::nodes::UseStatement* stmt
 	);
-	const std::vector<std::shared_ptr<const neon_compiler::parser::Operator>>* parse_use_statement_after_keyword();
+	const std::vector<std::shared_ptr<const neon_compiler::parser::Operator>>* find_operators
+	(
+		neon_compiler::ast::PackageMemberID operator_module_id
+	);
 
 	std::optional<neon_compiler::ast::PackageMemberID> parse_identifier
 	(

@@ -78,7 +78,11 @@ void Compiler::generate_analysis() const
 
 		std::shared_ptr<AnalysisReporter> reporter = std::make_shared<ConsoleAnalysisReporter>(pair.first);
 
-		parsers.emplace_back(logger, tokens_view, reporter, root_node, pair.first, operator_map);
+		std::unique_ptr<FileNode> file_node = std::make_unique<FileNode>(std::string{pair.first});
+
+		parsers.emplace_back(logger, tokens_view, reporter, file_node.get(), operator_map);
+
+		root_node->file_nodes.push_back(std::move(file_node));
 	}
 
 	for(Parser& parser : parsers)
