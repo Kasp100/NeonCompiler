@@ -223,7 +223,7 @@ private:
 	void parse_end_of_statement_after_expression();
 
 	std::unique_ptr<neon_compiler::ast::nodes::Statement> parse_return_statement_after_keyword(neon_compiler::parser::OperatorTable* operator_table);
-	std::unique_ptr<neon_compiler::ast::nodes::Statement> parse_discard_expression(neon_compiler::parser::OperatorTable* operator_table);
+	std::unique_ptr<neon_compiler::ast::nodes::DiscardExpression> parse_discard_expression(neon_compiler::parser::OperatorTable* operator_table);
 
 	bool parse_and_register_function_or_constant
 	(

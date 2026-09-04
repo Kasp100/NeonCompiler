@@ -1158,9 +1158,9 @@ CodeBlock Parser::parse_code_block_after_opening_bracket(std::shared_ptr<Operato
 
 	while(!reader.end_of_file_reached())
 	{
-		const TokenType token_type = reader.peek().get_type();
+		const TokenType tt = reader.peek().get_type();
 
-		if(token_type == TokenType::BRACKET_CURLY_CLOSE)
+		if(tt == TokenType::BRACKET_CURLY_CLOSE)
 		{
 			report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
 			break;
@@ -1168,23 +1168,33 @@ CodeBlock Parser::parse_code_block_after_opening_bracket(std::shared_ptr<Operato
 
 		std::unique_ptr<Statement> stmt;
 
-		switch(token_type)
+		std::optional<VariableDeclaration> opt_var_decl = parse_variable_declaration(operator_table.get());
+
+		if(opt_var_decl.has_value())
 		{
-			case TokenType::STMT_RETURN:
+			parse_end_of_statement_after_expression();
+			stmt = std::make_unique<LocalDeclarationOrAssignment>(std::move(opt_var_decl.value()));
+		}
+		else
+		{
+			switch(tt)
 			{
-				report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
-				stmt = parse_return_statement_after_keyword(operator_table.get());
-				break;
-			}
-			case TokenType::STMT_USE:
-			{
-				report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
-				operator_table = parse_use_statement_after_keyword_and_create_operator_table(operator_table);
-				break;
-			}
-			default:
-			{
-				stmt = parse_discard_expression(operator_table.get());
+				case TokenType::STMT_RETURN:
+				{
+					report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
+					stmt = parse_return_statement_after_keyword(operator_table.get());
+					break;
+				}
+				case TokenType::STMT_USE:
+				{
+					report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
+					operator_table = parse_use_statement_after_keyword_and_create_operator_table(operator_table);
+					break;
+				}
+				default:
+				{
+					stmt = parse_discard_expression(operator_table.get());
+				}
 			}
 		}
 
@@ -1238,16 +1248,8 @@ std::unique_ptr<Statement> Parser::parse_return_statement_after_keyword(Operator
 	return std::make_unique<Return>(std::move(value));
 }
 
-std::unique_ptr<Statement> Parser::parse_discard_expression(OperatorTable* operator_table)
+std::unique_ptr<DiscardExpression> Parser::parse_discard_expression(OperatorTable* operator_table)
 {
-	std::optional<VariableDeclaration> opt_var_decl = parse_variable_declaration(operator_table);
-
-	if(opt_var_decl.has_value())
-	{
-		parse_end_of_statement_after_expression();
-		return std::make_unique<LocalDeclarationOrAssignment>(std::move(opt_var_decl.value()));
-	}
-
 	std::unique_ptr<Expression> expression = parse_expression(operator_table);
 
 	std::unique_ptr<DiscardExpression> result;
