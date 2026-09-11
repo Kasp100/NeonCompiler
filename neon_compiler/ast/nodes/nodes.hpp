@@ -33,7 +33,7 @@ struct PackageMember : ASTNode
 
 struct Statement : ASTNode {};
 
-/** Use statement to enable an operator module. */
+/** Use statement to enable an operator module or extension module. */
 struct UseStatement : Statement
 {
 	neon_compiler::ast::PackageMemberID operator_module_id;
@@ -61,7 +61,7 @@ struct FileNode : ASTNode
 	neon_compiler::ast::PackageMemberID package{};
 	/** Imports */
 	std::vector<neon_compiler::ast::PackageMemberID> imports;
-	/** File-level use statements activating operator modules */
+	/** File-level "use" statements */
 	std::vector<neon_compiler::ast::nodes::UseStatement> use_statements;
 	/** Package members declared in this file */
 	std::vector<std::unique_ptr<PackageMember>> package_members;

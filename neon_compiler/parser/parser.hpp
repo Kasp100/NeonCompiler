@@ -166,7 +166,7 @@ private:
 	);
 	const std::vector<std::shared_ptr<const neon_compiler::parser::Operator>>* find_operators
 	(
-		neon_compiler::ast::PackageMemberID operator_module_id
+		neon_compiler::ast::PackageMemberID package_member_id
 	);
 
 	std::optional<neon_compiler::ast::PackageMemberID> parse_identifier

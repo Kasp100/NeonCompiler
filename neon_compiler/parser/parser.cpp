@@ -237,25 +237,25 @@ void Parser::run_use_statement(std::shared_ptr<OperatorTable>& previous, const U
 	previous = new_operator_table;
 }
 
-const std::vector<std::shared_ptr<const Operator>>* Parser::find_operators(PackageMemberID operator_module_id)
+const std::vector<std::shared_ptr<const Operator>>* Parser::find_operators(PackageMemberID package_member_id)
 {
-	if(operator_module_id.get_length() == 1)
+	if(package_member_id.get_length() == 1)
 	{
-		if(imports.contains(operator_module_id.get_last_part()))
+		if(imports.contains(package_member_id.get_last_part()))
 		{
-			operator_module_id = imports[operator_module_id.get_last_part()];
+			package_member_id = imports[package_member_id.get_last_part()];
 		}
 		else
 		{
-			operator_module_id = file_node->package.append(operator_module_id.get_last_part());
+			package_member_id = file_node->package.append(package_member_id.get_last_part());
 		}
 	}
 
-	const std::string id_str = operator_module_id.to_string();
+	const std::string id_str = package_member_id.to_string();
 
 	if(!operator_map->contains(id_str))
 	{
-		logger->info("Could not find operators: " + id_str);
+		// It may not be an operator module, which isn't necessarily an error.
 		return nullptr;
 	}
 
