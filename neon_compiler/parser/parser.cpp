@@ -457,7 +457,7 @@ PackageMemberPattern Parser::parse_package_member_pattern(bool no_report)
 
 	std::optional<ast::PackageMemberID> package_member_identifier = parse_identifier(AnalysisEntryType::REFERENCE, AnalysisSeverity::INFO, no_report);
 
-	if(reader.peek().get_type() != TokenType::INHERITANCE_EXTENDS) { return PackageMemberPattern{type, package_member_identifier}; }
+	if(reader.peek().get_type() != TokenType::IMPL) { return PackageMemberPattern{type, package_member_identifier}; }
 
 	if(no_report) { reader.consume(); } else
 	{ report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume()); }
@@ -487,21 +487,22 @@ void Parser::parse_package_member(const Access& access, std::shared_ptr<Operator
 		report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
 		parse_operator_module_and_register_after_keyword(access, operator_table);
 	}
-	else if(reader.peek().get_type() == TokenType::PACKAGE_MEMBER_CLASS)
+	else if(reader.peek().get_type() == TokenType::PACKAGE_MEMBER_TYPE)
 	{
 		report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
-		parse_and_register_type_after_keyword(access, TypeAbstractionLevel::CLASS, operator_table);
+		parse_and_register_type_after_keyword(access, TypeAbstractionLevel::CONCRETE, operator_table);
 	}
-	else if(reader.peek().get_type() == TokenType::MEMBER_ABSTRACT && reader.peek(1).get_type() == TokenType::PACKAGE_MEMBER_CLASS)
+	else if(reader.peek(1).get_type() == TokenType::PACKAGE_MEMBER_TYPE && reader.peek().get_type() == TokenType::SEMI_ABSTRACT)
 	{
 		report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
 		report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
-		parse_and_register_type_after_keyword(access, TypeAbstractionLevel::ABSTRACT_CLASS, operator_table);
+		parse_and_register_type_after_keyword(access, TypeAbstractionLevel::SEMI_ABSTRACT, operator_table);
 	}
-	else if(reader.peek().get_type() == TokenType::PACKAGE_MEMBER_INTERFACE)
+	else if(reader.peek(1).get_type() == TokenType::PACKAGE_MEMBER_TYPE && reader.peek().get_type() == TokenType::ABSTRACT)
 	{
 		report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
-		parse_and_register_type_after_keyword(access, TypeAbstractionLevel::INTERFACE, operator_table);
+		report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
+		parse_and_register_type_after_keyword(access, TypeAbstractionLevel::ABSTRACT, operator_table);
 	}
 	else if(!parse_and_register_function_or_constant(access, operator_table))
 	{

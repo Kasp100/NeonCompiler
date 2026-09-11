@@ -259,9 +259,9 @@ struct CodeBlock : ASTNode
 
 enum class TypeAbstractionLevel
 {
-	INTERFACE,
-	ABSTRACT_CLASS,
-	CLASS
+	CONCRETE,
+	SEMI_ABSTRACT,
+	ABSTRACT
 };
 
 struct FieldDeclaration : ASTNode
@@ -359,8 +359,17 @@ struct PackageFunctionDeclaration : FunctionDeclaration, PackageMember
 	}
 };
 
+enum class MethodDeclarationKind
+{
+	DEFAULT,              // No keyword present
+	EXPLICITLY_ABSTRACT,  // Explicitly "abstract": A subtype must implement this method.
+	IMPLEMENTING          // "impl": This method must implement an abstract method from a supertype.
+};
+
 struct MethodDeclaration : FunctionDeclaration
 {
+	/** The method kind */
+	MethodDeclarationKind kind;
 	/** The name of the method */
 	std::string name;
 	/** Whether this method may mutate the object */
@@ -373,6 +382,7 @@ struct MethodDeclaration : FunctionDeclaration
 	explicit MethodDeclaration
 	(
 		Access init_access,
+		MethodDeclarationKind init_kind,
 		std::optional<ReferenceType> init_return_type,
 		std::string init_name,
 		std::vector<GenericParameter> init_generic_parameters,
@@ -390,6 +400,7 @@ struct MethodDeclaration : FunctionDeclaration
 			std::move(init_parameters),
 			init_io
 		},
+		kind{init_kind},
 		name{std::move(init_name)},
 		mut{init_mut},
 		share_mut{init_share_mut},

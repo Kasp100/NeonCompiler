@@ -68,7 +68,6 @@ std::optional<TokenType> Token::keyword_to_token_type(std::string_view word)
 	else if (word == "exclusive")             return TokenType::ACCESS_EXCLUSIVE;
 	else if (word == "shallow")               return TokenType::SHALLOW;
 	else if (word == "deep")                  return TokenType::DEEP;
-	else if (word == "const")                 return TokenType::MEMBER_CONST;
 	else if (word == "mut")                   return TokenType::EFFECT_MUTATING_OR_MUTABLE;
 	else if (word == "share_mut")             return TokenType::EFFECT_SHARE_MUT;
 	else if (word == "io")                    return TokenType::EFFECT_IO;
@@ -81,9 +80,9 @@ std::optional<TokenType> Token::keyword_to_token_type(std::string_view word)
 	else if (word == "shared")                return TokenType::REF_TYPE_SHARED;
 	else if (word == "borrow")                return TokenType::REF_TYPE_BORROW;
 	else if (word == "operator_module")       return TokenType::PACKAGE_MEMBER_OPERATOR_MODULE;
-	else if (word == "class")                 return TokenType::PACKAGE_MEMBER_CLASS;
-	else if (word == "interface")             return TokenType::PACKAGE_MEMBER_INTERFACE;
-	else if (word == "abstract")              return TokenType::MEMBER_ABSTRACT;
+	else if (word == "type")                  return TokenType::PACKAGE_MEMBER_TYPE;
+	else if (word == "abstract")              return TokenType::ABSTRACT;
+	else if (word == "semi_abstract")         return TokenType::SEMI_ABSTRACT;
 	else if (word == "operator")              return TokenType::OPERATOR;
 	else if (word == "subordination")         return TokenType::SUBORDINATION;
 	else if (word == "associativity")         return TokenType::ASSOCIATIVITY;
@@ -92,11 +91,7 @@ std::optional<TokenType> Token::keyword_to_token_type(std::string_view word)
 	else if (word == "constructor")           return TokenType::CONSTRUCTOR;
 	else if (word == "super")                 return TokenType::REFERENCE_SUPER;
 	else if (word == "this")                  return TokenType::REFERENCE_THIS;
-	else if (word == "impl")                  return TokenType::INHERITANCE_IMPLEMENTS;
-	else if (word == "extends")               return TokenType::INHERITANCE_EXTENDS;
-	else if (word == "extendable")            return TokenType::DECL_CLASS_EXTENDABLE;
-	else if (word == "override")              return TokenType::DECL_METHOD_OVERRIDE;
-	else if (word == "overridable")           return TokenType::DECL_METHOD_OVERRIDABLE;
+	else if (word == "impl")                  return TokenType::IMPL;
 	else if (word == "true")                  return TokenType::BOOL_TRUE;
 	else if (word == "false")                 return TokenType::BOOL_FALSE;
 	else if (word == "void")                  return TokenType::RETURN_TYPE_VOID;
