@@ -1,7 +1,7 @@
 #ifndef DECLARATION_ANALYSER_HPP
 #define DECLARATION_ANALYSER_HPP
 
-#include "../ast/ast_visitor.hpp"
+#include "../ast/nodes/nodes.hpp"
 
 namespace neon_compiler::semantic_analyser
 {
