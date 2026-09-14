@@ -1376,13 +1376,19 @@ bool Parser::parse_and_register_function
 
 	ParameterDeclarationList params = parse_parameter_declarations_after_opening_bracket(operator_table.get());
 
+	bool effect_share_mut{false};
 	bool effect_io{false};
 
 	TokenType tt = reader.peek().get_type();
 
 	while(tt != TokenType::END_OF_FILE && tt != TokenType::BRACKET_CURLY_OPEN)
 	{
-		if(reader.peek().get_type() == TokenType::EFFECT_IO)
+		if(reader.peek().get_type() == TokenType::EFFECT_SHARE_MUT)
+		{
+			report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
+			effect_share_mut = true;
+		}
+		else if(reader.peek().get_type() == TokenType::EFFECT_IO)
 		{
 			report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume());
 			effect_io = true;
@@ -1415,6 +1421,7 @@ bool Parser::parse_and_register_function
 			std::move(id),
 			std::move(generic_parameters),
 			std::move(params),
+			effect_share_mut,
 			effect_io,
 			std::move(body)
 		)

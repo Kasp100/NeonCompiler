@@ -300,6 +300,8 @@ struct FunctionDeclaration : ASTNode
 	std::vector<GenericParameter> generic_parameters;
 	/** Parameters */
 	ParameterDeclarationList parameters;
+	/** Whether this function may mutate state that is not owned */
+	bool effect_share_mut;
 	/** Whether this function may perform I/O */
 	bool effect_io;
 
@@ -309,12 +311,14 @@ struct FunctionDeclaration : ASTNode
 		std::optional<ReferenceType> init_return_type,
 		std::vector<GenericParameter> init_generic_parameters,
 		ParameterDeclarationList init_parameters,
+		bool init_effect_share_mut,
 		bool init_effect_io
 	) :
 		access{std::move(init_access)},
 		return_type{std::move(init_return_type)},
 		generic_parameters{std::move(init_generic_parameters)},
 		parameters{std::move(init_parameters)},
+		effect_share_mut{init_effect_share_mut},
 		effect_io{init_effect_io}
 	{}
 };
@@ -334,6 +338,7 @@ struct PackageFunctionDeclaration : FunctionDeclaration, PackageMember
 		PackageMemberID init_id,
 		std::vector<GenericParameter> init_generic_parameters,
 		ParameterDeclarationList init_parameters,
+		bool init_share_mut,
 		bool init_effect_io,
 		CodeBlock init_body
 	) :
@@ -343,6 +348,7 @@ struct PackageFunctionDeclaration : FunctionDeclaration, PackageMember
 			std::move(init_return_type),
 			std::move(init_generic_parameters),
 			std::move(init_parameters),
+			init_share_mut,
 			init_effect_io
 		},
 		PackageMember
@@ -374,8 +380,6 @@ struct MethodDeclaration : FunctionDeclaration
 	std::string name;
 	/** Whether this method may mutate the object */
 	bool mut;
-	/** Whether this method may mutate the object */
-	bool share_mut;
 	/** Method body. Empty means it's not implemented (an abstract method). */
 	std::optional<CodeBlock> implementation;
 
@@ -398,12 +402,12 @@ struct MethodDeclaration : FunctionDeclaration
 			std::move(init_return_type),
 			std::move(init_generic_parameters),
 			std::move(init_parameters),
+			init_share_mut,
 			init_io
 		},
 		kind{init_kind},
 		name{std::move(init_name)},
 		mut{init_mut},
-		share_mut{init_share_mut},
 		implementation{std::move(init_implementation)}
 	{}
 

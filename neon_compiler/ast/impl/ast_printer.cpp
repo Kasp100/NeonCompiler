@@ -335,6 +335,7 @@ void ASTPrinter::visit(const nodes::PackageFunctionDeclaration& node)
 	print_access(node.access);
 	print(" function declaration ");
 	print(node.id.to_string());
+	if(node.effect_share_mut) { print(" share_mut"); }
 	if(node.effect_io) { print(" io"); }
 	print_line();
 
