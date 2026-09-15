@@ -61,9 +61,6 @@ namespace error_messages
 	constexpr std::string_view MISSING_SECOND_PACKAGE_MEMBER_PATTERN =
 		"Expected a second package member pattern.";
 
-	constexpr std::string_view MISSING_PACKAGE_MEMBER_PATTERNS =
-		"Expected one or more package member patterns enclosed in `{}`.";
-
 	constexpr std::string_view INVALID_PACKAGE_MEMBER_PATTERN__EXPECTED_CLOSING_BRACKET =
 		"Invalid package member pattern. Expected `}`.";
 

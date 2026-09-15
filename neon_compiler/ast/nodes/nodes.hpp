@@ -109,18 +109,17 @@ struct PackageMemberPattern
 enum class AccessType
 {
 	PUBLIC,
-	PRIVATE,
-	PROTECTED,
+	IMPLEMENTERS,
+	EXTENSIONS,
 	EXCLUSIVE
 };
 
 struct Access
 {
-	/** The access type: `public`, `private`, `protected` (not for package members and non-constant fields), or `exclusive` */
-	AccessType type;
-	/** Empty unless `type == AccessType::EXCLUSIVE`.
-	 * Represents the set of package member patterns that determine who can use. */
-	std::vector<PackageMemberPattern> patterns{};
+	/** The explicit access type, empty means there was no keyword */
+	std::optional<AccessType> explicit_type;
+	/** The set of package member patterns that determine who can use for the "exclusive" access type. */
+	std::vector<PackageMemberPattern> patterns;
 };
 
 enum class MutabilityMode

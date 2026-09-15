@@ -63,8 +63,8 @@ std::optional<TokenType> Token::keyword_to_token_type(std::string_view word)
 	     if (word == "pkg")                   return TokenType::PACKAGE;
 	else if (word == "import")                return TokenType::IMPORT;
 	else if (word == "public")                return TokenType::ACCESS_PUBLIC;
-	else if (word == "private")               return TokenType::ACCESS_PRIVATE;
-	else if (word == "protected")             return TokenType::ACCESS_PROTECTED;
+	else if (word == "implementers")          return TokenType::ACCESS_IMPLEMENTERS;
+	else if (word == "extensions")            return TokenType::ACCESS_EXTENSIONS;
 	else if (word == "exclusive")             return TokenType::ACCESS_EXCLUSIVE;
 	else if (word == "shallow")               return TokenType::SHALLOW;
 	else if (word == "deep")                  return TokenType::DEEP;

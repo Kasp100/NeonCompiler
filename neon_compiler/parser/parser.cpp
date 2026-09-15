@@ -89,7 +89,7 @@ void Parser::parse_and_build_ast(std::shared_ptr<OperatorTable> operator_table)
 			continue;
 		}
 
-		const Access access = parse_access(); // `private` if no keyword is present.
+		const Access access = parse_access();
 
 		parse_package_member(access, operator_table);
 	}
@@ -353,69 +353,53 @@ void Parser::parse_and_register_import_statement_after_keyword()
 
 Access Parser::parse_access(bool no_report)
 {
-	Access access{AccessType::PRIVATE};
+	Access access;
 
-	if(reader.peek().get_type() == TokenType::ACCESS_PRIVATE)
-	{
-		if(no_report) { reader.consume(); } else
-		{ report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume()); }
-	}
-	else if(reader.peek().get_type() == TokenType::ACCESS_PROTECTED)
-	{
-		access = Access{AccessType::PROTECTED};
-		if(no_report) { reader.consume(); } else
-		{
-			report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::ERROR, reader.consume(),
-				std::string{error_messages::PROTECTED_PACKAGE_MEMBER});
-		}
-	}
-	else if(reader.peek().get_type() == TokenType::ACCESS_PUBLIC)
-	{
-		access = Access{AccessType::PUBLIC};
-		if(no_report) { reader.consume(); } else
-		{ report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume()); }
-	}
-	else if(reader.peek().get_type() == TokenType::ACCESS_EXCLUSIVE)
-	{
-		if(no_report) { reader.consume(); } else
-		{ report_token(AnalysisEntryType::KEYWORD, AnalysisSeverity::INFO, reader.consume()); }
+	TokenType tt = reader.peek().get_type();
 
-		if(no_report) { reader.consume(); } else
-		{
-			if(reader.peek().get_type() == TokenType::BRACKET_CURLY_OPEN)
-			{
-				report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
-			}
-			else
-			{
-				report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
-					std::string{error_messages::MISSING_PACKAGE_MEMBER_PATTERNS});
-			}
-		}
+	     if(tt == TokenType::ACCESS_PUBLIC)       { access.explicit_type = AccessType::PUBLIC; }
+	else if(tt == TokenType::ACCESS_IMPLEMENTERS) { access.explicit_type = AccessType::IMPLEMENTERS; }
+	else if(tt == TokenType::ACCESS_EXTENSIONS)   { access.explicit_type = AccessType::EXTENSIONS; }
+	else if(tt == TokenType::ACCESS_EXCLUSIVE)    { access.explicit_type = AccessType::EXCLUSIVE; }
+	else
+	{
+		return access;
+	}
 
-		std::vector<PackageMemberPattern> patterns;
+	if(reader.peek().get_type() == TokenType::BRACKET_CURLY_OPEN)
+	{
+		if(no_report) { reader.consume(); } else
+		{ report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume()); }
+	}
+	else
+	{
+		return access;
+	}
+
+	std::vector<PackageMemberPattern> patterns;
+
+	patterns.push_back(parse_package_member_pattern(no_report));
+
+	while(reader.peek().get_type() == TokenType::COMMA)
+	{
+		if(no_report) { reader.consume(); } else
+		{ report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume()); }
 
 		patterns.push_back(parse_package_member_pattern(no_report));
-		while(reader.peek().get_type() == TokenType::COMMA)
+	}
+
+	access.patterns = std::move(patterns);
+
+	if(no_report) { reader.consume(); } else
+	{
+		if(reader.peek().get_type() == TokenType::BRACKET_CURLY_CLOSE)
 		{
-			if(no_report) { reader.consume(); } else
-			{ report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume()); }
-			patterns.push_back(parse_package_member_pattern(no_report));
+			report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
 		}
-
-		access = Access{AccessType::EXCLUSIVE, patterns};
-
-		if(no_report) { reader.consume(); } else
+		else
 		{
-			if(reader.peek().get_type() == TokenType::BRACKET_CURLY_CLOSE)
-			{
-				report_token(AnalysisEntryType::SEPARATOR, AnalysisSeverity::INFO, reader.consume());
-			}
-			else
-			{
-				report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
-					std::string{error_messages::INVALID_PACKAGE_MEMBER_PATTERN__EXPECTED_CLOSING_BRACKET});
-			}
+			report_token(AnalysisEntryType::UNKNOWN, AnalysisSeverity::ERROR, reader.consume(),
+				std::string{error_messages::INVALID_PACKAGE_MEMBER_PATTERN__EXPECTED_CLOSING_BRACKET});
 		}
 	}
 
