@@ -22,6 +22,8 @@ struct TypeID
     uint32_t value;
 };
 
+using SymbolID = std::variant<VariableID, FunctionID, TypeID>;
+
 struct Symbol
 {
     std::string name;
