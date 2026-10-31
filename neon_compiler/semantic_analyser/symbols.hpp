@@ -1,3 +1,6 @@
+#ifndef SYMBOLS_HPP
+#define SYMBOLS_HPP
+
 #include <cstdint>
 #include <string>
 #include "../ast/nodes/nodes.hpp"
@@ -52,3 +55,5 @@ struct FunctionSymbol : Symbol
 };
 
 }
+
+#endif // SYMBOLS_HPP
